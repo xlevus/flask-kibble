@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 
 import flask
@@ -16,6 +17,15 @@ class Authenticator(object):
 
 class Crud(flask.Blueprint):
     def __init__(self, name, import_name, authenticator, **kwargs):
+
+        kwargs.setdefault(
+            'template_folder',
+            os.path.join(os.path.dirname(__file__), 'templates'))
+
+        kwargs.setdefault(
+            'static_folder',
+            os.path.join(os.path.dirname(__file__), 'static'))
+
         super(Crud, self).__init__(name, import_name, **kwargs)
         self.auth = authenticator
 
@@ -35,21 +45,23 @@ class Crud(flask.Blueprint):
         """
         action = view_class.action
         model = view_class.model
+        kind = view_class.kind()
+
 
         # Check for duplicates
-        if action in self.registry[model]:
+        if action in self.registry[kind]:
             raise ValueError("%s already has view for %s.%s" % (
-                self, model.kind(), action))
+                self, kind, action))
 
         view_func = view_class.as_view(view_class.view_name())
 
-        for pattern, defaults in view_class.url_patterns():
+        for pattern, defaults in view_class._url_patterns:
             self.add_url_rule(
-                pattern.format(kind=model.kind(), action=action),
+                pattern.format(kind=kind, action=action),
                 defaults=defaults,
                 view_func = view_func)
 
-        self.registry[model][action] = view_class
+        self.registry[kind][action] = view_class
 
 
     def _index(self):
@@ -57,3 +69,4 @@ class Crud(flask.Blueprint):
 
     def _context_processor(self):
         return {'crud': self}
+

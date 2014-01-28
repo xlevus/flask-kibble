@@ -1,0 +1,35 @@
+{% extends "crud/base.html" %}
+
+{% block body %}
+    <div class='row'>
+        <div class='col-md-12'>
+            <h1>{{ crud.name.title() }}</h1>
+
+            <table class='table table-striped'>
+                
+                {% for instance, columns in table %}
+                    {% if loop.first %}
+                        <tr>
+                            {% for header in table.headers %}
+                                <th>{{ header }}</th>
+                            {% endfor %}
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        {% for column in columns %}
+                            <td>{{ column }}</td>
+                        {% endfor %}
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="{{ table.headers|length }}">
+                            There appears to be nothing here
+                        </td>
+                    </tr>
+                {% endfor %}
+                
+            </table>
+        </div>
+    </div>
+{% endblock %}
