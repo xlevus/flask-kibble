@@ -6,6 +6,7 @@ class CrudView(View):
     action = None
     model = None
 
+    _methods = ['GET']
     _url_patterns = [("/{kind}/{action}/", {})]
     _requires_instance = True
 
@@ -25,6 +26,8 @@ class CrudView(View):
         ]
 
     def base_context(self):
-        return {}
+        return {
+            'view': self,
+        }
 
 

@@ -1,3 +1,4 @@
+import logging
 from werkzeug.utils  import cached_property
 import flask
 
@@ -16,6 +17,8 @@ class Table(object):
     def headers(self):
         headers = []
         for attr_name in self.crud_view.list_display:
+            if callable(attr_name):
+                attr_name = attr_name.__name__
             headers.append(attr_name.replace("_", " ").strip().title())
         return headers
 
@@ -24,7 +27,11 @@ class Table(object):
         retval = []
 
         for attr_name in self.crud_view.list_display:
-            if hasattr(instance, attr_name):
+            if callable(attr_name):
+                attr = attr_name
+                args = (instance,)
+
+            elif hasattr(instance, attr_name):
                 attr = getattr(instance, attr_name)
                 args = ()
 
@@ -36,26 +43,28 @@ class Table(object):
                 attr = attr_name
                 args = (instance,)
 
+            else:
+                attr = attr_name
+                args = ()
+
             if callable(attr):
-                future = attr(*args)
+                attr = attr(*args)
 
-            if isinstance(future, ndb.Future):
-                future = yield future
+            if isinstance(attr, ndb.Future):
+                attr = yield attr
 
-            retval.append(future)
-
-            raise ndb.Return((instance, retval))
+            retval.append(attr)
+        raise ndb.Return((instance, retval))
 
     def __iter__(self):
         for row in self._rows.get_result():
             yield row
 
 
-
 class List(CrudView):
     action = 'list'
 
-    list_display = ('__unicode__',)
+    list_display = (unicode,)
 
     _url_patterns = [("/{kind}/", {})]
     _requires_instance = False
