@@ -28,8 +28,13 @@ class ContactEdit(crud.Edit):
     model = models.Contact
 
 
+class OtherList(crud.List):
+    model = models.OtherThing
+
 my_crud.register_view(ContactList)
 my_crud.register_view(ContactCreate)
 my_crud.register_view(ContactEdit)
+
+my_crud.register_view(OtherList)
 
 app.register_blueprint(my_crud)

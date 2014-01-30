@@ -12,3 +12,6 @@ class Contact(ndb.Model):
 
     is_a_fish = ndb.BooleanProperty()
 
+class OtherThing(ndb.Model):
+    name = ndb.StringProperty()
+
