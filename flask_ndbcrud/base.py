@@ -1,3 +1,4 @@
+import flask
 from flask.views import View
 
 
@@ -28,4 +29,32 @@ class CrudView(View):
         return {
             'view': self,
         }
+
+    def has_permission(self, key=None, instance=None):
+        """
+        Check if the user has the permissions required for this view.
+
+        :param key: A ndb.Key instance to link to (optional)
+        :param instance: A ndb.Model instance to link to (optional)
+        """
+        if instance:
+            key = instance.key
+
+        return flask.g.crud.auth.has_permission_for(
+            self.model,
+            self.action,
+            key=key)
+
+    def url_for(self, blueprint='', key=None, instance=None):
+        """
+        Get the URL for this view.
+
+        :param blueprint: The blueprint name the view is registered to. If not
+            provided, the current requests blueprint will be used. (optional)
+        :param key: A ndb.Key instance to link to (optional)
+        :param instance: A ndb.Model instance to link to (optional)
+        """
+        if instance:
+            key = instance.key
+        return flask.url_for('%s.%s' % (blueprint, self.view_name()), key=key)
 

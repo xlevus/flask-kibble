@@ -66,7 +66,7 @@ class List(CrudView):
 
     list_display = (unicode,)
 
-    _url_patterns = [("/{kind}/", {})]
+    _url_patterns = [("/{kind_lower}/", {})]
     _requires_instance = False
 
     def get_query(self):

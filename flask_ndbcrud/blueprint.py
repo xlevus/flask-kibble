@@ -9,16 +9,36 @@ logger = logging.getLogger(__name__)
 
 class Authenticator(object):
     def is_logged_in(self):
-        True
+        """
+        Should return true if the current user is logged in.
+        """
+        return True
 
     def has_permission_for(self, model, action, **view_args):
+        """
+        Should return true if the current user has the permissions for
+        the Model/Action/ViewArgs.
+
+        :param model: The model class that is being operated on
+        :param action: The CrudView.action that is being executed or the name
+            of the view (for non-CBVs)
+        :param **view_args: The current view args. In most cases,
+            this will be ``key``, a ndb.Key instance of the object
+            being edited or empty.
+        """
         return True
 
     def get_login_url(self):
+        """
+        Should return a URL the user can use to log in.
+        """
         return "/"
 
 
 def index():
+    """
+    Crud index view. Lists the registered classes and views.
+    """
     return flask.render_template('crud/index.html')
 
 
@@ -88,7 +108,10 @@ class Crud(flask.Blueprint):
         app.url_map.converters.setdefault('ndbkey', NDBKeyConverter)
 
     def _before_request(self):
+        flask.g.crud = self         # Set global var
+
         if not self.auth.is_logged_in():
+            # User not logged in, redirect to the login url.
             logger.debug("User is not logged in.")
             flask.flash("You are not logged in.", 'warning')
             return flask.redirect(self.auth.get_login_url())
@@ -97,9 +120,11 @@ class Crud(flask.Blueprint):
         view_class = getattr(view_func, 'view_class', None)
 
         if view_class:
+            # for CBVs, use the model and action parameters.
             model = view_class.model
             action = view_class.action
         else:
+            # For non-CBVs, use the view name as the permission values.
             model = None
             action = view_func.__name__
 
