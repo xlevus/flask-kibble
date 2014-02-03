@@ -1,18 +1,25 @@
+import logging
 import os
 from collections import defaultdict
 
 import flask
 
+logger = logging.getLogger(__name__)
+
 
 class Authenticator(object):
-    def get_user(self):
-        return None
-
-    def is_logged_in(self, user):
+    def is_logged_in(self):
         True
 
     def has_permission_for(self, model, action, **view_args):
         return True
+
+    def get_login_url(self):
+        return "/"
+
+
+def index():
+    return flask.render_template('crud/index.html')
 
 
 class Crud(flask.Blueprint):
@@ -31,10 +38,12 @@ class Crud(flask.Blueprint):
 
         self.registry = defaultdict(dict)
 
-        self.context_processor(self._context_processor)
+        self.add_url_rule('/', view_func=index, endpoint='index')
+
         self.record_once(self._register_urlconverter)
-        self.add_url_rule('/', view_func=self._index, endpoint='index')
+
         self.before_request(self._before_request)
+        self.context_processor(self._context_processor)
 
     def register_view(self, view_class):
         """
@@ -61,16 +70,13 @@ class Crud(flask.Blueprint):
             self.add_url_rule(
                 pattern.format(
                     kind=kind,
-                    kind_lower = kind.lower(),
+                    kind_lower=kind.lower(),
                     action=action),
                 methods=view_class._methods,
                 defaults=defaults,
                 view_func=view_func)
 
         self.registry[kind][action] = view_class
-
-    def _index(self):
-        return flask.render_template('crud/index.html')
 
     def _context_processor(self):
         return {'crud': self}
@@ -82,11 +88,26 @@ class Crud(flask.Blueprint):
         app.url_map.converters.setdefault('ndbkey', NDBKeyConverter)
 
     def _before_request(self):
+        if not self.auth.is_logged_in():
+            logger.debug("User is not logged in.")
+            flask.flash("You are not logged in.", 'warning')
+            return flask.redirect(self.auth.get_login_url())
+
         view_func = flask.current_app.view_functions[flask.request.endpoint]
-        view_class = view_func.view_class
+        view_class = getattr(view_func, 'view_class', None)
+
+        if view_class:
+            model = view_class.model
+            action = view_class.action
+        else:
+            model = None
+            action = view_func.__name__
 
         if not self.auth.has_permission_for(
-                view_class.model, view_class.action, **flask.request.view_args):
+                model, action,
+                **flask.request.view_args):
 
-            flask.abort(403)
+            logger.debug("User is missing permission for %r",
+                         flask.request.endpoint)
+            return flask.render_template('crud/403.html'), 403
 

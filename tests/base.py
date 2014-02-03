@@ -13,6 +13,14 @@ import flask_ndbcrud as crud
 ndb.utils.DEBUG = False
 
 
+class TestAuthenticator(crud.Authenticator):
+    def is_logged_in(self):
+        return True
+
+    def get_login_url(self):
+        return '/login/'
+
+
 class TestCase(FTestCase):
     def _pre_setup(self):
         self.testbed = testbed.Testbed()
@@ -39,14 +47,14 @@ class TestCase(FTestCase):
         app.config['SECRET_KEY'] = 'test_secret'
         app.config['DEBUG'] = True
 
-        self.authenticator = mock.Mock(wraps=crud.Authenticator())
+        self.authenticator = mock.Mock(wraps=TestAuthenticator())
 
-        crud_bp = crud.Crud('crud', __name__, self.authenticator)
+        self.crud = crud.Crud('crud', __name__, self.authenticator)
 
         for view in crud_views:
-            crud_bp.register_view(view)
+            self.crud.register_view(view)
 
-        app.register_blueprint(crud_bp)
+        app.register_blueprint(self.crud)
 
         return app
 
