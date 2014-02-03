@@ -11,7 +11,7 @@ class Authenticator(object):
     def is_logged_in(self, user):
         True
 
-    def has_permission_for(self, model, action):
+    def has_permission_for(self, model, action, **view_args):
         return True
 
 
@@ -34,20 +34,21 @@ class Crud(flask.Blueprint):
         self.context_processor(self._context_processor)
         self.record_once(self._register_urlconverter)
         self.add_url_rule('/', view_func=self._index, endpoint='index')
+        self.before_request(self._before_request)
 
     def register_view(self, view_class):
         """
         Register a class with the CRUD blueprint.
 
         :param view_class: A crud view class
-        :param url_pattern: Override the URL pattern provided by the crud class.
+        :param url_pattern: Override the URL pattern provided by the crud
+        class.
 
-        :raises ValueError: When the same (Class,Action) pair is already registered.
+        :raises ValueError: When the same (Class,Action) pair is already
+        registered.
         """
         action = view_class.action
-        model = view_class.model
         kind = view_class.kind()
-
 
         # Check for duplicates
         if action in self.registry[kind]:
@@ -58,13 +59,15 @@ class Crud(flask.Blueprint):
 
         for pattern, defaults in view_class._url_patterns:
             self.add_url_rule(
-                pattern.format(kind=kind, action=action),
+                pattern.format(
+                    kind=kind,
+                    kind_lower = kind.lower(),
+                    action=action),
                 methods=view_class._methods,
                 defaults=defaults,
-                view_func = view_func)
+                view_func=view_func)
 
         self.registry[kind][action] = view_class
-
 
     def _index(self):
         return flask.render_template('crud/index.html')
@@ -77,4 +80,13 @@ class Crud(flask.Blueprint):
         from .util.url_converter import NDBKeyConverter
         app = setup_state.app
         app.url_map.converters.setdefault('ndbkey', NDBKeyConverter)
+
+    def _before_request(self):
+        view_func = flask.current_app.view_functions[flask.request.endpoint]
+        view_class = view_func.view_class
+
+        if not self.auth.has_permission_for(
+                view_class.model, view_class.action, **flask.request.view_args):
+
+            flask.abort(403)
 
