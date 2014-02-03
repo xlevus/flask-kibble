@@ -9,7 +9,7 @@ app.debug = True
 app.config['SECRET_KEY'] = 'notasecret'
 
 my_crud = crud.Crud(
-    'crud', __name__, crud.Authenticator,
+    'crud', __name__, crud.Authenticator(),
     static_url_path='/crud/static'
 )
 
