@@ -66,3 +66,4 @@ class TestCase(FTestCase):
                 raise AssertionError('nothing flashed')
             assert expected_message in message
             assert expected_category == category
+

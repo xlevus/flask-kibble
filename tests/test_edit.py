@@ -20,6 +20,11 @@ class CreateTestCase(TestCase):
     def create_app(self):
         return self._create_app(TestCreate, TestEdit)
 
+    def test_view_name(self):
+        self.assertEqual(
+            TestCreate.view_name(),
+            'testmodel_create')
+
     def test_url(self):
         self.assertEqual(
             flask.url_for('crud.testmodel_create'),
@@ -84,6 +89,11 @@ class EditTestCase(TestCase):
         self.inst = TestModel(id='test', name='test')
         self.inst.put()
 
+    def test_view_name(self):
+        self.assertEqual(
+            TestEdit.view_name(),
+            'testmodel_edit')
+
     def test_url(self):
         self.assertEqual(
             flask.url_for('crud.testmodel_edit', key=self.inst.key),
@@ -124,5 +134,4 @@ class EditTestCase(TestCase):
         inst = self.inst.key.get()
         save_model.assert_called_once_with(mock.ANY, inst)
         get_success_redirect.assert_called_once_with(inst)
-
 
