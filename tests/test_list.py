@@ -19,6 +19,11 @@ class TestList(crud.List):
         'model_member', 'model_member_async',
     ]
 
+    query_composers = [
+        mock.Mock(name='qc1'),
+        mock.Mock(name='qc2'),
+    ]
+
     def view_member(self, instance):
         return 'view_member_' + instance.name
 
@@ -42,13 +47,38 @@ class ListTestCase(TestCase):
     @mock.patch.object(list, 'Table')
     @mock.patch.object(TestList, 'get_query')
     def test_get(self, get_query, Table):
+        qc1, qc2 = TestList.query_composers
+        qc1().context_var = 'qc1'
+        qc2().context_var = 'qc2'
+
+        qc1().get_query_params.return_value = {'qc1': True}
+        qc2().get_query_params.return_value = {'qc2': True}
+
+        qc1.reset_mock()
+        qc2.reset_mock()
+
         resp = self.client.get('/testmodel/')
         self.assert200(resp)
 
-        Table.assert_called_once_with(mock.ANY, get_query())
+        # Check get_query were called on each query composer with the previous
+        # query.
+        qc1.assert_called_once_with(mock.ANY, get_query())
+        qc2.assert_called_once_with(mock.ANY, qc1().get_query())
 
+        # Check get_query_params were called on each query composer
+        qc1().get_query_params.assert_called_once_with()
+        qc2().get_query_params.assert_called_once_with()
+
+        Table.assert_called_once_with(mock.ANY, qc2().get_query(), {
+            'qc1': True,
+            'qc2': True
+        })
+
+        # Check the template was rendered right
         self.assertTemplateUsed('crud/list.html')
         self.assertContext('table', Table())
+        self.assertContext('qc1', qc1())
+        self.assertContext('qc2', qc2())
 
     def test_get_missing_perm(self):
         self.authenticator.has_permission_for.return_value = False
@@ -61,7 +91,10 @@ class ListTableTestCase(TestCase):
         return self._create_app(TestList)
 
     def get_table(self):
-        return list.Table(TestList(), TestModel.query().order(TestModel.name))
+        return list.Table(
+            TestList(),
+            TestModel.query().order(TestModel.name),
+            {})
 
     def test_headers(self):
         t = self.get_table()

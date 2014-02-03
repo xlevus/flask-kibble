@@ -1,17 +1,17 @@
-import logging
-from werkzeug.utils  import cached_property
 import flask
+from werkzeug.utils import cached_property
 
 from google.appengine.ext import ndb
 
 from .base import CrudView
+from . import query_composers
 
 
 class Table(object):
-    def __init__(self, crud_view, query):
+    def __init__(self, crud_view, query, query_params):
         self.crud_view = crud_view
 
-        self._rows = query.map_async(self._map)
+        self._rows = query.map_async(self._map, **query_params)
 
     @cached_property
     def headers(self):
@@ -66,16 +66,33 @@ class List(CrudView):
 
     list_display = (unicode,)
 
-    _url_patterns = [("/{kind_lower}/", {})]
+    query_composers = [
+        query_composers.Paginator
+    ]
+
+    _url_patterns = [
+        ("/{kind_lower}/", {'page': 1}),
+        ("/{kind_lower}/page-<int:page>/", {}),
+    ]
     _requires_instance = False
 
     def get_query(self):
         return self.model.query()
 
-    def dispatch_request(self):
+    def dispatch_request(self, page):
         context = self.base_context()
 
-        context['table'] = Table(self, self.get_query())
+        query = self.get_query()
+        query_params = {}
+
+        for composer_cls in self.query_composers:
+            composer = composer_cls(self, query)
+            context[composer.context_var] = composer
+
+            query = composer.get_query()
+            query_params.update(composer.get_query_params())
+
+        context['table'] = Table(self, query, query_params)
 
         return flask.render_template(self.templates, **context)
 
