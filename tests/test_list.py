@@ -18,6 +18,7 @@ class TestList(crud.List):
         'view_member', 'view_member_async',
         'model_member', 'model_member_async',
     ]
+    actions = []
 
     query_composers = [
         mock.Mock(name='qc1'),

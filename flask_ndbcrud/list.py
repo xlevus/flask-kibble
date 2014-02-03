@@ -66,6 +66,9 @@ class List(CrudView):
 
     list_display = (unicode,)
 
+    #: Number of results to display per page.
+    page_size = 20
+
     query_composers = [
         query_composers.Paginator
     ]

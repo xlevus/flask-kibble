@@ -14,15 +14,22 @@ my_crud = crud.Crud(
 )
 
 
+class ContactDelete(crud.Delete):
+    model = models.Contact
+
+
 class ContactList(crud.List):
     model = models.Contact
 
     list_display = [
         'name', 'home_phone', 'work_phone',
     ]
+    actions = [ContactDelete]
+
 
 class ContactCreate(crud.Create):
     model = models.Contact
+
 
 class ContactEdit(crud.Edit):
     model = models.Contact
@@ -31,9 +38,11 @@ class ContactEdit(crud.Edit):
 class OtherList(crud.List):
     model = models.OtherThing
 
+
 my_crud.register_view(ContactList)
 my_crud.register_view(ContactCreate)
 my_crud.register_view(ContactEdit)
+my_crud.register_view(ContactDelete)
 
 my_crud.register_view(OtherList)
 

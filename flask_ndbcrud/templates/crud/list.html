@@ -13,12 +13,29 @@
                             {% for header in table.headers %}
                                 <th>{{ header }}</th>
                             {% endfor %}
+
+                            {% for action in view.actions %}
+                                <th>{{ action.action|title }}</th>
+                            {% endfor %}
                         </tr>
                     {% endif %}
 
                     <tr>
                         {% for column in columns %}
                             <td>{{ column|default("<i>(null)</i>"|safe, True) }}</td>
+                        {% endfor %}
+                        {% for action in view.actions %}
+                            <td>
+                                {% if action.has_permission_for(instance=instance) %}
+                                    <a href='{{ action.url_for(instance=instance) }}' class='btn {{ action.button_class }}'>
+                                        {% if action.button_icon %}
+                                            <span class='glyphicon {{ action.button_icon }}'></span>
+                                        {% else %}
+                                            {{ action.action|title }}
+                                        {% endif %}
+                                    </a>
+                                {% endif %}
+                            </td>
                         {% endfor %}
                     </tr>
                 {% else %}

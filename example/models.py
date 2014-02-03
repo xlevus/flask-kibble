@@ -1,5 +1,6 @@
 from google.appengine.ext import ndb
 
+
 class Contact(ndb.Model):
     name = ndb.StringProperty(required=True)
 
@@ -11,6 +12,10 @@ class Contact(ndb.Model):
     address_3 = ndb.StringProperty()
 
     is_a_fish = ndb.BooleanProperty()
+
+    def __unicode__(self):
+        return self.name
+
 
 class OtherThing(ndb.Model):
     name = ndb.StringProperty()

@@ -23,7 +23,7 @@ class Paginator(QueryComposer):
     def __init__(self, *args, **kwargs):
         super(Paginator, self).__init__(*args, **kwargs)
 
-        self._total_objects = self.crud.get_query().count_async()
+        self._total_objects = self.crud_view.get_query().count_async()
 
     def get_query_params(self):
         return {
@@ -33,7 +33,7 @@ class Paginator(QueryComposer):
 
     @property
     def per_page(self):
-        return min(self.crud.page_size, 50)
+        return min(self.crud_view.page_size, 50)
 
     @property
     def total_objects(self):

@@ -30,7 +30,8 @@ class CrudView(View):
             'view': self,
         }
 
-    def has_permission(self, key=None, instance=None):
+    @classmethod
+    def has_permission_for(cls, key=None, instance=None):
         """
         Check if the user has the permissions required for this view.
 
@@ -41,11 +42,12 @@ class CrudView(View):
             key = instance.key
 
         return flask.g.crud.auth.has_permission_for(
-            self.model,
-            self.action,
+            cls.model,
+            cls.action,
             key=key)
 
-    def url_for(self, blueprint='', key=None, instance=None):
+    @classmethod
+    def url_for(cls, blueprint='', key=None, instance=None):
         """
         Get the URL for this view.
 
@@ -56,5 +58,5 @@ class CrudView(View):
         """
         if instance:
             key = instance.key
-        return flask.url_for('%s.%s' % (blueprint, self.view_name()), key=key)
+        return flask.url_for('%s.%s' % (blueprint, cls.view_name()), key=key)
 

@@ -16,6 +16,13 @@ class Operation(CrudView):
     #: otherwise, the operation will be performed immediately.
     require_confirmation = True
 
+    #: Bootstrap3 icon classes to use when rendering button icon. If not
+    #: present, text will be used
+    button_icon = None
+
+    #: Bootstrap3 button class to be used when rendering button.
+    button_class = 'btn-default'
+
     _url_patterns = [
         ("/{kind_lower}/<ndbkey('{kind}'):key>/{action}/", {}),
     ]
@@ -76,7 +83,7 @@ class Operation(CrudView):
             m = u"Successfully {past_tense} {instance}"
 
         return m.format(
-            verb=self.verb,
+            verb=self.action,
             past_tense=self.past_tense,
             result=result,
             instance=instance)
@@ -104,7 +111,7 @@ class Operation(CrudView):
                 return flask.redirect(
                     self.get_redirect(instance, result))
 
-        return flask.render_template(
-            self.templates,
-            instance=instance)
+        ctx = self.base_context()
+        ctx['instance'] = instance
+        return flask.render_template(self.templates, **ctx)
 
