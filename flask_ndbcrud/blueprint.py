@@ -14,7 +14,7 @@ class Authenticator(object):
         """
         return True
 
-    def has_permission_for(self, model, action, **view_args):
+    def has_permission_for(self, model, action, key=None, **view_args):
         """
         Should return true if the current user has the permissions for
         the Model/Action/ViewArgs.
@@ -22,9 +22,8 @@ class Authenticator(object):
         :param model: The model class that is being operated on
         :param action: The CrudView.action that is being executed or the name
             of the view (for non-CBVs)
-        :param **view_args: The current view args. In most cases,
-            this will be ``key``, a ndb.Key instance of the object
-            being edited or empty.
+        :param key: The ndb.Key of the object currently operating on.
+        :param **view_args: The current view args.
         """
         return True
 

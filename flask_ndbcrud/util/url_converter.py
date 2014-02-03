@@ -13,7 +13,7 @@ class NDBKeyConverter(BaseConverter):
 
     def to_url(self, key):
         if isinstance(key, ndb.Model):
-            key = key.key()
+            key = key.key
 
         if key.parent():
             return 'u-' + key.urlsafe()
