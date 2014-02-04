@@ -65,6 +65,7 @@ class List(CrudView):
     action = 'list'
 
     list_display = (unicode,)
+    link_first = True
 
     #: Number of results to display per page.
     page_size = 20

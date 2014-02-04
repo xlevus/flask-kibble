@@ -1,10 +1,10 @@
 {% extends "crud/base.html" %}
 
+{% block page_header %}{{ view.kind() }}{% endblock %}
+
 {% block body %}
     <div class='row'>
         <div class='col-md-12'>
-            <h1>{{ view.kind() }}</h1>
-
             <table class='table table-striped'>
                 
                 {% for instance, columns in table %}
@@ -22,7 +22,13 @@
 
                     <tr>
                         {% for column in columns %}
-                            <td>{{ column|default("<i>(null)</i>"|safe, True) }}</td>
+                            <td>
+                                {% with edit_url = crud.url_for(view.model, "edit", instance) %}
+                                    {% if edit_url and loop.first and view.link_first %}<a href='{{ edit_url }}'>{% endif %}
+                                        {{ column|default("<i>(null)</i>"|safe, True) }}
+                                    {% if edit_url and loop.first and view.link_first %}</a>{% endif %}
+                                {% endwith %}
+                            </td>
                         {% endfor %}
                         {% for action in view.actions %}
                             <td>

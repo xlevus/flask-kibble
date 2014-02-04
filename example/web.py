@@ -30,6 +30,14 @@ class ContactList(crud.List):
 class ContactCreate(crud.Create):
     model = models.Contact
 
+    fieldsets = [
+        {'name': "Name", 'fields': ['name']},
+        {'name': 'Address', 'fields': [
+            'address_1', 'address_2', 'address_3']},
+        {'name': 'Contact Details', 'fields': [
+            'home_phone', 'work_phone']},
+    ]
+
 
 class ContactEdit(crud.Edit):
     model = models.Contact

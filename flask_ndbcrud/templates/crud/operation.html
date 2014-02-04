@@ -1,10 +1,11 @@
 {% extends "crud/base.html" %}
 
+{% block page_header %}Confirm {{ view.action|title }}{% endblock %}
+
 {% block body %}
     <div class='row'>
         <div class='col-md-12'>
-            <h1>Confirm Operation</h1>
-            <p>Are you sure you want to {{ view.action }} {{ instance }}?</p>
+            <p>Are you sure you want to {{ view.action }} {{ view.kind() }}: {{ instance }}?</p>
 
             <form method='POST' action='{{ request.path }}'>
                 <button type='submit' class='btn {{ view.button_class }}'>

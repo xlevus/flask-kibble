@@ -2,6 +2,8 @@ import logging
 import os
 from collections import defaultdict
 
+from google.appengine.ext import ndb
+
 import flask
 
 logger = logging.getLogger(__name__)
@@ -134,4 +136,20 @@ class Crud(flask.Blueprint):
             logger.debug("User is missing permission for %r",
                          flask.request.endpoint)
             return flask.render_template('crud/403.html'), 403
+
+    def url_for(self, model, action, key=None, instance=None):
+        """
+        Get the URL for a specific Model/Action/Instance.
+
+        If the view isn't registered, returns an empty string.
+        """
+        if issubclass(model, ndb.Model):
+            model = model._get_kind()
+
+        view = self.registry.get(model, {}).get(action)
+
+        if not view:
+            return ""
+
+        return view.url_for(self.name, key, instance)
 

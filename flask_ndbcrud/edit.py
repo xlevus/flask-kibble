@@ -6,10 +6,46 @@ from .base import CrudView
 from wtforms_ndb import model_form
 
 
+class Fieldset(object):
+    def __init__(self, form, name, fields=[], **kwargs):
+        self.name = name
+        self.form = form
+        self.fields = fields
+        self._kwargs = kwargs
+
+    def __getattr__(self, attr):
+        try:
+            self._kwargs[attr]
+        except KeyError:
+            raise AttributeError("Fieldset %r has no attribute %r" % (
+                self.name, attr))
+
+    def __iter__(self):
+        for field in self.fields:
+            yield self.form[field]
+
+
+class FieldsetIterator(object):
+    def __init__(self, crud_view, form):
+        self.crud_view = crud_view
+        self.form = form
+
+        self._fields = set(self.form._fields.keys())
+
+    def __iter__(self):
+        for fieldset in self.crud_view.fieldsets:
+            self._fields.difference_update(fieldset.get('fields', []))
+
+            yield Fieldset(self.form, **fieldset)
+
+        yield Fieldset(self.form, None, self._fields)
+
+
 class FormView(CrudView):
     action = 'list'
 
     form = None
+    fieldsets = []
 
     _methods = ['GET', 'POST']
 
@@ -58,6 +94,7 @@ class FormView(CrudView):
 
         ctx = self.base_context()
         ctx['form'] = form
+        ctx['fieldsets'] = FieldsetIterator(self, form)
         ctx['instance'] = instance
 
         return flask.render_template(self.templates, **ctx)
