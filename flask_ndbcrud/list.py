@@ -64,12 +64,21 @@ class Table(object):
 class List(CrudView):
     action = 'list'
 
+    #: Columns to display in the list table. Can be one of:
+    #:  * callable: Will be called with the instance as the first argument
+    #:  * model member: If callable, will be called
+    #:  * view member: If callable, will be called with instance as first
+    #:    argument.
     list_display = (unicode,)
+
+    #: Link to the object in the first column.
     link_first = True
 
     #: Number of results to display per page.
     page_size = 20
 
+    #: A list of query composers to perform query operations
+    #: e.g. Filtering, sorting, pagination.
     query_composers = [
         query_composers.Paginator
     ]
@@ -81,6 +90,11 @@ class List(CrudView):
     _requires_instance = False
 
     def get_query(self):
+        """
+        Returns the base query to display on the list.
+
+        :returns: ``ndb.Query``
+        """
         return self.model.query()
 
     def dispatch_request(self, page):

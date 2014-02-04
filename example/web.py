@@ -42,6 +42,8 @@ class ContactCreate(crud.Create):
 class ContactEdit(crud.Edit):
     model = models.Contact
 
+    fieldsets = ContactCreate.fieldsets
+
 
 class OtherList(crud.List):
     model = models.OtherThing
