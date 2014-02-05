@@ -6,6 +6,7 @@ from .base import TestCase
 from .models import TestModel
 
 import flask_ndbcrud as crud
+from flask_ndbcrud import edit
 
 
 class TestCreate(crud.Create):
@@ -14,6 +15,15 @@ class TestCreate(crud.Create):
 
 class TestEdit(crud.Edit):
     model = TestModel
+
+    fieldsets = [
+        {'name': 'Name', 'fields': ['name']},
+        {
+            'name': 'Other',
+            'fields': ['other_field_1', 'other_field_2'],
+            'other_arg': mock.sentinel.OTHER_ARG
+        }
+    ]
 
 
 class CreateTestCase(TestCase):
@@ -99,16 +109,20 @@ class EditTestCase(TestCase):
             flask.url_for('crud.testmodel_edit', key=self.inst.key),
             '/testmodel/i-test/')
 
+    @mock.patch('flask_ndbcrud.edit.FieldsetIterator')
     @mock.patch.object(TestEdit, 'form')
-    def test_get(self, form):
+    def test_get(self, form, fieldset_iterator):
         resp = self.client.get('/testmodel/i-test/')
         self.assert200(resp)
         self.authenticator.has_permission_for.assert_called_once_with(
             TestModel, 'edit', key=self.inst.key)
 
+        fieldset_iterator.assert_called_once_with(mock.ANY, form())
+
         self.assertTemplateUsed('crud/edit.html')
         self.assertContext('form', form())
         self.assertContext('instance', self.inst)
+        self.assertContext('fieldsets', fieldset_iterator())
 
     def test_get_missing_perm(self):
         self.authenticator.has_permission_for.return_value = False
@@ -134,4 +148,38 @@ class EditTestCase(TestCase):
         inst = self.inst.key.get()
         save_model.assert_called_once_with(mock.ANY, inst)
         get_success_redirect.assert_called_once_with(inst)
+
+
+class FieldsetIteratorTestCase(TestCase):
+    def create_app(self):
+        return self._create_app(TestCreate, TestEdit)
+
+    def get_iterator(self):
+        view = TestEdit()
+        form = view.form()
+        return edit.FieldsetIterator(view, form)
+
+    def test_iter(self):
+        fsi = self.get_iterator()
+
+        fieldsets = list(fsi)
+
+        self.assertEqual(fieldsets[0].name, 'Name')
+        self.assertEqual(
+            [x.name for x in fieldsets[0]],
+            ['name']
+        )
+
+        self.assertEqual(fieldsets[1].name, 'Other')
+        self.assertEqual(
+            [x.name for x in fieldsets[1]],
+            ['other_field_1', 'other_field_2']
+        )
+        self.assertEqual(fieldsets[1].other_arg, mock.sentinel.OTHER_ARG)
+
+        self.assertEqual(fieldsets[2].name, None)
+        self.assertEqual(
+            [x.name for x in fieldsets[2]],
+            ['other_field_3']
+        )
 

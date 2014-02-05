@@ -4,6 +4,10 @@ from google.appengine.ext import ndb
 class TestModel(ndb.Model):
     name = ndb.StringProperty(required=True)
 
+    other_field_1 = ndb.StringProperty(default='other1')
+    other_field_2 = ndb.StringProperty(default='other2')
+    other_field_3 = ndb.StringProperty(default='other3')
+
     def model_member(self):
         return "Model Member %s" % self.name
 

@@ -7,15 +7,15 @@ from wtforms_ndb import model_form
 
 
 class Fieldset(object):
-    def __init__(self, form, name, fields=[], **kwargs):
+    def __init__(self, form, name=None, fields=None, **kwargs):
         self.name = name
         self.form = form
-        self.fields = fields
+        self.fields = fields or []
         self._kwargs = kwargs
 
     def __getattr__(self, attr):
         try:
-            self._kwargs[attr]
+            return self._kwargs[attr]
         except KeyError:
             raise AttributeError("Fieldset %r has no attribute %r" % (
                 self.name, attr))
@@ -26,6 +26,15 @@ class Fieldset(object):
 
 
 class FieldsetIterator(object):
+    """
+    Iterator to facilitate ordering and grouping fields.
+
+    If not all fields are specified in the view's fieldsets parameter,
+    a final group will be created containing the remainders.
+
+    :param crud_view: The crud view instance.
+    :param form: The form.
+    """
     def __init__(self, crud_view, form):
         self.crud_view = crud_view
         self.form = form
@@ -38,13 +47,25 @@ class FieldsetIterator(object):
 
             yield Fieldset(self.form, **fieldset)
 
-        yield Fieldset(self.form, None, self._fields)
+        if self._fields:
+            yield Fieldset(self.form, None, self._fields)
 
 
 class FormView(CrudView):
     action = 'list'
 
     form = None
+
+    #: An array of dictionaries specifying fieldsets. These should
+    #: contain at least a ``name`` and ``fields`` values.
+    #: All fields not specified will be grouped into an unordered
+    #: remainder.
+    #:
+    #: Example ::
+    #:
+    #:  [
+    #:      {'name':"Title", 'fields': ['title','slug']},
+    #:  ]
     fieldsets = []
 
     _methods = ['GET', 'POST']
@@ -84,7 +105,7 @@ class FormView(CrudView):
         except BuildError:
             return flask.url_for(".index")
 
-    def do_form(self, instance=None):
+    def _form_logic(self, instance=None):
         form = self.form(flask.request.form, obj=instance)
 
         if flask.request.method == 'POST' and form.validate():
@@ -113,7 +134,7 @@ class Edit(FormView):
         if instance is None:
             flask.abort(404)
 
-        return self.do_form(instance)
+        return self._form_logic(instance)
 
 
 class Create(FormView):
@@ -125,5 +146,5 @@ class Create(FormView):
     _requires_instance = False
 
     def dispatch_request(self):
-        return self.do_form(None)
+        return self._form_logic(None)
 
