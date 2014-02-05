@@ -1,5 +1,8 @@
 import flask
 from flask.views import View
+from werkzeug.utils import cached_property
+
+from google.appengine.ext import ndb
 
 
 class CrudView(View):
@@ -9,10 +12,13 @@ class CrudView(View):
     #: The associated ndb.Model class this action deals with
     model = None
 
+    #: A list of associated views that this action can link to.
+    #: Can either be a CrudView subclass or an action name.
+    linked_actions = []
+
     #: Bootstrap3 icon classes to use when rendering button icon. If not
     #: present, text will be used
     button_icon = None
-
     #: Bootstrap3 button class to be used when rendering button.
     button_class = 'btn-default'
 
@@ -41,15 +47,15 @@ class CrudView(View):
         }
 
     @classmethod
-    def has_permission_for(cls, key=None, instance=None):
+    def has_permission_for(cls, key=None):
         """
         Check if the user has the permissions required for this view.
 
         :param key: A ndb.Key instance to link to (optional)
         :param instance: A ndb.Model instance to link to (optional)
         """
-        if instance:
-            key = instance.key
+        if isinstance(key, ndb.Model):
+            key = key.key
 
         return flask.g.crud.auth.has_permission_for(
             cls.model,
@@ -57,7 +63,7 @@ class CrudView(View):
             key=key)
 
     @classmethod
-    def url_for(cls, instance=None, blueprint=''):
+    def url_for(cls, key=None, blueprint=''):
         """
         Get the URL for this view.
 
@@ -66,7 +72,23 @@ class CrudView(View):
         :param key: A ndb.Key instance to link to (optional)
         :param instance: A ndb.Model instance to link to (optional)
         """
+        if isinstance(key, ndb.Model):
+            key = key.key
+
         return flask.url_for(
             '%s.%s' % (blueprint, cls.view_name()),
-            key=instance)
+            key=key)
+
+    @cached_property
+    def _linked_actions(self):
+        views = []
+        for v in self._linked_actions:
+            if issubclass(v, CrudView):
+                views.append(v)
+            else:
+                try:
+                    v.append(flask.g.crud.registry[self.kind()][v])
+                except KeyError:
+                    pass
+        return v
 
