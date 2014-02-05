@@ -1,0 +1,22 @@
+{% macro action_button(view, instance) %}
+    <button type='submit' class='btn {{ view.button_class }}'>
+        {% if view.button_icon %}
+            <span class='glyphicon {{ view.button_icon }}'></span>
+        {% endif %}
+        {{ view.action|title }}
+    </button>
+{% endmacro %}
+
+{% macro action_link(view, instance=None, text=True) -%}
+    {% set url = view.url_for(instance) %}
+    {% set perm = view.has_permission_for(instance) %}
+
+    <a href='{% if perm %}{{ url }}{% else %}#{% endif %}' 
+        class='btn {{ view.button_class }} {% if not perm %}disabled{% endif %}'>
+            {% if view.button_icon %}
+                <span class='glyphicon glyphicon-{{ view.button_icon }}'></span>
+            {% endif %}
+            {% if text or not view.button_class %}{{ view.action|title }}{% endif %}
+    </a>
+{%- endmacro %}
+

@@ -1,4 +1,3 @@
-import types
 import flask
 from google.appengine.ext import ndb
 
@@ -15,13 +14,6 @@ class Operation(CrudView):
     #: If true, the user will be taken to an intermediate confirmation page
     #: otherwise, the operation will be performed immediately.
     require_confirmation = True
-
-    #: Bootstrap3 icon classes to use when rendering button icon. If not
-    #: present, text will be used
-    button_icon = None
-
-    #: Bootstrap3 button class to be used when rendering button.
-    button_class = 'btn-default'
 
     _url_patterns = [
         ("/{kind_lower}/<ndbkey('{kind}'):key>/{action}/", {}),

@@ -13,6 +13,10 @@ class Table(object):
 
         self._rows = query.map_async(self._map, **query_params)
 
+    @property
+    def row_count(self):
+        return len(self._rows.get_result())
+
     @cached_property
     def headers(self):
         headers = []
@@ -82,6 +86,8 @@ class List(CrudView):
     query_composers = [
         query_composers.Paginator
     ]
+
+    button_icon = 'list'
 
     _url_patterns = [
         ("/{kind_lower}/", {'page': 1}),

@@ -1,6 +1,22 @@
 {% extends "crud/base.html" %}
 
-{% block page_header %}{{ view.kind() }}{% endblock %}
+{% from "crud/macros/pagination.html" import render_paginator %}
+{% from "crud/macros/action_button.html" import action_link %}
+
+{% block page_header %}
+    {{ view.kind() }}
+    {% if paginator %}<small>Showing {{ table.row_count }} of {{ paginator.total_objects }} rows</small>{% endif %}
+{% endblock %}
+
+{% block header_buttons %}
+    <div class='pull-right'>
+        {% for action in view.actions if not action._requires_instance %}
+            {% if action.has_permission_for() %}
+                {{ action_link(action) }}
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endblock %}
 
 {% block body %}
     <div class='row'>
@@ -14,8 +30,8 @@
                                 <th>{{ header }}</th>
                             {% endfor %}
 
-                            {% for action in view.actions %}
-                                <th>{{ action.action|title }}</th>
+                            {% for action in view.actions if action._requires_instance %}
+                            <th width='1px'>{{ action.action|title }}</th>
                             {% endfor %}
                         </tr>
                     {% endif %}
@@ -30,17 +46,9 @@
                                 {% endwith %}
                             </td>
                         {% endfor %}
-                        {% for action in view.actions %}
+                        {% for action in view.actions if action._requires_instance %}
                             <td>
-                                {% if action.has_permission_for(instance=instance) %}
-                                    <a href='{{ action.url_for(instance=instance) }}' class='btn {{ action.button_class }}'>
-                                        {% if action.button_icon %}
-                                            <span class='glyphicon {{ action.button_icon }}'></span>
-                                        {% else %}
-                                            {{ action.action|title }}
-                                        {% endif %}
-                                    </a>
-                                {% endif %}
+                                {{ action_link(action, instance, text=False) }}
                             </td>
                         {% endfor %}
                     </tr>
@@ -53,6 +61,8 @@
                 {% endfor %}
                 
             </table>
+
+            {{ render_paginator(paginator) }}
         </div>
     </div>
 {% endblock %}

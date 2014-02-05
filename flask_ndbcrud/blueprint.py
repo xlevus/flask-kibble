@@ -137,7 +137,7 @@ class Crud(flask.Blueprint):
                          flask.request.endpoint)
             return flask.render_template('crud/403.html'), 403
 
-    def url_for(self, model, action, key=None, instance=None):
+    def url_for(self, model, action, instance=None):
         """
         Get the URL for a specific Model/Action/Instance.
 
@@ -151,5 +151,5 @@ class Crud(flask.Blueprint):
         if not view:
             return ""
 
-        return view.url_for(self.name, key, instance)
+        return view.url_for(instance, blueprint=self.name)
 

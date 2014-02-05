@@ -18,15 +18,6 @@ class ContactDelete(crud.Delete):
     model = models.Contact
 
 
-class ContactList(crud.List):
-    model = models.Contact
-
-    list_display = [
-        'name', 'home_phone', 'work_phone',
-    ]
-    actions = [ContactDelete]
-
-
 class ContactCreate(crud.Create):
     model = models.Contact
 
@@ -36,6 +27,20 @@ class ContactCreate(crud.Create):
             'address_1', 'address_2', 'address_3']},
         {'name': 'Contact Details', 'fields': [
             'home_phone', 'work_phone']},
+    ]
+
+
+class ContactList(crud.List):
+    model = models.Contact
+
+    page_size = 5
+
+    list_display = [
+        'name', 'home_phone', 'work_phone',
+    ]
+    actions = [
+        ContactCreate,
+        ContactDelete,
     ]
 
 

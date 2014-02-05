@@ -1,0 +1,35 @@
+{% macro render_paginator(paginator) %}
+    {% if paginator and paginator.pages > 1 %}
+        <ul class="pagination center-block pagination-sm">
+            {% if paginator.has_prev %}
+                <li><a href="{{ paginator.url_for_page(1) }}">&#x21E4;</a></li>
+                <li><a href="{{ paginator.url_for_page(paginator.prev) }}">&#x2190;</a></li>
+            {% else %}
+                <li class='disabled'><a href="#">&#x21E4;</a></li>
+                <li class='disabled'><a href="#">&#x2190;</a></li>
+            {% endif %}
+
+            {% for page in paginator.iter_page_numbers() %}
+                {% if page %}
+                    {% if page == paginator.page_number %}
+                        <li class="active"><a class="active" href="#"><strong>{{ page }}</strong></a></li>
+                    {% else %}
+                        <li><a href="{{ paginator.url_for_page(page) }}">{{ page }}</a></li>
+                    {% endif %}
+                {% else %}
+                    <li class="disabled" >
+                        <a href="#">&#x2026;</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if paginator.has_next %}
+                <li><a href="{{ paginator.url_for_page(paginator.next) }}">&#x2192;</a></li>
+                <li><a href="{{ paginator.url_for_page(paginator.pages) }}">&#x21E5;</a></li>
+            {% else %}
+                <li class='disabled'><a href="#">&#x2192;</a></li>
+                <li class='disabled'><a href="#">&#x21E5;</a></li>
+            {% endif %}
+        </ul>
+    {% endif %}
+{% endmacro %}

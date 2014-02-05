@@ -3,8 +3,18 @@ from flask.views import View
 
 
 class CrudView(View):
+    #: The name of the action this view performs.
     action = None
+
+    #: The associated ndb.Model class this action deals with
     model = None
+
+    #: Bootstrap3 icon classes to use when rendering button icon. If not
+    #: present, text will be used
+    button_icon = None
+
+    #: Bootstrap3 button class to be used when rendering button.
+    button_class = 'btn-default'
 
     _methods = ['GET']
     _url_patterns = [("/{kind_lower}/{action}/", {})]
@@ -47,7 +57,7 @@ class CrudView(View):
             key=key)
 
     @classmethod
-    def url_for(cls, blueprint='', key=None, instance=None):
+    def url_for(cls, instance=None, blueprint=''):
         """
         Get the URL for this view.
 
@@ -56,7 +66,7 @@ class CrudView(View):
         :param key: A ndb.Key instance to link to (optional)
         :param instance: A ndb.Model instance to link to (optional)
         """
-        if instance:
-            key = instance.key
-        return flask.url_for('%s.%s' % (blueprint, cls.view_name()), key=key)
+        return flask.url_for(
+            '%s.%s' % (blueprint, cls.view_name()),
+            key=instance)
 

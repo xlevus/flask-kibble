@@ -124,6 +124,8 @@ class FormView(CrudView):
 class Edit(FormView):
     action = 'edit'
 
+    button_icon = 'pencil'
+
     _url_patterns = [
         ("/{kind_lower}/<ndbkey('{kind}'):key>/", {})
     ]
@@ -139,6 +141,8 @@ class Edit(FormView):
 
 class Create(FormView):
     action = 'create'
+
+    button_icon = 'plus-sign'
 
     _url_patterns = [
         ('/{kind_lower}/new/', {}),

@@ -1,5 +1,7 @@
 {% extends "crud/base.html" %}
 
+{% from "crud/macros/action_button.html" import action_link %}
+
 {% block page_header %}
     {{ crud.name|title }}
 {% endblock %}
@@ -18,8 +20,7 @@
                         <td>{{ kind.title() }}</td>
                         <td>
                             {% for name, view_cls in actions|dictsort if not view_cls._requires_instance %}
-                                <a href={{ url_for("."+view_cls.view_name()) }}>{{ name.title() }}</a>
-                                {% if not loop.last %}, {% endif %}
+                                {{ action_link(view_cls) }}
                             {% endfor %}
                     </tr>
                 {% endfor %}
