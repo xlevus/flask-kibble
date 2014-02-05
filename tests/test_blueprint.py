@@ -1,4 +1,5 @@
 import mock
+from google.appengine.ext import ndb
 
 from .base import TestCase, TestAuthenticator
 from .models import TestModel
@@ -51,6 +52,35 @@ class BlueprintTestCase(TestCase):
         self.assertEqual(self.crud._context_processor(), {
             'crud': self.crud,
         })
+
+    @mock.patch.object(DummyView, 'url_for')
+    def test_url_for(self, dummy_url_for):
+        dummy_url_for.return_value = mock.sentinel.URL_FOR
+
+        # get url from view w/o instance
+        self.assertEqual(
+            self.crud.url_for(TestModel, 'dummy'),
+            mock.sentinel.URL_FOR)
+        dummy_url_for.assert_called_once_with(None, blueprint='crud')
+        dummy_url_for.reset_mock()
+
+        # Get URL for instance
+        self.assertEqual(
+            self.crud.url_for(TestModel, 'dummy', mock.sentinel.INSTANCE),
+            mock.sentinel.URL_FOR)
+        dummy_url_for.assert_called_once_with(
+            mock.sentinel.INSTANCE, blueprint='crud')
+
+        # View not installed. Return empty string
+        self.assertEqual(
+            self.crud.url_for(TestModel, 'not_registered'),
+            '')
+
+        # Neither model nor view registerd
+        class OtherModel(ndb.Model):
+            pass
+
+        self.assertEqual(self.crud.url_for(OtherModel, 'other'), '')
 
 
 class BlueprintIndexTestCase(TestCase):
