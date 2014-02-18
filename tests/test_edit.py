@@ -83,7 +83,7 @@ class CreateTestCase(TestCase):
 
         self.assertRedirects(resp, '/t/')
 
-        self.assertFlashes("TestModel saved")
+        self.assertFlashes("TestModel saved", "success")
 
         inst = TestModel.query().get()
 
@@ -109,7 +109,7 @@ class EditTestCase(TestCase):
             flask.url_for('kibble.testmodel_edit', key=self.inst.key),
             '/testmodel/i-test/')
 
-    @mock.patch('flask_ndbkibble.edit.FieldsetIterator')
+    @mock.patch('flask_kibble.edit.FieldsetIterator')
     @mock.patch.object(TestEdit, 'form')
     def test_get(self, form, fieldset_iterator):
         resp = self.client.get('/testmodel/i-test/')
@@ -143,7 +143,7 @@ class EditTestCase(TestCase):
 
         self.assertRedirects(resp, '/t/')
 
-        self.assertFlashes("TestModel saved")
+        self.assertFlashes("TestModel saved", "success")
 
         inst = self.inst.key.get()
         save_model.assert_called_once_with(mock.ANY, inst)

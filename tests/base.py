@@ -64,6 +64,11 @@ class TestCase(FTestCase):
                 category, message = session['_flashes'][0]
             except KeyError:
                 raise AssertionError('nothing flashed')
-            assert expected_message in message
-            assert expected_category == category
+            self.assertIn(
+                expected_message, message,
+                msg="Message %r not found" % message)
+            self.assertEqual(
+                expected_category, category,
+                msg="Message category mismatch. Expected %r got %r" % (
+                    expected_category, category))
 
