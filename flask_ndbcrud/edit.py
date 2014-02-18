@@ -110,7 +110,7 @@ class FormView(CrudView):
 
         if flask.request.method == 'POST' and form.validate():
             instance = self.save_model(form, instance)
-            flask.flash("{kind} saved".format(kind=self.kind()))
+            flask.flash("{kind} saved".format(kind=self.kind()), 'success')
             return flask.redirect(self.get_success_redirect(instance))
 
         ctx = self.base_context()
