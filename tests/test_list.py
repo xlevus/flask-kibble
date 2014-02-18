@@ -6,11 +6,11 @@ from google.appengine.ext import ndb
 from .models import TestModel
 from .base import TestCase
 
-import flask_ndbcrud as crud
-from flask_ndbcrud import list
+import flask_kibble as kibble
+from flask_kibble import list
 
 
-class TestList(crud.List):
+class TestList(kibble.List):
     model = TestModel
 
     list_display = [
@@ -43,7 +43,7 @@ class ListTestCase(TestCase):
         self.assertEqual(TestList.view_name(), 'testmodel_list')
 
     def test_url(self):
-        self.assertEqual(flask.url_for('crud.testmodel_list'), '/testmodel/')
+        self.assertEqual(flask.url_for('kibble.testmodel_list'), '/testmodel/')
 
     @mock.patch.object(list, 'Table')
     @mock.patch.object(TestList, 'get_query')
@@ -76,7 +76,7 @@ class ListTestCase(TestCase):
         })
 
         # Check the template was rendered right
-        self.assertTemplateUsed('crud/list.html')
+        self.assertTemplateUsed('kibble/list.html')
         self.assertContext('table', Table())
         self.assertContext('qc1', qc1())
         self.assertContext('qc2', qc2())

@@ -4,8 +4,8 @@ import flask
 class QueryComposer(object):
     context_var = None
 
-    def __init__(self, crud_view, query):
-        self.crud_view = crud_view
+    def __init__(self, kibble_view, query):
+        self.kibble_view = kibble_view
         self._query = query
 
     def get_query(self):
@@ -23,7 +23,7 @@ class Paginator(QueryComposer):
     def __init__(self, *args, **kwargs):
         super(Paginator, self).__init__(*args, **kwargs)
 
-        self._total_objects = self.crud_view.get_query().count_async()
+        self._total_objects = self.kibble_view.get_query().count_async()
 
     def get_query_params(self):
         return {
@@ -33,7 +33,7 @@ class Paginator(QueryComposer):
 
     @property
     def per_page(self):
-        return min(self.crud_view.page_size, 50)
+        return min(self.kibble_view.page_size, 50)
 
     @property
     def total_objects(self):

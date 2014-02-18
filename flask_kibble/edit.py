@@ -1,7 +1,7 @@
 import flask
 from werkzeug.routing import BuildError
 
-from .base import CrudView
+from .base import KibbleView
 
 from wtforms_ndb import model_form
 
@@ -32,17 +32,17 @@ class FieldsetIterator(object):
     If not all fields are specified in the view's fieldsets parameter,
     a final group will be created containing the remainders.
 
-    :param crud_view: The crud view instance.
+    :param kibble_view: The kibble view instance.
     :param form: The form.
     """
-    def __init__(self, crud_view, form):
-        self.crud_view = crud_view
+    def __init__(self, kibble_view, form):
+        self.kibble_view = kibble_view
         self.form = form
 
         self._fields = set(self.form._fields.keys())
 
     def __iter__(self):
-        for fieldset in self.crud_view.fieldsets:
+        for fieldset in self.kibble_view.fieldsets:
             self._fields.difference_update(fieldset.get('fields', []))
 
             yield Fieldset(self.form, **fieldset)
@@ -51,7 +51,7 @@ class FieldsetIterator(object):
             yield Fieldset(self.form, None, self._fields)
 
 
-class FormView(CrudView):
+class FormView(KibbleView):
     action = 'list'
 
     form = None

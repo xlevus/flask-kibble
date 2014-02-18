@@ -8,13 +8,13 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="../../docs-assets/ico/favicon.png">
 
-    <title>{{ crud.name.title() }}</title>
+    <title>{{ kibble.name.title() }}</title>
 
     <!-- Bootstrap core CSS -->
     <link href="{{ url_for(".static", filename="bootstrap/css/bootstrap.css") }}" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="{{ url_for(".static", filename="crud/base.css") }}" rel="stylesheet">
+    <link href="{{ url_for(".static", filename="kibble/base.css") }}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -33,7 +33,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{{ url_for(".index") }}">{{ crud.name.title() }}</a>
+          <a class="navbar-brand" href="{{ url_for(".index") }}">{{ kibble.name.title() }}</a>
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">

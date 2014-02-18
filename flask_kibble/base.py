@@ -5,7 +5,7 @@ from werkzeug.utils import cached_property
 from google.appengine.ext import ndb
 
 
-class CrudView(View):
+class KibbleView(View):
     #: The name of the action this view performs.
     action = None
 
@@ -13,7 +13,7 @@ class CrudView(View):
     model = None
 
     #: A list of associated views that this action can link to.
-    #: Can either be a CrudView subclass or an action name.
+    #: Can either be a KibbleView subclass or an action name.
     linked_actions = []
 
     #: Bootstrap3 icon classes to use when rendering button icon. If not
@@ -37,8 +37,8 @@ class CrudView(View):
     @property
     def templates(self):
         return [
-            'crud/%s.html' % self.action,
-            'crud/%s_%s.html' % (self.kind().lower(), self.action)
+            'kibble/%s.html' % self.action,
+            'kibble/%s_%s.html' % (self.kind().lower(), self.action)
         ]
 
     def base_context(self):
@@ -57,7 +57,7 @@ class CrudView(View):
         if isinstance(key, ndb.Model):
             key = key.key
 
-        return flask.g.crud.auth.has_permission_for(
+        return flask.g.kibble.auth.has_permission_for(
             cls.model,
             cls.action,
             key=key)
@@ -83,11 +83,11 @@ class CrudView(View):
     def _linked_actions(self):
         views = []
         for v in self._linked_actions:
-            if issubclass(v, CrudView):
+            if issubclass(v, KibbleView):
                 views.append(v)
             else:
                 try:
-                    v.append(flask.g.crud.registry[self.kind()][v])
+                    v.append(flask.g.kibble.registry[self.kind()][v])
                 except KeyError:
                     pass
         return v

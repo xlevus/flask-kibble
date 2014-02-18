@@ -5,10 +5,10 @@ import flask
 from .models import TestModel
 from .base import TestCase
 
-import flask_ndbcrud as crud
+import flask_kibble as kibble
 
 
-class DummyOperation(crud.Operation):
+class DummyOperation(kibble.Operation):
     action = 'dummy'
     past_tense = 'dummied'
 
@@ -40,13 +40,13 @@ class OperationTestCase(TestCase):
 
     def test_url(self):
         self.assertEqual(
-            flask.url_for('crud.testmodel_dummy', key=self.instance),
+            flask.url_for('kibble.testmodel_dummy', key=self.instance),
             '/testmodel/i-test/dummy/')
 
     def test_get(self):
         resp = self.client.get('/testmodel/i-test/dummy/')
         self.assert200(resp)
-        self.assertTemplateUsed('crud/operation.html')
+        self.assertTemplateUsed('kibble/operation.html')
         self.assertContext('instance', self.instance)
 
         self.assertFalse(self.run.called)
@@ -76,7 +76,7 @@ class OperationTestCase(TestCase):
         self.run.assert_called_once_with(self.instance)
 
     def test_post_failure(self):
-        failure = crud.Operation.Failure("")
+        failure = kibble.Operation.Failure("")
         self.run.side_effect = failure
 
         resp = self.client.post('/testmodel/i-test/dummy/')

@@ -4,11 +4,11 @@ from google.appengine.ext import ndb
 from .base import TestCase, TestAuthenticator
 from .models import TestModel
 
-import flask_ndbcrud as crud
-from flask_ndbcrud.base import CrudView
+import flask_kibble as kibble
+from flask_kibble.base import KibbleView
 
 
-class DummyView(CrudView):
+class DummyView(KibbleView):
     action = 'dummy'
     model = TestModel
 
@@ -30,7 +30,7 @@ class BlueprintTestCase(TestCase):
 
         Also check the view gets added to the internal registry.
         """
-        bp = crud.Crud('test_crud', __name__, TestAuthenticator())
+        bp = kibble.Kibble('test_kibble', __name__, TestAuthenticator())
 
         mpo = mock.patch.object
         with mpo(bp, 'add_url_rule', wraps=bp.add_url_rule) as add_url_rule:
@@ -49,8 +49,8 @@ class BlueprintTestCase(TestCase):
             self.assertEqual(bp.registry, {'TestModel': {'dummy': DummyView}})
 
     def test_context_processor(self):
-        self.assertEqual(self.crud._context_processor(), {
-            'crud': self.crud,
+        self.assertEqual(self.kibble._context_processor(), {
+            'kibble': self.kibble,
         })
 
     @mock.patch.object(DummyView, 'url_for')
@@ -59,28 +59,28 @@ class BlueprintTestCase(TestCase):
 
         # get url from view w/o instance
         self.assertEqual(
-            self.crud.url_for(TestModel, 'dummy'),
+            self.kibble.url_for(TestModel, 'dummy'),
             mock.sentinel.URL_FOR)
-        dummy_url_for.assert_called_once_with(None, blueprint='crud')
+        dummy_url_for.assert_called_once_with(None, blueprint='kibble')
         dummy_url_for.reset_mock()
 
         # Get URL for instance
         self.assertEqual(
-            self.crud.url_for(TestModel, 'dummy', mock.sentinel.INSTANCE),
+            self.kibble.url_for(TestModel, 'dummy', mock.sentinel.INSTANCE),
             mock.sentinel.URL_FOR)
         dummy_url_for.assert_called_once_with(
-            mock.sentinel.INSTANCE, blueprint='crud')
+            mock.sentinel.INSTANCE, blueprint='kibble')
 
         # View not installed. Return empty string
         self.assertEqual(
-            self.crud.url_for(TestModel, 'not_registered'),
+            self.kibble.url_for(TestModel, 'not_registered'),
             '')
 
         # Neither model nor view registerd
         class OtherModel(ndb.Model):
             pass
 
-        self.assertEqual(self.crud.url_for(OtherModel, 'other'), '')
+        self.assertEqual(self.kibble.url_for(OtherModel, 'other'), '')
 
 
 class BlueprintIndexTestCase(TestCase):
@@ -93,7 +93,7 @@ class BlueprintIndexTestCase(TestCase):
     def test_index(self):
         resp = self.client.get('/')
         self.assert200(resp)
-        self.assertTemplateUsed('crud/index.html')
+        self.assertTemplateUsed('kibble/index.html')
 
         self.authenticator.has_permission_for.assert_called_once_with(
             None, 'index')

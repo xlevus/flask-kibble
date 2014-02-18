@@ -4,10 +4,10 @@ import mock
 from .base import TestCase
 from .models import TestModel
 
-from flask_ndbcrud.base import CrudView
+from flask_kibble.base import KibbleView
 
 
-class DummyView(CrudView):
+class DummyView(KibbleView):
     action = 'dummy'
     model = TestModel
 
@@ -18,7 +18,7 @@ class DummyView(CrudView):
     _methods = ['GET', 'DELETE']
 
 
-class BaseCrudViewTestCase(TestCase):
+class BaseKibbleViewTestCase(TestCase):
     def create_app(self):
         return self._create_app(DummyView)
 
@@ -33,16 +33,16 @@ class BaseCrudViewTestCase(TestCase):
         v = self.get_view()
 
         self.assertEqual(v.templates, [
-            'crud/dummy.html',
-            'crud/testmodel_dummy.html',
+            'kibble/dummy.html',
+            'kibble/testmodel_dummy.html',
         ])
 
     def test_has_permission_for(self):
         v = self.get_view()
 
-        flask.g.crud = self.crud
+        flask.g.kibble = self.kibble
 
-        with mock.patch.object(self.crud.auth, 'has_permission_for') as auth:
+        with mock.patch.object(self.kibble.auth, 'has_permission_for') as auth:
             v.has_permission_for()
             auth.assert_called_once_with(TestModel, 'dummy', key=None)
             auth.reset_mock()
