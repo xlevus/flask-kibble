@@ -44,7 +44,16 @@ def index():
 
 
 class Kibble(flask.Blueprint):
-    def __init__(self, name, import_name, authenticator, **kwargs):
+    def __init__(self, name, import_name, auth, label=None, **kwargs):
+        """
+        The central point of the Kibble admin. Manages permissions of views.
+
+        :param name: The blueprint name.
+        :param import_name: The importable name.
+        :param auth: A ``flask_kibble.Authenticator`` subclass to provide
+            authentication and permissions.
+        :param label: The label of the Kibble admin. Will default to the name.
+        """
 
         kwargs.setdefault(
             'template_folder',
@@ -55,7 +64,8 @@ class Kibble(flask.Blueprint):
             os.path.join(os.path.dirname(__file__), 'static'))
 
         super(Kibble, self).__init__(name, import_name, **kwargs)
-        self.auth = authenticator
+        self.label = label or self.name.title()
+        self.auth = auth
 
         self.registry = defaultdict(dict)
 

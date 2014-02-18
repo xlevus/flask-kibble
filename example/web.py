@@ -9,7 +9,10 @@ app.debug = True
 app.config['SECRET_KEY'] = 'notasecret'
 
 admin = kibble.Kibble(
-    'kibble', __name__, kibble.Authenticator(),
+    'kibble',
+    __name__,
+    kibble.Authenticator(),
+    label='Example Kibble Admin',
     static_url_path='/kibble/static'
 )
 
