@@ -2,23 +2,23 @@ import flask
 
 import models
 
-import flask_ndbcrud as crud
+import flask_kibble as kibble
 
 app = flask.Flask(__name__)
 app.debug = True
 app.config['SECRET_KEY'] = 'notasecret'
 
-my_crud = crud.Crud(
-    'crud', __name__, crud.Authenticator(),
-    static_url_path='/crud/static'
+admin = kibble.Kibble(
+    'kibble', __name__, kibble.Authenticator(),
+    static_url_path='/kibble/static'
 )
 
 
-class ContactDelete(crud.Delete):
+class ContactDelete(kibble.Delete):
     model = models.Contact
 
 
-class ContactCreate(crud.Create):
+class ContactCreate(kibble.Create):
     model = models.Contact
 
     fieldsets = [
@@ -30,7 +30,7 @@ class ContactCreate(crud.Create):
     ]
 
 
-class ContactList(crud.List):
+class ContactList(kibble.List):
     model = models.Contact
 
     page_size = 5
@@ -44,21 +44,21 @@ class ContactList(crud.List):
     ]
 
 
-class ContactEdit(crud.Edit):
+class ContactEdit(kibble.Edit):
     model = models.Contact
 
     fieldsets = ContactCreate.fieldsets
 
 
-class OtherList(crud.List):
+class OtherList(kibble.List):
     model = models.OtherThing
 
 
-my_crud.register_view(ContactList)
-my_crud.register_view(ContactCreate)
-my_crud.register_view(ContactEdit)
-my_crud.register_view(ContactDelete)
+admin.register_view(ContactList)
+admin.register_view(ContactCreate)
+admin.register_view(ContactEdit)
+admin.register_view(ContactDelete)
 
-my_crud.register_view(OtherList)
+admin.register_view(OtherList)
 
-app.register_blueprint(my_crud)
+app.register_blueprint(admin)

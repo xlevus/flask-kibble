@@ -5,15 +5,15 @@ from werkzeug.datastructures import MultiDict
 from .base import TestCase
 from .models import TestModel
 
-import flask_ndbcrud as crud
-from flask_ndbcrud import edit
+import flask_kibble as kibble
+from flask_kibble import edit
 
 
-class TestCreate(crud.Create):
+class TestCreate(kibble.Create):
     model = TestModel
 
 
-class TestEdit(crud.Edit):
+class TestEdit(kibble.Edit):
     model = TestModel
 
     fieldsets = [
@@ -37,7 +37,7 @@ class CreateTestCase(TestCase):
 
     def test_url(self):
         self.assertEqual(
-            flask.url_for('crud.testmodel_create'),
+            flask.url_for('kibble.testmodel_create'),
             '/testmodel/new/')
 
     @mock.patch.object(TestCreate, 'form')
@@ -48,7 +48,7 @@ class CreateTestCase(TestCase):
         self.authenticator.has_permission_for.assert_called_once_with(
             TestModel, 'create')
 
-        self.assertTemplateUsed('crud/create.html')
+        self.assertTemplateUsed('kibble/create.html')
 
         self.assertContext('form', form())
         self.assertContext('instance', None)
@@ -106,10 +106,10 @@ class EditTestCase(TestCase):
 
     def test_url(self):
         self.assertEqual(
-            flask.url_for('crud.testmodel_edit', key=self.inst.key),
+            flask.url_for('kibble.testmodel_edit', key=self.inst.key),
             '/testmodel/i-test/')
 
-    @mock.patch('flask_ndbcrud.edit.FieldsetIterator')
+    @mock.patch('flask_ndbkibble.edit.FieldsetIterator')
     @mock.patch.object(TestEdit, 'form')
     def test_get(self, form, fieldset_iterator):
         resp = self.client.get('/testmodel/i-test/')
@@ -119,7 +119,7 @@ class EditTestCase(TestCase):
 
         fieldset_iterator.assert_called_once_with(mock.ANY, form())
 
-        self.assertTemplateUsed('crud/edit.html')
+        self.assertTemplateUsed('kibble/edit.html')
         self.assertContext('form', form())
         self.assertContext('instance', self.inst)
         self.assertContext('fieldsets', fieldset_iterator())

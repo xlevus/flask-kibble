@@ -1,4 +1,4 @@
-from .blueprint import Authenticator, Crud
+from .blueprint import Authenticator, Kibble
 
 from .list import List
 from .edit import Edit, Create

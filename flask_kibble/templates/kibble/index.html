@@ -1,9 +1,9 @@
-{% extends "crud/base.html" %}
+{% extends "kibble/base.html" %}
 
-{% from "crud/macros/action_button.html" import action_link %}
+{% from "kibble/macros/action_button.html" import action_link %}
 
 {% block page_header %}
-    {{ crud.name|title }}
+    {{ kibble.name|title }}
 {% endblock %}
 
 {% block body %}
@@ -15,7 +15,7 @@
                     <th>Actions</th>
                 </tr>
 
-                {% for kind, actions in crud.registry|dictsort %}
+                {% for kind, actions in kibble.registry|dictsort %}
                     <tr>
                         <td>{{ kind.title() }}</td>
                         <td>

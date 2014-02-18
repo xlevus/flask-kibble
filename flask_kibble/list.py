@@ -3,13 +3,13 @@ from werkzeug.utils import cached_property
 
 from google.appengine.ext import ndb
 
-from .base import CrudView
+from .base import KibbleView
 from . import query_composers
 
 
 class Table(object):
-    def __init__(self, crud_view, query, query_params):
-        self.crud_view = crud_view
+    def __init__(self, kibble_view, query, query_params):
+        self.kibble_view = kibble_view
 
         self._rows = query.map_async(self._map, **query_params)
 
@@ -20,7 +20,7 @@ class Table(object):
     @cached_property
     def headers(self):
         headers = []
-        for attr_name in self.crud_view.list_display:
+        for attr_name in self.kibble_view.list_display:
             if callable(attr_name):
                 attr_name = attr_name.__name__
             headers.append(attr_name.replace("_", " ").strip().title())
@@ -30,7 +30,7 @@ class Table(object):
     def _map(self, instance):
         retval = []
 
-        for attr_name in self.crud_view.list_display:
+        for attr_name in self.kibble_view.list_display:
             if callable(attr_name):
                 attr = attr_name
                 args = (instance,)
@@ -39,8 +39,8 @@ class Table(object):
                 attr = getattr(instance, attr_name)
                 args = ()
 
-            elif hasattr(self.crud_view, attr_name):
-                attr = getattr(self.crud_view, attr_name)
+            elif hasattr(self.kibble_view, attr_name):
+                attr = getattr(self.kibble_view, attr_name)
                 args = (instance,)
 
             elif callable(attr_name):
@@ -65,7 +65,7 @@ class Table(object):
             yield row
 
 
-class List(CrudView):
+class List(KibbleView):
     action = 'list'
 
     #: Columns to display in the list table. Can be one of:

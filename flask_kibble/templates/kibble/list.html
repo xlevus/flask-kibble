@@ -1,7 +1,7 @@
-{% extends "crud/base.html" %}
+{% extends "kibble/base.html" %}
 
-{% from "crud/macros/pagination.html" import render_paginator %}
-{% from "crud/macros/action_button.html" import action_link %}
+{% from "kibble/macros/pagination.html" import render_paginator %}
+{% from "kibble/macros/action_button.html" import action_link %}
 
 {% block page_header %}
     {{ view.kind() }}
@@ -39,7 +39,7 @@
                     <tr>
                         {% for column in columns %}
                             <td>
-                                {% with edit_url = crud.url_for(view.model, "edit", instance) %}
+                                {% with edit_url = kibble.url_for(view.model, "edit", instance) %}
                                     {% if edit_url and loop.first and view.link_first %}<a href='{{ edit_url }}'>{% endif %}
                                         {{ column|default("<i>(null)</i>"|safe, True) }}
                                     {% if edit_url and loop.first and view.link_first %}</a>{% endif %}

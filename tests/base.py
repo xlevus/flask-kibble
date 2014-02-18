@@ -7,13 +7,13 @@ from google.appengine.ext import ndb
 from google.appengine.ext import testbed
 from google.appengine.datastore import datastore_stub_util
 
-import flask_ndbcrud as crud
+import flask_kibble as kibble
 
 
 ndb.utils.DEBUG = False
 
 
-class TestAuthenticator(crud.Authenticator):
+class TestAuthenticator(kibble.Authenticator):
     def is_logged_in(self):
         return True
 
@@ -41,7 +41,7 @@ class TestCase(FTestCase):
     def _post_teardown(self):
         super(TestCase, self)._post_teardown()
 
-    def _create_app(self, *crud_views):
+    def _create_app(self, *kibble_views):
         app = flask.Flask(__name__)
 
         app.config['SECRET_KEY'] = 'test_secret'
@@ -49,12 +49,12 @@ class TestCase(FTestCase):
 
         self.authenticator = mock.Mock(wraps=TestAuthenticator())
 
-        self.crud = crud.Crud('crud', __name__, self.authenticator)
+        self.kibble = kibble.Kibble('kibble', __name__, self.authenticator)
 
-        for view in crud_views:
-            self.crud.register_view(view)
+        for view in kibble_views:
+            self.kibble.register_view(view)
 
-        app.register_blueprint(self.crud)
+        app.register_blueprint(self.kibble)
 
         return app
 

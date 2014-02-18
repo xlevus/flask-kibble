@@ -1,6 +1,6 @@
 # vim: set nospell:
 
-application: flask-ndb-crud 
+application: flask-kibble
 version: dev
 runtime: python27
 api_version: 1

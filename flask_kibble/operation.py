@@ -1,10 +1,10 @@
 import flask
 from google.appengine.ext import ndb
 
-from .base import CrudView
+from .base import KibbleView
 
 
-class Operation(CrudView):
+class Operation(KibbleView):
     action = None
 
     #: The past tense verb of the action. Used to display default messages
@@ -28,9 +28,9 @@ class Operation(CrudView):
     @property
     def templates(self):
         return [
-            'crud/operation.html',
-            'crud/%s.html' % self.action,
-            'crud/%s_%s.html' % (self.kind().lower(), self.action)
+            'kibble/operation.html',
+            'kibble/%s.html' % self.action,
+            'kibble/%s_%s.html' % (self.kind().lower(), self.action)
         ]
 
     def run(self, instance):

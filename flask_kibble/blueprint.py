@@ -22,8 +22,8 @@ class Authenticator(object):
         the Model/Action/ViewArgs.
 
         :param model: The model class that is being operated on
-        :param action: The CrudView.action that is being executed or the name
-            of the view (for non-CBVs)
+        :param action: The KibbleView.action that is being executed or the
+            name of the view (for non-CBVs)
         :param key: The ndb.Key of the object currently operating on.
         :param **view_args: The current view args.
         """
@@ -38,12 +38,12 @@ class Authenticator(object):
 
 def index():
     """
-    Crud index view. Lists the registered classes and views.
+    Kibble index view. Lists the registered classes and views.
     """
-    return flask.render_template('crud/index.html')
+    return flask.render_template('kibble/index.html')
 
 
-class Crud(flask.Blueprint):
+class Kibble(flask.Blueprint):
     def __init__(self, name, import_name, authenticator, **kwargs):
 
         kwargs.setdefault(
@@ -54,7 +54,7 @@ class Crud(flask.Blueprint):
             'static_folder',
             os.path.join(os.path.dirname(__file__), 'static'))
 
-        super(Crud, self).__init__(name, import_name, **kwargs)
+        super(Kibble, self).__init__(name, import_name, **kwargs)
         self.auth = authenticator
 
         self.registry = defaultdict(dict)
@@ -68,11 +68,9 @@ class Crud(flask.Blueprint):
 
     def register_view(self, view_class):
         """
-        Register a class with the CRUD blueprint.
+        Register a class with the Kibble blueprint.
 
-        :param view_class: A crud view class
-        :param url_pattern: Override the URL pattern provided by the crud
-        class.
+        :param view_class: A KibbleView class
 
         :raises ValueError: When the same (Class,Action) pair is already
         registered.
@@ -100,7 +98,7 @@ class Crud(flask.Blueprint):
         self.registry[kind][action] = view_class
 
     def _context_processor(self):
-        return {'crud': self}
+        return {'kibble': self}
 
     @classmethod
     def _register_urlconverter(self, setup_state):
@@ -109,7 +107,7 @@ class Crud(flask.Blueprint):
         app.url_map.converters.setdefault('ndbkey', NDBKeyConverter)
 
     def _before_request(self):
-        flask.g.crud = self         # Set global var
+        flask.g.kibble = self         # Set global var
 
         if not self.auth.is_logged_in():
             # User not logged in, redirect to the login url.
@@ -135,7 +133,7 @@ class Crud(flask.Blueprint):
 
             logger.debug("User is missing permission for %r",
                          flask.request.endpoint)
-            return flask.render_template('crud/403.html'), 403
+            return flask.render_template('kibble/403.html'), 403
 
     def url_for(self, model, action, instance=None):
         """
