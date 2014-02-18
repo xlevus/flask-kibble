@@ -39,3 +39,5 @@ nosetests.xml
 .ropeproject
 
 .*.swp
+
+docs/_build
