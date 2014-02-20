@@ -1,8 +1,7 @@
-
-Flask-NDB-Crud
+Flask-Kibble
 --------------
 
-An attempt at bringing the django-admin to Google Appengine with Flask
+Auto-Generated admin for Flask and Google Appengine's NDB library.
 
 
 To Do
@@ -11,4 +10,5 @@ To Do
     * Documentation
     * Improve visuals and UX
     * Table filtering and sorting
+    * Parent/Child editing.
 
