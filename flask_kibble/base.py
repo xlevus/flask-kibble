@@ -5,7 +5,19 @@ from werkzeug.utils import cached_property
 from google.appengine.ext import ndb
 
 
+class KibbleMeta(type):
+    _autodiscover = set([])
+
+    def __new__(mcls, name, bases, attrs):
+        cls = super(KibbleMeta, mcls).__new__(mcls, name, bases, attrs)
+        mcls._autodiscover.add(cls)
+
+        return cls
+
+
 class KibbleView(View):
+    __metaclass__ = KibbleMeta
+
     #: The name of the action this view performs.
     action = None
 

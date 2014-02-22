@@ -107,6 +107,29 @@ class Kibble(flask.Blueprint):
 
         self.registry[kind][action] = view_class
 
+    def autodiscover(self, paths, models=None):
+        """
+        Automatically register all Kibble views under ``path``.
+
+        :param paths: The module paths to search under.
+        :param models: A list of model kinds (either a ``ndb.Model`` subclass
+            or a string) (Optional)
+        """
+        from werkzeug.utils import find_modules, import_string
+        from .base import KibbleMeta
+
+        all_models = models is None
+        models = [
+            (x._kind() if isinstance(x, ndb.Model) else x)
+            for x in models or []]
+
+        for p in paths:
+            map(import_string, find_modules(p, True, True))
+
+        for view in KibbleMeta._autodiscover:
+            if view.model and (all_models or view.kind() in models):
+                self.register_view(view)
+
     def _context_processor(self):
         return {'kibble': self}
 
