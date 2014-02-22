@@ -1,4 +1,6 @@
-from .blueprint import Authenticator, Kibble
+from .blueprint import Kibble
+
+from .auth import Authenticator, GAEAuthenticator
 
 from .list import List
 from .edit import Edit, Create

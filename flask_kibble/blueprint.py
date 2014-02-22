@@ -6,34 +6,8 @@ from google.appengine.ext import ndb
 
 import flask
 
+
 logger = logging.getLogger(__name__)
-
-
-class Authenticator(object):
-    def is_logged_in(self):
-        """
-        Should return true if the current user is logged in.
-        """
-        return True
-
-    def has_permission_for(self, model, action, key=None, **view_args):
-        """
-        Should return true if the current user has the permissions for
-        the Model/Action/ViewArgs.
-
-        :param model: The model class that is being operated on
-        :param action: The KibbleView.action that is being executed or the
-            name of the view (for non-CBVs)
-        :param key: The ndb.Key of the object currently operating on.
-        :param **view_args: The current view args.
-        """
-        return True
-
-    def get_login_url(self):
-        """
-        Should return a URL the user can use to log in.
-        """
-        return "/"
 
 
 def index():
