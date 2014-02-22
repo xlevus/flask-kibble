@@ -52,8 +52,11 @@ class FieldsetIterator(object):
 
 
 class FormView(KibbleView):
+    #: Action name
     action = 'list'
 
+    #: The :py:class:`wtforms.Form` class to use. If not provided
+    #: one will be generated through :py:func:`wtforms_ndb.model_form`.
     form = None
 
     #: An array of dictionaries specifying fieldsets. These should
@@ -85,6 +88,9 @@ class FormView(KibbleView):
 
         :param form: The form instance
         :param instance: The instance (if any) to save to.
+
+        :returns: The saved instance
+        :rtype: :py:class:`ndb.Model`
         """
         if instance is None:
             instance = self.model()
@@ -99,6 +105,7 @@ class FormView(KibbleView):
         the URL to redirect to afterwards.
 
         :param instance: The successfully saved instance.
+        :returns: URL to redirect to.
         """
         try:
             return flask.url_for(".%s_list" % self.kind())
@@ -122,6 +129,7 @@ class FormView(KibbleView):
 
 
 class Edit(FormView):
+    #: View name
     action = 'edit'
 
     button_icon = 'pencil'
@@ -140,6 +148,7 @@ class Edit(FormView):
 
 
 class Create(FormView):
+    #: View name
     action = 'create'
 
     button_icon = 'plus-sign'

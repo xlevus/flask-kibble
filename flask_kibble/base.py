@@ -21,39 +21,69 @@ class KibbleView(View):
     #: The name of the action this view performs.
     action = None
 
-    #: The associated ndb.Model class this action deals with
+    #: The associated :py:class:`ndb.Model` class this action deals with
     model = None
 
     #: A list of associated views that this action can link to.
-    #: Can either be a KibbleView subclass or an action name.
+    #: Can either be a :class:`~flask_kibble.KibbleView` subclass or an action
+    #: name.
     linked_actions = []
 
-    #: Bootstrap3 icon classes to use when rendering button icon. If not
-    #: present, text will be used
+    #: Bootstrap3 icon classes to use when rendering the views button. If
+    #: not provided, text will be used
     button_icon = None
-    #: Bootstrap3 button class to be used when rendering button.
+    #: Bootstrap3 button class to be used when rendering the views button.
     button_class = 'btn-default'
 
-    _methods = ['GET']
+    _methods = ['GET']  # Duplicate?
+
+    #: List of the views url patterns. Should be a tuple of ``(pattern,
+    #: defaults)``. Pattern is formatted with the following arguments:
+    #:  * ``kind`` the model's kind.
+    #:  * ``kind_lower`` lowercase model kind
+    #:  * ``action`` the name of the action.
     _url_patterns = [("/{kind_lower}/{action}/", {})]
+
+    #: Does the view require an instance to act against. Used
+    #: when rendering buttons.
     _requires_instance = True
 
     @classmethod
     def kind(cls):
+        """
+        Returns the name of the associated :py:class:`ndb.Model`.
+        """
         return cls.model._get_kind()
 
     @classmethod
     def view_name(cls):
+        """
+        Returns the name of the flask endpoint for this view.
+
+        Defaults to ``<kind.lower>_<action>``.
+        """
         return "%s_%s" % (cls.kind().lower(), cls.action)
 
     @property
     def templates(self):
+        """
+        The views templates.
+
+        Defaults to:
+            * ``kibble/{action}.html``
+            * ``kibble/{kind.lower}_{action}.html``
+        """
         return [
             'kibble/%s.html' % self.action,
             'kibble/%s_%s.html' % (self.kind().lower(), self.action)
         ]
 
     def base_context(self):
+        """
+        The base context the view should provide to the template.
+
+        :returns: Context dictionary
+        """
         return {
             'view': self,
         }
@@ -63,7 +93,8 @@ class KibbleView(View):
         """
         Check if the user has the permissions required for this view.
 
-        :param key: A ndb.Key instance to link to (optional)
+        :param key: A a :py:class:`ndb.Model` instance or :py:class:`ndb.Key`
+            to perform row-level permission checks against.
         :param instance: A ndb.Model instance to link to (optional)
         """
         if isinstance(key, ndb.Model):
@@ -79,10 +110,11 @@ class KibbleView(View):
         """
         Get the URL for this view.
 
+        :param key: A a :py:class:`ndb.Model` instance or :py:class:`ndb.Key`
+            to link to (optional)
         :param blueprint: The blueprint name the view is registered to. If not
             provided, the current requests blueprint will be used. (optional)
-        :param key: A ndb.Key instance to link to (optional)
-        :param instance: A ndb.Model instance to link to (optional)
+        :returns: View URL
         """
         if isinstance(key, ndb.Model):
             key = key.key

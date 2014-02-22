@@ -66,10 +66,11 @@ class Table(object):
 
 
 class List(KibbleView):
+    #: Action name
     action = 'list'
 
     #: Columns to display in the list table. Can be one of:
-    #:  * callable: Will be called with the instance as the first argument
+    #:  * *callable*: Will be called with the instance as the first argument
     #:  * model member: If callable, will be called
     #:  * view member: If callable, will be called with instance as first
     #:    argument.
@@ -82,7 +83,8 @@ class List(KibbleView):
     page_size = 20
 
     #: A list of query composers to perform query operations
-    #: e.g. Filtering, sorting, pagination. See :mod:`~flask_kibble.query_composers`
+    #: e.g. Filtering, sorting, pagination. See
+    #: :mod:`~flask_kibble.query_composers` for more information.
     query_composers = [
         query_composers.Paginator
     ]
@@ -97,9 +99,8 @@ class List(KibbleView):
 
     def get_query(self):
         """
-        Returns the base query to display on the list.
-
-        :returns: ``ndb.Query``
+        :returns: Base query for list.
+        :rtype: :py:class:`ndb.Query`
         """
         return self.model.query()
 

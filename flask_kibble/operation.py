@@ -43,9 +43,10 @@ class Operation(KibbleView):
 
         :param instance: The instance.
 
-        :raises Operation.Failure: to signify the operation failed.
-        :returns: Any value. If the response is a
-            flask.current_app.response_class, it will be returned to the user.
+        :returns: Any value. If the response is a :py:class:`flask.Response`,
+            it will be returned to the user.
+
+        :raises: :class:`~Operation.Failure` to signify the operation failed.
         """
         raise self.Failure('Not Implemented')
 
@@ -57,6 +58,8 @@ class Operation(KibbleView):
         :param instance: The instance operated on.
         :param result: The return value of ``self.run()`` or an
             ``Operation.Failure`` exception.
+
+        :returns: The url to redirect to on success.
         """
         return flask.url_for('.index')
 
@@ -67,7 +70,9 @@ class Operation(KibbleView):
 
         :param instance: The instance operated on.
         :param result: The return value of ``self.run()`` or an
-            ``Operation.Failure`` exception.
+            :class:`~Operation.Failure` exception.
+
+        :returns: The message to flash to the user.
         """
         if isinstance(result, self.Failure):
             m = u"Failed to {verb} {instance}: {result.message}"

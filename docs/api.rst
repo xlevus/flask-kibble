@@ -18,21 +18,7 @@ The  Kibble blueprint.
 
 Action Views
 ------------
-
-.. autoclass:: Create
-   :members:
-
-.. autoclass:: Edit
-   :members:
-
-.. autoclass:: List
-   
-   See :ref:`views/list` for more details.
-
-   :members:
-
-.. autoclass:: Delete
-   :members:
+See :ref:`views` for more details.
 
 Query Composers
 ---------------
