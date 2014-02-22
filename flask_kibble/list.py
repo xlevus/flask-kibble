@@ -82,7 +82,7 @@ class List(KibbleView):
     page_size = 20
 
     #: A list of query composers to perform query operations
-    #: e.g. Filtering, sorting, pagination.
+    #: e.g. Filtering, sorting, pagination. See :mod:`~flask_kibble.query_composers`
     query_composers = [
         query_composers.Paginator
     ]

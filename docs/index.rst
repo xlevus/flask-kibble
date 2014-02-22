@@ -11,7 +11,12 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   getting_started
+   installation
+   quickstart
+   authentication
+
+   views/index
+
    api
 
 

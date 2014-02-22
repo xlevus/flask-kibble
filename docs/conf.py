@@ -29,8 +29,8 @@ import os
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-  'sphinx.ext.autodoc',
-  'sphinx.ext.intersphinx',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -187,22 +187,22 @@ htmlhelp_basename = 'Flask-Kibbledoc'
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-# The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
+    # The paper size ('letterpaper' or 'a4paper').
+    #'papersize': 'letterpaper',
 
-# The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
+    # The font size ('10pt', '11pt' or '12pt').
+    #'pointsize': '10pt',
 
-# Additional stuff for the LaTeX preamble.
-#'preamble': '',
+    # Additional stuff for the LaTeX preamble.
+    #'preamble': '',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'Flask-Kibble.tex', u'Flask-Kibble Documentation',
-   u'Chris Targett', 'manual'),
+    ('index', 'Flask-Kibble.tex', u'Flask-Kibble Documentation',
+     u'Chris Targett', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -245,9 +245,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Flask-Kibble', u'Flask-Kibble Documentation',
-   u'Chris Targett', 'Flask-Kibble', 'One line description of project.',
-   'Miscellaneous'),
+    ('index', 'Flask-Kibble', u'Flask-Kibble Documentation',
+     u'Chris Targett', 'Flask-Kibble', 'One line description of project.',
+     'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -274,7 +274,8 @@ epub_copyright = u'2014, Chris Targett'
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'Flask-Kibble'
 
-# The HTML theme for the epub output. Since the default themes are not optimized
+# The HTML theme for the epub output. Since the default themes are not
+# optimized
 # for small screen space, using the same theme for HTML and epub output is
 # usually not wise. This defaults to 'epub', a theme designed to save visual
 # space.
@@ -331,3 +332,7 @@ epub_exclude_files = ['search.html']
 
 # If false, no index is generated.
 #epub_use_index = True
+
+intersphinx_mapping = {
+    'flask': ('http://flask.pocoo.org/docs/', None),
+}

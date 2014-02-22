@@ -1,0 +1,5 @@
+.. _authentication:
+
+Authentication & Permissions
+============================
+

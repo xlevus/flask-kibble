@@ -16,6 +16,9 @@ class QueryComposer(object):
 
 
 class Paginator(QueryComposer):
+    """
+    Paginates the query into smaller chunks.
+    """
     context_var = 'paginator'
 
     PAGE_ARG = 'page'

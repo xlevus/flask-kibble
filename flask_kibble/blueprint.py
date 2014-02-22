@@ -83,7 +83,7 @@ class Kibble(flask.Blueprint):
         :param view_class: A KibbleView class
 
         :raises ValueError: When the same (Class,Action) pair is already
-        registered.
+            registered.
         """
         action = view_class.action
         kind = view_class.kind()
@@ -173,6 +173,11 @@ class Kibble(flask.Blueprint):
         Get the URL for a specific Model/Action/Instance.
 
         If the view isn't registered, returns an empty string.
+
+        :param model: A ``ndb.Model`` subclass or string
+        :param action: The name of the action to link to. e.g. 'create'.
+        :param instance: A :py:class:`ndb.Model` instance or
+            :py:class:`ndb.Key` to link to.
         """
         if issubclass(model, ndb.Model):
             model = model._get_kind()

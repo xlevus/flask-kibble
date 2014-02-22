@@ -16,6 +16,14 @@ admin = kibble.Kibble(
     static_url_path='/kibble/static'
 )
 
+admin.autodiscover(
+    paths=[
+        'example.autodiscover'
+    ],
+    models=[
+        'AutodiscoverTestModel'
+    ])
+
 
 class ContactDelete(kibble.Delete):
     model = models.Contact
