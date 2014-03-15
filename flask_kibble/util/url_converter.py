@@ -1,39 +1,62 @@
 import logging
 
 from google.appengine.ext import ndb
+from google.net.proto.ProtocolBuffer import ProtocolBufferDecodeError
 from werkzeug.routing import BaseConverter, ValidationError
 
 logger = logging.getLogger(__name__)
 
 
 class NDBKeyConverter(BaseConverter):
-    def __init__(self, url_map, kind):
+    """
+    URLConverter for NDB Key objects.
+
+    :param *kinds: The NDB model kinds to retrieve
+    :param urlsafe: If false, use ndb.Key.urlsafe()
+    """
+
+    def __init__(self, url_map, *kinds, **kwargs):
         super(NDBKeyConverter, self).__init__(url_map)
-        self.kind = kind
+        self.kinds = kinds
+
+        self.separator = kwargs.get('separator', '.')
+        self.urlsafe = kwargs.get('urlsafe', True)
 
     def to_url(self, key):
-        if isinstance(key, ndb.Model):
-            key = key.key
+        if self.urlsafe:
+            if isinstance(key, ndb.Model):
+                key = key.key
 
-        if key.parent():
-            return 'u-' + key.urlsafe()
+            return self.separator.join(unicode(i) for kind, i in key.pairs())
         else:
-            return 'i-' + unicode(key.id())
+            return key.urlsafe()
+
+    def _coerce_int(self, value):
+        try:
+            return int(value)
+        except ValueError:
+            return value
 
     def to_python(self, value):
-        if value.startswith('u-'):
-            key = ndb.Key(urlsafe=value[2:])
-            if key.kind() != self.kind:
-                logger.debug("Key %r does not match kind" % value)
-                raise ValidationError()
+        if self.urlsafe:
+            return self.to_python_pairs(value)
         else:
-            value = value[2:]
             try:
-                value = int(value)
-            except ValueError:
-                logger.debug("Key %r not an integer", value)
-                pass
-            key = ndb.Key(self.kind, value)
+                key = ndb.Key(urlsafe=value)
+                if tuple([p[0] for p in key.pairs()]) != self.kinds:
+                    raise TypeError
+                return key
+            except (TypeError, ProtocolBufferDecodeError):
+                raise ValidationError("Invalid URL")
+
+    def to_python_pairs(self, value):
+        pairs = zip(
+            self.kinds,
+            map(self._coerce_int, value.split(self.separator)))
+
+        print pairs
+
+        key = ndb.Key(pairs=pairs)
 
         logger.debug("Key: %r", key)
 
