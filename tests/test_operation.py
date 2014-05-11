@@ -41,10 +41,10 @@ class OperationTestCase(TestCase):
     def test_url(self):
         self.assertEqual(
             flask.url_for('kibble.testmodel_dummy', key=self.instance),
-            '/testmodel/i-test/dummy/')
+            '/testmodel/test/dummy/')
 
     def test_get(self):
-        resp = self.client.get('/testmodel/i-test/dummy/')
+        resp = self.client.get('/testmodel/test/dummy/')
         self.assert200(resp)
         self.assertTemplateUsed('kibble/operation.html')
         self.assertContext('instance', self.instance)
@@ -54,7 +54,7 @@ class OperationTestCase(TestCase):
         self.assertFalse(self.get_redirect.called)
 
     def test_post(self):
-        resp = self.client.post('/testmodel/i-test/dummy/')
+        resp = self.client.post('/testmodel/test/dummy/')
         self.assertRedirects(resp, '/dummy-redirect/')
 
         self.run.assert_called_once_with(self.instance)
@@ -69,7 +69,7 @@ class OperationTestCase(TestCase):
     def test_post_response_class(self):
         self.run.return_value = flask.make_response("OK")
 
-        resp = self.client.post('/testmodel/i-test/dummy/')
+        resp = self.client.post('/testmodel/test/dummy/')
         self.assert200(resp)
         self.assertEqual(resp.data, "OK")
 
@@ -79,7 +79,7 @@ class OperationTestCase(TestCase):
         failure = kibble.Operation.Failure("")
         self.run.side_effect = failure
 
-        resp = self.client.post('/testmodel/i-test/dummy/')
+        resp = self.client.post('/testmodel/test/dummy/')
         self.assertRedirects(resp, '/dummy-redirect/')
 
         self.run.assert_called_once_with(self.instance)

@@ -2,7 +2,7 @@ import mock
 import flask
 from werkzeug.datastructures import MultiDict
 
-from .base import TestCase
+from .base import TestCase, ModelEqualityTester
 from .models import TestModel
 
 import flask_kibble as kibble
@@ -88,7 +88,12 @@ class CreateTestCase(TestCase):
         inst = TestModel.query().get()
 
         save_model.assert_called_once_with(mock.ANY, None)
-        get_success_redirect.assert_called_once_with(inst)
+
+        # Check that the keys match, as they're effectively the same
+        # but asserting the instances are equal doesn't work
+        self.assertEqual(
+            get_success_redirect.call_args[0][0].key,
+            inst.key)
 
 
 class EditTestCase(TestCase):
@@ -107,12 +112,12 @@ class EditTestCase(TestCase):
     def test_url(self):
         self.assertEqual(
             flask.url_for('kibble.testmodel_edit', key=self.inst.key),
-            '/testmodel/i-test/')
+            '/testmodel/test/')
 
     @mock.patch('flask_kibble.edit.FieldsetIterator')
     @mock.patch.object(TestEdit, 'form')
     def test_get(self, form, fieldset_iterator):
-        resp = self.client.get('/testmodel/i-test/')
+        resp = self.client.get('/testmodel/test/')
         self.assert200(resp)
         self.authenticator.has_permission_for.assert_called_once_with(
             TestModel, 'edit', key=self.inst.key)
@@ -121,12 +126,12 @@ class EditTestCase(TestCase):
 
         self.assertTemplateUsed('kibble/edit.html')
         self.assertContext('form', form())
-        self.assertContext('instance', self.inst)
+        self.assertContext('instance', ModelEqualityTester(self.inst))
         self.assertContext('fieldsets', fieldset_iterator())
 
     def test_get_missing_perm(self):
         self.authenticator.has_permission_for.return_value = False
-        resp = self.client.get('/testmodel/i-test/')
+        resp = self.client.get('/testmodel/test/')
         self.assert403(resp)
 
     @mock.patch.object(TestEdit, 'get_success_redirect', return_value='/t/')
@@ -139,7 +144,7 @@ class EditTestCase(TestCase):
         save_model.side_effect = _save
 
         data = MultiDict({'name': 'Test2'})
-        resp = self.client.post('/testmodel/i-test/', data=data)
+        resp = self.client.post('/testmodel/test/', data=data)
 
         self.assertRedirects(resp, '/t/')
 

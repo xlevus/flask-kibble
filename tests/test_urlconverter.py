@@ -8,11 +8,11 @@ from google.appengine.ext import ndb
 from flask_kibble.util.url_converter import NDBKeyConverter
 
 
-class TestModel(ndb.Model):
+class UrlTestModel(ndb.Model):
     value = ndb.StringProperty()
 
 
-class TestModel2(ndb.Model):
+class UrlTestModel2(ndb.Model):
     value = ndb.StringProperty()
 
 
@@ -26,25 +26,25 @@ class NDBConverterTestCase(TestCase):
         app.url_map.converters.setdefault('ndbkey', NDBKeyConverter)
 
         app.add_url_rule(
-            '/t/<ndbkey("TestModel"):key>/',
+            '/t/<ndbkey("UrlTestModel"):key>/',
             methods=['GET'],
             view_func=self.mock_view,
             endpoint='parent')
 
         app.add_url_rule(
-            '/a/<ndbkey("TestModel", "TestModel2"):key>/',
+            '/a/<ndbkey("UrlTestModel", "UrlTestModel2"):key>/',
             methods=['GET'],
             view_func=self.mock_view,
             endpoint='ancestor')
 
         app.add_url_rule(
-            '/cs/<ndbkey("TestModel", "TestModel2", separator="-"):key>/',
+            '/cs/<ndbkey("UrlTestModel", "UrlTestModel2", separator="-"):key>/',
             methods=['GET'],
             view_func=self.mock_view,
             endpoint='custom_separator')
 
         app.add_url_rule(
-            '/nu/<ndbkey("TestModel", "TestModel2", urlsafe=False):key>/',
+            '/nu/<ndbkey("UrlTestModel", "UrlTestModel2", urlsafe=False):key>/',
             methods=['GET'],
             view_func=self.mock_view,
             endpoint='not_urlsafe')
@@ -52,43 +52,71 @@ class NDBConverterTestCase(TestCase):
         return app
 
     def test_to_url_toplevel(self):
-        key1 = TestModel(value='1').put()
+        """
+        Test url-component for top level entities looks like::
+
+            /<id>/
+        """
+        key1 = UrlTestModel(value='1').put()
 
         self.assertEqual(
             flask.url_for('parent', key=key1),
             '/t/%s/' % key1.id())
 
     def test_to_url_ancestors(self):
-        key1 = TestModel(value='1').put()
-        key2 = TestModel2(value='2', parent=key1).put()
+        """
+        Test urls for ancestor entities look like::
+
+            /<ancestor-id>.<child-id>/
+        """
+        key1 = UrlTestModel(value='1').put()
+        key2 = UrlTestModel2(value='2', parent=key1).put()
         self.assertEqual(
             flask.url_for('ancestor', key=key2),
             '/a/%s.%s/' % (key1.id(), key2.id()))
 
     def test_custom_separator(self):
-        key1 = TestModel(value='1').put()
-        key2 = TestModel2(value='2', parent=key1).put()
+        """
+        Test urls for ancestor entities look like::
+
+            /<ancestor-id>-<child-id>/
+
+        when provided with a custom separator.
+        """
+        key1 = UrlTestModel(value='1').put()
+        key2 = UrlTestModel2(value='2', parent=key1).put()
         self.assertEqual(
             flask.url_for('custom_separator', key=key2),
             '/cs/%s-%s/' % (key1.id(), key2.id()))
 
     def test_not_urlsafe(self):
-        key1 = TestModel(value='1').put()
-        key2 = TestModel2(value='2', parent=key1).put()
+        """
+        Test urls for keys with non-urlsafe IDs look like::
+
+            /<key.urlsafe()>/
+        """
+        key1 = UrlTestModel(value='1').put()
+        key2 = UrlTestModel2(value='2', parent=key1).put()
         self.assertEqual(
             flask.url_for('not_urlsafe', key=key2),
             '/nu/%s/' % (key2.urlsafe()))
 
     def test_from_url_toplevel(self):
-        key1 = TestModel(value='1').put()
+        """
+        Test top-level urls route to the correct view w/ correct arguments.
+        """
+        key1 = UrlTestModel(value='1').put()
         resp = self.client.get('/t/%s/' % key1.id())
 
         self.mock_view.assert_called_once_with(key=key1)
         self.assert200(resp)
 
     def test_from_url_ancestors(self):
-        key1 = TestModel(value='1').put()
-        key2 = TestModel2(value='2', parent=key1).put()
+        """
+        Test ancestor-urls route to the correct view w/ correct arguments.
+        """
+        key1 = UrlTestModel(value='1').put()
+        key2 = UrlTestModel2(value='2', parent=key1).put()
 
         resp = self.client.get('/a/%s.%s/' % (key1.id(), key2.id()))
 
@@ -96,8 +124,12 @@ class NDBConverterTestCase(TestCase):
         self.assert200(resp)
 
     def test_from_url_custom_sep(self):
-        key1 = TestModel(value='1').put()
-        key2 = TestModel2(value='2', parent=key1).put()
+        """
+        Test ancestor-urls with custom separators route to the correct view w/
+        correct arguments.
+        """
+        key1 = UrlTestModel(value='1').put()
+        key2 = UrlTestModel2(value='2', parent=key1).put()
 
         resp = self.client.get('/cs/%s-%s/' % (key1.id(), key2.id()))
 
@@ -105,8 +137,11 @@ class NDBConverterTestCase(TestCase):
         self.assert200(resp)
 
     def test_from_url_noturlsafe(self):
-        key1 = TestModel(value='1').put()
-        key2 = TestModel2(value='2', parent=key1).put()
+        """
+        Test non-urlsafe keys route to the correct view w/ correct arguments.
+        """
+        key1 = UrlTestModel(value='1').put()
+        key2 = UrlTestModel2(value='2', parent=key1).put()
 
         resp = self.client.get('/nu/%s/' % (key2.urlsafe()))
 
@@ -114,7 +149,10 @@ class NDBConverterTestCase(TestCase):
         self.assert200(resp)
 
     def test_from_url_notulrsafe_bad_value(self):
-        key1 = TestModel(value='1').put()
+        """
+        Test badly formed arguments for non-urlsafe keys result in 404s.
+        """
+        key1 = UrlTestModel(value='1').put()
 
         bad_urls = [
             'WRONG',                    # Not base64

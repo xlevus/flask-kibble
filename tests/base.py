@@ -13,6 +13,19 @@ import flask_kibble as kibble
 ndb.utils.DEBUG = False
 
 
+class ModelEqualityTester(object):
+    """
+    Utility to assert rough equality of models.
+    """
+    def __init__(self, key):
+        if isinstance(key, ndb.Model):
+            key = key.key
+        self.key = key
+
+    def __eq__(self, other):
+        return getattr(other, 'key', object()) == self.key
+
+
 class TestAuthenticator(kibble.Authenticator):
     def is_logged_in(self):
         return True

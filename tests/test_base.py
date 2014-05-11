@@ -75,6 +75,3 @@ class BaseKibbleViewTestCase(TestCase):
         url_for.assert_called_once_with('fudge.testmodel_dummy', key=None)
         url_for.reset_mock()
 
-    def test_linked_actions(self):
-        self.fail("Not Tested")
-
