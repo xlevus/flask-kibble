@@ -54,8 +54,6 @@ class NDBKeyConverter(BaseConverter):
             self.kinds,
             map(self._coerce_int, value.split(self.separator)))
 
-        print pairs
-
         key = ndb.Key(pairs=pairs)
 
         logger.debug("Key: %r", key)

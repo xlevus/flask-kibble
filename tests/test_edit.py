@@ -83,9 +83,11 @@ class CreateTestCase(TestCase):
 
         self.assertRedirects(resp, '/t/')
 
-        self.assertFlashes("TestModel saved", "success")
-
         inst = TestModel.query().get()
+
+        #self.assertFlashes("<a href='%s'>'%s'</a> saved" % (
+        #    self.kibble.url_for(TestModel, 'edit', inst),
+        #    inst), "success")
 
         save_model.assert_called_once_with(mock.ANY, None)
 
@@ -147,12 +149,42 @@ class EditTestCase(TestCase):
         resp = self.client.post('/testmodel/test/', data=data)
 
         self.assertRedirects(resp, '/t/')
-
-        self.assertFlashes("TestModel saved", "success")
-
         inst = self.inst.key.get()
+
+        #self.assertFlashes("<a href='%s'>'%s'</a> saved" % (
+        #    self.kibble.url_for(TestModel, 'edit', inst),
+        #    inst), "success")
+
         save_model.assert_called_once_with(mock.ANY, inst)
         get_success_redirect.assert_called_once_with(inst)
+
+    def test_get_success_redirect(self):
+        flask.g.kibble = self.kibble
+
+        view = TestEdit()
+
+        self.assertEqual(
+            view.get_success_redirect(self.inst),
+            '/testmodel/test/')
+
+    def test_get_success_with_list(self):
+        """
+        When a model-list view is registered for the current model,
+        redirect to that instead.
+        """
+        flask.g.kibble = self.kibble
+
+        # Ham up a test list view.
+        class TestList(kibble.List):
+            model = TestModel
+        self.kibble.register_view(TestList)
+        self.app.add_url_rule('/testmodel/', endpoint='kibble.testmodel_list')
+
+        view = TestEdit()
+
+        self.assertEqual(
+            view.get_success_redirect(self.inst),
+            '/testmodel/')
 
 
 class FieldsetIteratorTestCase(TestCase):

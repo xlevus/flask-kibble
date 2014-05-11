@@ -1,5 +1,4 @@
 import flask
-from werkzeug.routing import BuildError
 
 from .base import KibbleView
 
@@ -107,17 +106,36 @@ class FormView(KibbleView):
         :param instance: The successfully saved instance.
         :returns: URL to redirect to.
         """
-        try:
-            return flask.url_for(".%s_list" % self.kind())
-        except BuildError:
-            return flask.url_for(".index")
+        return (
+            flask.g.kibble.url_for(self.model, 'list')
+            or flask.g.kibble.url_for(self.model, 'edit', instance)
+            or flask.url_for('.index')
+        )
+
+    def get_success_message(self, instance):
+        """
+        Returns the message to flash to the user on a successful action.
+
+        :param instance: The successfully saved instance.
+        :returns: Message to flash.
+        """
+        url = flask.g.kibble.url_for(self.model, 'edit', instance)
+        if url:
+            tmpl = u"{kind} <a href='{url}'>'{instance}'</a> saved."
+        else:
+            tmpl = u"{kind} '{instance}' saved."
+
+        return tmpl.format(
+            url=url,
+            instance=instance,
+            kind=self.kind())
 
     def _form_logic(self, instance=None):
         form = self.form(flask.request.form, obj=instance)
 
         if flask.request.method == 'POST' and form.validate():
             instance = self.save_model(form, instance)
-            flask.flash("{kind} saved".format(kind=self.kind()), 'success')
+            flask.flash(self.get_success_message(instance), 'success')
             return flask.redirect(self.get_success_redirect(instance))
 
         ctx = self.base_context()

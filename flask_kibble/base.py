@@ -24,6 +24,9 @@ class KibbleView(View):
     #: The associated :py:class:`ndb.Model` class this action deals with
     model = None
 
+    #: An array of ancestor :py:class:`ndb.Model` classes.
+    ancestors = []
+
     #: A list of associated views that this action can link to.
     #: Can either be a :class:`~flask_kibble.KibbleView` subclass or an action
     #: name.
