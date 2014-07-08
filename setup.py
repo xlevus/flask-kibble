@@ -15,8 +15,8 @@ setup(
     author='Chris Targett',
     author_email='chris@xlevus.net',
     url='http://github.com/xlevus/flask-kibble',
-    packages=['flask_kibble'],
-    install_requires=['flask', 'wtforms'],
+    packages=['flask_kibble', 'flask_kibble.util'],
+    install_requires=['flask', 'wtforms', 'wtforms-ndb'],
     classifiers=[
     ],
     keywords='flask wtforms appengine ndb',

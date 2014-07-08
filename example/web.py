@@ -18,7 +18,7 @@ admin = kibble.Kibble(
 
 admin.autodiscover(
     paths=[
-        'example.autodiscover'
+        'autodiscover'
     ],
     models=[
         'AutodiscoverTestModel'

@@ -1,2 +1,2 @@
 flask
-../wtforms-ndb/
+wtforms-ndb
