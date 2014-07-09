@@ -2,7 +2,7 @@ import flask
 
 from .base import KibbleView
 
-from wtforms_ndb import model_form
+from flask_kibble.util import forms
 
 
 class Fieldset(object):
@@ -76,7 +76,7 @@ class FormView(KibbleView):
         super(FormView, self).__init__(*args, **kwargs)
 
         if not self.form:
-            self.form = model_form(self.model)
+            self.form = forms.model_form(self.model)
 
     def save_model(self, form, instance=None):
         """

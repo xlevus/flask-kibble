@@ -1,6 +1,6 @@
 {% extends "kibble/base.html" %}
 
-{% from "kibble/macros/render_form.html" import render_fieldset %}
+{% from "kibble/macros/render_form.html" import render_form %}
 
 {% block page_header %}New {{ view.kind() }}{% endblock %}
 
@@ -8,16 +8,7 @@
     <div class='row'>
         <form role='form' class='form-horizontal' method='POST' action='{{ request.path }}'>
             {% block form_body %}
-                {% for fieldset in fieldsets %}
-                    <div class='panel {{ fieldset.panel_class|default("panel-default") }}'>
-                        {% if fieldset.name %}
-                            <div class='panel-heading'>{{ fieldset.name }}</div>
-                        {% endif %}
-                        <div class='panel-body'>
-                            {{ render_fieldset(fieldset) }}
-                        </div>
-                    </div>
-                {% endfor %}
+                {{ render_form(form, fieldsets) }}
             {% endblock %}
 
             {% block form_actions %}

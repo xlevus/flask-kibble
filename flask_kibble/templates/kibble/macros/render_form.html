@@ -1,18 +1,48 @@
-
-{% macro render_fieldset(form) %}
-    {% for field in form %}
+{% macro render_field(form, field) %}
     <div class='form-group field-{{ field.type }} {% if field.errors %}has-error{% endif %}'>
-            {{ field.label(class="control-label col-sm-2") }}
-            <div class='col-sm-10'>
-                {{ field(class="form-control") }}
-                {% if field.errors %}
-                    <ul class='alert alert-danger list-unstyled'>
-                        {% for error in field.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-            </div>
+        {{ field.label(class="control-label col-sm-2") }}
+        <div class='col-sm-10'>
+            {{ field(class="form-control") }}
+            {% if field.errors %}
+                <ul class='alert alert-danger list-unstyled'>
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
         </div>
-    {% endfor %}
+    </div>
+{% endmacro %}
+
+
+{% macro _render_hidden(form, types) %}
+  {% for field in form if field.type in types %}
+    <div style='display: none'>{{ field }}</div>
+  {% endfor %}
+{% endmacro %}
+
+
+{% macro render_form(form, fieldsets, _field=render_field, _hidden_types=("CSRFTokenField", "HiddenField"), _hidden=_render_hidden) %}
+  {% for fieldset in fieldsets %}
+      <div class='panel {{ fieldset.panel_class|default("panel-default") }}'>
+          {% if fieldset.name %}
+              <div class='panel-heading'>{{ fieldset.name }}</div>
+          {% endif %}
+
+          <div class='panel-body'>
+            {% for field in fieldset if field.type not in _hidden_types %}
+              {% with field_name = field.name.replace("-", "_") %}
+                {% if field_name in kwargs %}
+                  {{ kwargs[field_name](form, field) }}
+                {% else %}
+                  {{ _field(form, field) }}
+                {% endif %}
+               {% endwith %}
+            {% endfor %}
+          </div>
+
+      </div>
+  {% endfor %}
+
+  {{ _hidden(form, _hidden_types) }}
 {% endmacro %}
