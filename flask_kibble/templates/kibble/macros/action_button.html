@@ -7,8 +7,8 @@
     </button>
 {% endmacro %}
 
-{% macro action_link(view, instance=None, text=True) -%}
-    {% set url = view.url_for(instance) %}
+{% macro action_link(view, instance=None, ancestor=None, text=True, from=None) -%}
+    {% set url = view.url_for(instance, ancestor) %}
     {% set perm = view.has_permission_for(instance) %}
 
     <a href='{% if perm %}{{ url }}{% else %}#{% endif %}' 
@@ -16,7 +16,12 @@
             {% if view.button_icon %}
                 <span class='glyphicon glyphicon-{{ view.button_icon }}'></span>
             {% endif %}
-            {% if text or not view.button_class %}{{ view.action|title }}{% endif %}
+            {% if text or not view.button_class %}
+                {% if from and from.path() != view.path() %}
+                    {{ view.kind() }}
+                {% endif %}
+                {{ view.action|title }}
+            {% endif %}
     </a>
 {%- endmacro %}
 

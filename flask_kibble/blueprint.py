@@ -61,11 +61,12 @@ class Kibble(flask.Blueprint):
         """
         action = view_class.action
         kind = view_class.kind()
+        path = view_class.path()
 
         # Check for duplicates
-        if action in self.registry[kind]:
-            raise ValueError("%s already has view for %s.%s" % (
-                self, kind, action))
+        if action in self.registry[path]:
+            raise ValueError("%s already has view for %s:%s" % (
+                self, path, action))
 
         view_func = view_class.as_view(view_class.view_name())
         ancest_kinds = [x._get_kind() for x in view_class.ancestors]
@@ -87,7 +88,7 @@ class Kibble(flask.Blueprint):
                 defaults=defaults,
                 view_func=view_func)
 
-        self.registry[kind][action] = view_class
+        self.registry[path][action] = view_class
 
     def autodiscover(self, paths, models=None):
         """
@@ -156,12 +157,13 @@ class Kibble(flask.Blueprint):
 
         If the view isn't registered, returns an empty string.
 
-        :param model: A ``ndb.Model`` subclass or string
+        :param model: A ``ndb.Model`` subclass or string. For ancestral
+                      objects, this can be a path.
         :param action: The name of the action to link to. e.g. 'create'.
         :param instance: A :py:class:`ndb.Model` instance or
             :py:class:`ndb.Key` to link to.
         """
-        if issubclass(model, ndb.Model):
+        if isinstance(model, type) and issubclass(model, ndb.Model):
             model = model._get_kind()
 
         view = self.registry.get(model, {}).get(action)

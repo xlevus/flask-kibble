@@ -71,9 +71,17 @@ class KibbleView(View):
         Defaults to ``<kind.lower>_<action>`` or
         ``<ancestor.lower>_<kind.lower>_<action>`` for ancestor views.
         """
-        return "_".join(
-            [a._get_kind().lower() for a in cls.ancestors] +
-            [cls.kind().lower(), cls.action])
+        return cls.path().lower().replace('/', '_') + '_' + cls.action
+
+    @classmethod
+    def path(cls):
+        """
+        The "Path" of the view. Will return slash-separated
+        ancestral path.
+        """
+        p = [a._get_kind() for a in cls.ancestors] +\
+            [cls.kind()]
+        return "/".join(p)
 
     @property
     def templates(self):
@@ -82,11 +90,13 @@ class KibbleView(View):
 
         Defaults to:
             * ``kibble/{action}.html``
-            * ``kibble/{kind.lower}_{action}.html``
+            * ''kibble/{path.lower}/{action}.html``
+            * ``kibble/{kind.lower}/{action}.html``
         """
         return [
             'kibble/%s.html' % self.action,
-            'kibble/%s_%s.html' % (self.kind().lower(), self.action)
+            'kibble/%s/%s.html' % (self.path().lower(), self.action),
+            'kibble/%s/%s.html' % (self.kind().lower(), self.action),
         ]
 
     def base_context(self):
@@ -117,7 +127,7 @@ class KibbleView(View):
             key=key)
 
     @classmethod
-    def url_for(cls, key=None, blueprint=''):
+    def url_for(cls, key=None, ancestor_key=None, blueprint=''):
         """
         Get the URL for this view.
 
@@ -127,23 +137,38 @@ class KibbleView(View):
             provided, the current requests blueprint will be used. (optional)
         :returns: View URL
         """
-        if isinstance(key, ndb.Model):
-            key = key.key
+
+        if cls.ancestors:
+            if isinstance(ancestor_key, ndb.Model):
+                ancestor_key = ancestor_key.key
+                key = None
+        else:
+            if isinstance(key, ndb.Model):
+                key = key.key
+            # No ancestors, so this value isn't necessary
+            ancestor_key = None
 
         return flask.url_for(
             '%s.%s' % (blueprint, cls.view_name()),
-            key=key)
+            key=key,
+            ancestor_key=ancestor_key)
 
     @cached_property
     def _linked_actions(self):
         views = []
-        for v in self._linked_actions:
-            if issubclass(v, KibbleView):
+        for v in self.linked_actions:
+            if isinstance(v, type) and issubclass(v, KibbleView):
                 views.append(v)
             else:
                 try:
-                    v.append(flask.g.kibble.registry[self.kind()][v])
+                    path, action = v.split(":")
+                except ValueError:
+                    path = self.path()
+                    action = v
+
+                try:
+                    views.append(flask.g.kibble.registry[path][action])
                 except KeyError:
                     pass
-        return v
+        return views
 
