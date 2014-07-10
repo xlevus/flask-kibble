@@ -1,3 +1,19 @@
 {% extends "kibble/create.html" %}
 
 {% block page_header %}Edit {{ view.kind() }}: {{ instance }}{% endblock %}
+
+{% block header_buttons %}
+    <div class='pull-right'>
+        {% for action in view._linked_actions %}
+            {% if action.has_permission_for() %}
+                {% if action._requires_instance  %}
+                    {{ action_link(action, instance, from=view) }}
+                {% else %}
+                    {{ action_link(action, ancestor=instance, from=view) }}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endblock %}
+
+
