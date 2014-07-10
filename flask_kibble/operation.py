@@ -16,7 +16,7 @@ class Operation(KibbleView):
     require_confirmation = True
 
     _url_patterns = [
-        ("/{kind_lower}/<ndbkey('{kind}'):key>/{action}/", {}),
+        ("/{key}/{action}/", {}),
     ]
     _requires_instance = True
     _methods = ['GET', 'POST']

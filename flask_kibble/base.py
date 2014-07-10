@@ -32,6 +32,9 @@ class KibbleView(View):
     #: name.
     linked_actions = []
 
+    #: A list of linked views for descendants.
+    linked_descendant_views = []
+
     #: Bootstrap3 icon classes to use when rendering the views button. If
     #: not provided, text will be used
     button_icon = None
@@ -42,6 +45,8 @@ class KibbleView(View):
 
     #: List of the views url patterns. Should be a tuple of ``(pattern,
     #: defaults)``. Pattern is formatted with the following arguments:
+    #:  * ``key`` a template for the objects key
+    #:  * ``ancestor_key`` a template for the ancestoral key
     #:  * ``kind`` the model's kind.
     #:  * ``kind_lower`` lowercase model kind
     #:  * ``action`` the name of the action.
@@ -63,9 +68,12 @@ class KibbleView(View):
         """
         Returns the name of the flask endpoint for this view.
 
-        Defaults to ``<kind.lower>_<action>``.
+        Defaults to ``<kind.lower>_<action>`` or
+        ``<ancestor.lower>_<kind.lower>_<action>`` for ancestor views.
         """
-        return "%s_%s" % (cls.kind().lower(), cls.action)
+        return "_".join(
+            [a._get_kind().lower() for a in cls.ancestors] +
+            [cls.kind().lower(), cls.action])
 
     @property
     def templates(self):

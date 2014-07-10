@@ -68,10 +68,18 @@ class Kibble(flask.Blueprint):
                 self, kind, action))
 
         view_func = view_class.as_view(view_class.view_name())
+        ancest_kinds = [x._get_kind() for x in view_class.ancestors]
+
+        key = "<ndbkey({0}):key>".format(",".join([
+            "'%s'" % x for x in ancest_kinds + [kind]]))
+        ancestor_key = "<ndbkey({0}):ancestor_key>".format(
+            ",".join(["'%s'" % x for x in ancest_kinds]))
 
         for pattern, defaults in view_class._url_patterns:
             self.add_url_rule(
                 pattern.format(
+                    key=key,
+                    ancestor_key=ancestor_key,
                     kind=kind,
                     kind_lower=kind.lower(),
                     action=action),

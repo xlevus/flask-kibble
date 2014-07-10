@@ -4,6 +4,9 @@
 {% from "kibble/macros/action_button.html" import action_link %}
 
 {% block page_header %}
+    {% if ancestor %}
+    {{ ancestor }}  <span class='text-muted'>&raquo;</span>
+    {% endif %}
     {{ view.kind() }}
     {% if paginator %}<small>Showing {{ table.row_count }} of {{ paginator.total_objects }} rows</small>{% endif %}
 {% endblock %}

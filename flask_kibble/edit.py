@@ -1,8 +1,11 @@
+import logging
 import flask
 
 from .base import KibbleView
 
 from flask_kibble.util import forms
+
+logger = logging.getLogger(__name__)
 
 
 class Fieldset(object):
@@ -22,6 +25,9 @@ class Fieldset(object):
     def __iter__(self):
         for field in self.fields:
             yield self.form[field]
+
+    def __bool__(self):
+        return len(self.fields) > 0
 
 
 class FieldsetIterator(object):
@@ -84,7 +90,7 @@ class FormView(KibbleView):
                 self.model,
                 field_args=self.form_field_args)
 
-    def save_model(self, form, instance=None):
+    def save_model(self, form, instance=None, ancestor_key=None):
         """
         Called when a form is saved with no errors.
 
@@ -98,7 +104,7 @@ class FormView(KibbleView):
         :rtype: :py:class:`ndb.Model`
         """
         if instance is None:
-            instance = self.model()
+            instance = self.model(parent=ancestor_key)
 
         form.populate_obj(instance)
         instance.put()
@@ -136,11 +142,11 @@ class FormView(KibbleView):
             instance=instance,
             kind=self.kind())
 
-    def _form_logic(self, instance=None):
+    def _form_logic(self, instance=None, ancestor_key=None):
         form = self.form(flask.request.form, obj=instance)
 
         if flask.request.method == 'POST' and form.validate():
-            instance = self.save_model(form, instance)
+            instance = self.save_model(form, instance, ancestor_key)
             flask.flash(self.get_success_message(instance), 'success')
             return flask.redirect(self.get_success_redirect(instance))
 
@@ -159,13 +165,14 @@ class Edit(FormView):
     button_icon = 'pencil'
 
     _url_patterns = [
-        ("/{kind_lower}/<ndbkey('{kind}'):key>/", {})
+        ("/{key}/", {})
     ]
     _requires_instance = True
 
     def dispatch_request(self, key):
         instance = key.get()
         if instance is None:
+            logger.debug("Unable to find instance with key %r", key)
             flask.abort(404)
 
         return self._form_logic(instance)
@@ -178,10 +185,11 @@ class Create(FormView):
     button_icon = 'plus-sign'
 
     _url_patterns = [
-        ('/{kind_lower}/new/', {}),
+        ('/{kind_lower}/new/', {'ancestor_key': None}),
+        ('/{ancestor_key}/{kind_lower}/new/', {}),
     ]
     _requires_instance = False
 
-    def dispatch_request(self):
-        return self._form_logic(None)
+    def dispatch_request(self, ancestor_key=None):
+        return self._form_logic(None, ancestor_key)
 
