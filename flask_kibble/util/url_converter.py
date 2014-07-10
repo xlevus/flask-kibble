@@ -21,19 +21,24 @@ class NDBKeyConverter(BaseConverter):
         self.kinds = kinds
 
         self.urlsafe = kwargs.get('urlsafe', True)
+        self.separator = '/'
 
         if self.urlsafe:
-            self.regex = ".".join([
-                r"{0}-([^/]+)".format(kind.lower())
-                for kind in kinds])
-            self._regex = re.compile(self.regex)
+            kinds_lower = [x.lower() for x in kinds]
+            self.regex = self.separator.join([r"{0}-[^{1}]+".format(
+                kind, self.separator)
+                for kind in kinds_lower])
+
+            self._regex = re.compile(
+                self.separator.join([r"{0}-([^/]+)".format(kind)
+                for kind in kinds_lower]))
 
     def to_url(self, key):
         if self.urlsafe:
             if isinstance(key, ndb.Model):
                 key = key.key
 
-            return ".".join(
+            return self.separator.join(
                 '{0}-{1}'.format(
                     kind.lower(),
                     unicode(i)) for kind, i in key.pairs())
@@ -59,8 +64,11 @@ class NDBKeyConverter(BaseConverter):
                 raise ValidationError("Invalid URL")
 
     def to_python_pairs(self, value):
+        ids = self._regex.findall(value)
+        if len(self.kinds) > 1:
+            ids = ids[0]
         pairs = zip(self.kinds,
-                    map(self._coerce_int, self._regex.findall(value)[0]))
+                    map(self._coerce_int, ids))
 
         key = ndb.Key(pairs=pairs)
 
