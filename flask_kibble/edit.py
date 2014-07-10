@@ -58,6 +58,10 @@ class FormView(KibbleView):
     #: one will be generated through :py:func:`wtforms_ndb.model_form`.
     form = None
 
+    #: If no form is provided, These per-field arguments will passed through
+    #: to :py:func:`wtforms_ndb.model_form`.
+    form_field_args = None
+
     #: An array of dictionaries specifying fieldsets. These should
     #: contain at least a ``name`` and ``fields`` values.
     #: All fields not specified will be grouped into an unordered
@@ -76,7 +80,9 @@ class FormView(KibbleView):
         super(FormView, self).__init__(*args, **kwargs)
 
         if not self.form:
-            self.form = forms.model_form(self.model)
+            self.form = forms.model_form(
+                self.model,
+                field_args=self.form_field_args)
 
     def save_model(self, form, instance=None):
         """

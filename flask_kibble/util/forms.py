@@ -1,5 +1,6 @@
 import flask
 import wtforms
+from wtforms_ndb import model_form as orig_model_form
 from wtforms.csrf.session import SessionCSRF
 
 
@@ -17,7 +18,8 @@ class BaseCSRFForm(wtforms.Form):
             return flask.session
 
 
-def model_form(model):
-    from wtforms_ndb import model_form
-    return model_form(model, base_class=BaseCSRFForm)
+def model_form(model, base_class=BaseCSRFForm, only=None, exclude=None,
+               field_args=None, converter=None):
+    return orig_model_form(model, base_class, only, exclude,
+                           field_args, converter)
 
