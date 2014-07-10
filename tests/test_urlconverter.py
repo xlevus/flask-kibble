@@ -55,39 +55,25 @@ class NDBConverterTestCase(TestCase):
         """
         Test url-component for top level entities looks like::
 
-            /<id>/
+            /<kind>-<id>/
         """
         key1 = UrlTestModel(value='1').put()
 
         self.assertEqual(
             flask.url_for('parent', key=key1),
-            '/t/%s/' % key1.id())
+            '/t/urltestmodel-%s/' % key1.id())
 
     def test_to_url_ancestors(self):
         """
         Test urls for ancestor entities look like::
 
-            /<ancestor-id>.<child-id>/
+            /<ancestor.kind>-<ancestor-id>.<child.kind>-<child-id>/
         """
         key1 = UrlTestModel(value='1').put()
         key2 = UrlTestModel2(value='2', parent=key1).put()
         self.assertEqual(
             flask.url_for('ancestor', key=key2),
-            '/a/%s.%s/' % (key1.id(), key2.id()))
-
-    def test_custom_separator(self):
-        """
-        Test urls for ancestor entities look like::
-
-            /<ancestor-id>-<child-id>/
-
-        when provided with a custom separator.
-        """
-        key1 = UrlTestModel(value='1').put()
-        key2 = UrlTestModel2(value='2', parent=key1).put()
-        self.assertEqual(
-            flask.url_for('custom_separator', key=key2),
-            '/cs/%s-%s/' % (key1.id(), key2.id()))
+            '/a/urltestmodel-%s.urltestmodel2-%s/' % (key1.id(), key2.id()))
 
     def test_not_urlsafe(self):
         """
@@ -106,7 +92,7 @@ class NDBConverterTestCase(TestCase):
         Test top-level urls route to the correct view w/ correct arguments.
         """
         key1 = UrlTestModel(value='1').put()
-        resp = self.client.get('/t/%s/' % key1.id())
+        resp = self.client.get('/t/urltestmodel-%s/' % key1.id())
 
         self.mock_view.assert_called_once_with(key=key1)
         self.assert200(resp)
@@ -118,20 +104,7 @@ class NDBConverterTestCase(TestCase):
         key1 = UrlTestModel(value='1').put()
         key2 = UrlTestModel2(value='2', parent=key1).put()
 
-        resp = self.client.get('/a/%s.%s/' % (key1.id(), key2.id()))
-
-        self.mock_view.assert_called_once_with(key=key2)
-        self.assert200(resp)
-
-    def test_from_url_custom_sep(self):
-        """
-        Test ancestor-urls with custom separators route to the correct view w/
-        correct arguments.
-        """
-        key1 = UrlTestModel(value='1').put()
-        key2 = UrlTestModel2(value='2', parent=key1).put()
-
-        resp = self.client.get('/cs/%s-%s/' % (key1.id(), key2.id()))
+        resp = self.client.get('/a/urltestmodel-%s.urltestmodel2-%s/' % (key1.id(), key2.id()))
 
         self.mock_view.assert_called_once_with(key=key2)
         self.assert200(resp)

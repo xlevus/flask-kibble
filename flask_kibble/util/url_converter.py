@@ -1,3 +1,4 @@
+import re
 import logging
 
 from google.appengine.ext import ndb
@@ -19,15 +20,23 @@ class NDBKeyConverter(BaseConverter):
         super(NDBKeyConverter, self).__init__(url_map)
         self.kinds = kinds
 
-        self.separator = kwargs.get('separator', '.')
         self.urlsafe = kwargs.get('urlsafe', True)
+
+        if self.urlsafe:
+            self.regex = ".".join([
+                r"{0}-([^/]+)".format(kind.lower())
+                for kind in kinds])
+            self._regex = re.compile(self.regex)
 
     def to_url(self, key):
         if self.urlsafe:
             if isinstance(key, ndb.Model):
                 key = key.key
 
-            return self.separator.join(unicode(i) for kind, i in key.pairs())
+            return ".".join(
+                '{0}-{1}'.format(
+                    kind.lower(),
+                    unicode(i)) for kind, i in key.pairs())
         else:
             return key.urlsafe()
 
@@ -50,9 +59,8 @@ class NDBKeyConverter(BaseConverter):
                 raise ValidationError("Invalid URL")
 
     def to_python_pairs(self, value):
-        pairs = zip(
-            self.kinds,
-            map(self._coerce_int, value.split(self.separator)))
+        pairs = zip(self.kinds,
+                    map(self._coerce_int, self._regex.findall(value)[0]))
 
         key = ndb.Key(pairs=pairs)
 
