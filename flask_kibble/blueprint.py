@@ -76,7 +76,7 @@ class Kibble(flask.Blueprint):
         ancestor_key = "<ndbkey({0}):ancestor_key>".format(
             ",".join(["'%s'" % x for x in ancest_kinds]))
 
-        for pattern, defaults in view_class._url_patterns:
+        for pattern, defaults in view_class.url_patterns():
             self.add_url_rule(
                 pattern.format(
                     key=key,
@@ -107,11 +107,15 @@ class Kibble(flask.Blueprint):
             for x in models or []]
 
         for p in paths:
-            map(import_string, find_modules(p, True, True))
+            for mod in find_modules(p, True, True):
+                logger.debug("Autodiscover: %s", mod)
+                import_string(mod)
 
         for view in KibbleMeta._autodiscover:
             if view.model and (all_models or view.kind() in models):
                 self.register_view(view)
+            else:
+                logger.debug("Autodiscover skipping: %r", view)
 
     def _context_processor(self):
         return {'kibble': self}

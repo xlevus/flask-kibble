@@ -83,6 +83,10 @@ class KibbleView(View):
             [cls.kind()]
         return "/".join(p)
 
+    @classmethod
+    def url_patterns(cls):
+        return cls._url_patterns
+
     @property
     def templates(self):
         """
