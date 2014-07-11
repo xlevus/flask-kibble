@@ -97,10 +97,15 @@ class KibbleView(View):
             * ''kibble/{path.lower}/{action}.html``
             * ``kibble/{kind.lower}/{action}.html``
         """
+        kwargs = {
+            'action': self.action,
+            'path': self.path().lower(),
+            'kind': self.kind().lower(),
+        }
         return [
-            'kibble/%s.html' % self.action,
-            'kibble/%s/%s.html' % (self.path().lower(), self.action),
-            'kibble/%s/%s.html' % (self.kind().lower(), self.action),
+            'kibble/{action}.html'.format(**kwargs),
+            'kibble/{path}/{action}.html'.format(**kwargs),
+            'kibble/{kind}/{action}.html'.format(**kwargs),
         ]
 
     def base_context(self):
