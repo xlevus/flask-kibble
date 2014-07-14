@@ -17,6 +17,7 @@
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#~0.3.3",
-    "bootstrap": "~3.2.0"
+    "bootstrap": "~3.2.0",
+    "underscore": "~1.6.0"
   }
 }

@@ -86,7 +86,7 @@ class FormView(KibbleView):
         super(FormView, self).__init__(*args, **kwargs)
 
         if not self.form:
-            self.form = forms.model_form(
+            self.form = forms.KibbleModelConverter.model_form(
                 self.model,
                 field_args=self.form_field_args)
 

@@ -1,0 +1,33 @@
+{% macro render_row(form) -%}
+    <tr class='formrow'>
+        {% for subfield in form if not subfield.type in ("CSRFTokenField", "HiddenField") %}
+            <td class='{% if subfield.errors %} error{% endif %}'>
+                {{ subfield(class="form-control") }}
+                {% if subfield.errors %}<br />{{ "<br />".join(subfield.errors) }}{% endif %}
+
+                {% if loop.last and form.hidden_tag %}{{ form.hidden_tag() }}{% endif %}
+            </td>
+        {% endfor %}
+    </tr>
+{%- endmacro %}
+
+<table class='table table-bordered table-striped table-hover {{ kwargs.class }}' {% block table_tag %}data-template="{{ base64(render_row(empty_row())) }}"{% endblock %}>
+    <tr class='header'>
+        {% for subfield in empty_row() if not subfield.type in ("CSRFTokenField", "HiddenField") %}
+            <th>{{ subfield.label }}</th>
+        {% endfor %}
+    </tr>
+
+    {% for form in field %}
+        {{ render_row(form) }}
+    {% endfor %}
+    <tr class='empty'>
+        <td colspan='{{ empty_row()._fields|length }}'>No Entries</td>
+    </tr>
+
+    <tr class='buttons'><td colspan='{{ empty_row()._fields|length }}'>
+        <a href='#' class='add-row btn btn-success btn-small'><i class='icon-white icon-plus'></i> Add Row</a>
+        <a href='#' class='delete-row btn btn-danger btn-small'><i class='icon-white icon-minus'></i> Delete Row</a>
+    </td></tr>
+</table>
+
