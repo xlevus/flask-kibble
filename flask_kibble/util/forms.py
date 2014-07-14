@@ -8,6 +8,8 @@ from wtforms.widgets import HTMLString
 from wtforms_ndb import ModelConverter
 from wtforms.csrf.session import SessionCSRF
 
+from google.appengine.ext import blobstore
+
 
 class BaseCSRFForm(wtforms.Form):
     class Meta:
@@ -44,7 +46,26 @@ class TabluarFormListWidget(object):
         return f
 
 
+class JSUploadWidget(object):
+    template = 'kibble/widgets/jsupload.html'
+
+    def __call__(self, field, **kwargs):
+        ctx = {
+            'upload_url': blobstore.create_upload_url(
+                flask.url_for('.upload')),
+            'field_args': kwargs,
+        }
+        return HTMLString(
+            flask.render_template(self.template,
+                                  **ctx))
+
+
 class KibbleModelConverter(ModelConverter):
+    def convert_BlobKeyProperty(self, model, prop, field_args):
+        field_args['widget'] = JSUploadWidget()
+        return super(KibbleModelConverter, self).convert_BlobKeyProperty(
+            model, prop, field_args)
+
     def convert_StructuredProperty(self, model, prop, field_args):
         if prop._repeated:
             field_args.setdefault('LIST', {})['widget'] = TabluarFormListWidget()

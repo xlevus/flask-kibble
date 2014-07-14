@@ -46,3 +46,18 @@ function RepeatedFormField(node){
 $('.field-FieldList').each(function(i, elem){
     new RepeatedFormField($(elem).find('table'));
 });
+
+$('.jsupload').each(function(i, elem){
+    var elem = $(elem);
+    var btn = elem.children('a');
+    var inpt = elem.children('input');
+    var dz = new Dropzone(btn.get(0), {
+        url: inpt.data('url'),
+        preview_template: ' ',
+    });
+
+    dz.on('success', function(file, resp){
+        console.log(file);
+        console.log(resp);
+    });
+});

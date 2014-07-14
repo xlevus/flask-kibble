@@ -3,6 +3,7 @@ import os
 from collections import defaultdict
 
 from google.appengine.ext import ndb
+from werkzeug import parse_options_header
 
 import flask
 
@@ -15,6 +16,19 @@ def index():
     Kibble index view. Lists the registered classes and views.
     """
     return flask.render_template('kibble/index.html')
+
+
+def upload():
+    payload = {}
+
+    for field, filedata in flask.request.files.iteritems():
+        parsed_header = parse_options_header(filedata.content_type)
+        payload[field] = {
+            'blobkey': parsed_header[1]['blob-key'],
+            'filename': filedata.filename,
+        }
+
+    return flask.jsonify(payload)
 
 
 class Kibble(flask.Blueprint):
@@ -44,6 +58,10 @@ class Kibble(flask.Blueprint):
         self.registry = defaultdict(dict)
 
         self.add_url_rule('/', view_func=index, endpoint='index')
+        self.add_url_rule('/_upload/',
+                          view_func=upload,
+                          endpoint='upload',
+                          methods=['POST'])
 
         self.record_once(self._register_urlconverter)
 
