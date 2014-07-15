@@ -92,22 +92,28 @@ class List(KibbleView):
     button_icon = 'list'
 
     _url_patterns = [
-        ("/{kind_lower}/", {'page': 1}),
-        ("/{kind_lower}/page-<int:page>/", {}),
+        ("/{kind_lower}/", {'page': 1, 'ancestor_key': None}),
+        ("/{kind_lower}/page-<int:page>/", {'ancestor_key': None}),
+        ("/{ancestor_key}/{kind_lower}/", {'page': 1}),
+        ("/{ancestor_key}/{kind_lower}/page-<int:page>/", {}),
     ]
     _requires_instance = False
 
-    def get_query(self):
+    def get_query(self, ancestor_key=None):
         """
         :returns: Base query for list.
         :rtype: :py:class:`ndb.Query`
         """
-        return self.model.query()
+        return self.model.query(ancestor=ancestor_key)
 
-    def dispatch_request(self, page):
+    def dispatch_request(self, page, ancestor_key):
         context = self.base_context()
+        if ancestor_key:
+            ancestor = ancestor_key.get_async()
+        else:
+            ancestor = None
 
-        query = self.get_query()
+        query = self.get_query(ancestor_key)
         query_params = {}
 
         for composer_cls in self.query_composers:
@@ -118,6 +124,8 @@ class List(KibbleView):
             query_params.update(composer.get_query_params())
 
         context['table'] = Table(self, query, query_params)
+        context['ancestor_key'] = ancestor_key
+        context['ancestor'] = ancestor.get_result() if ancestor_key else None
 
         return flask.render_template(self.templates, **context)
 

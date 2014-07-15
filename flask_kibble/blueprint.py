@@ -2,7 +2,9 @@ import logging
 import os
 from collections import defaultdict
 
-from google.appengine.ext import ndb
+from google.appengine.ext import ndb, blobstore
+
+from werkzeug import parse_options_header
 
 import flask
 
@@ -15,6 +17,28 @@ def index():
     Kibble index view. Lists the registered classes and views.
     """
     return flask.render_template('kibble/index.html')
+
+
+def upload():
+    payload = {}
+
+    for field, filedata in flask.request.files.iteritems():
+        parsed_header = parse_options_header(filedata.content_type)
+
+        blobkey = parsed_header[1]['blob-key']
+        blobinfo = blobstore.BlobInfo.get(blobkey)
+        if not flask.g.kibble.auth.can_upload_file(blobinfo):
+            blobinfo.delete()
+            payload[field] = {
+                'error': 'permission denied',
+            }
+        else:
+            payload[field] = {
+                'blobkey': blobkey,
+                'filename': filedata.filename,
+            }
+
+    return flask.jsonify(payload)
 
 
 class Kibble(flask.Blueprint):
@@ -44,6 +68,10 @@ class Kibble(flask.Blueprint):
         self.registry = defaultdict(dict)
 
         self.add_url_rule('/', view_func=index, endpoint='index')
+        self.add_url_rule('/_upload/',
+                          view_func=upload,
+                          endpoint='upload',
+                          methods=['POST'])
 
         self.record_once(self._register_urlconverter)
 
@@ -61,17 +89,26 @@ class Kibble(flask.Blueprint):
         """
         action = view_class.action
         kind = view_class.kind()
+        path = view_class.path()
 
         # Check for duplicates
-        if action in self.registry[kind]:
-            raise ValueError("%s already has view for %s.%s" % (
-                self, kind, action))
+        if action in self.registry[path]:
+            raise ValueError("%s already has view for %s:%s" % (
+                self, path, action))
 
         view_func = view_class.as_view(view_class.view_name())
+        ancest_kinds = [x._get_kind() for x in view_class.ancestors]
 
-        for pattern, defaults in view_class._url_patterns:
+        key = "<ndbkey({0}):key>".format(",".join([
+            "'%s'" % x for x in ancest_kinds + [kind]]))
+        ancestor_key = "<ndbkey({0}):ancestor_key>".format(
+            ",".join(["'%s'" % x for x in ancest_kinds]))
+
+        for pattern, defaults in view_class.url_patterns():
             self.add_url_rule(
                 pattern.format(
+                    key=key,
+                    ancestor_key=ancestor_key,
                     kind=kind,
                     kind_lower=kind.lower(),
                     action=action),
@@ -79,7 +116,7 @@ class Kibble(flask.Blueprint):
                 defaults=defaults,
                 view_func=view_func)
 
-        self.registry[kind][action] = view_class
+        self.registry[path][action] = view_class
 
     def autodiscover(self, paths, models=None):
         """
@@ -98,11 +135,15 @@ class Kibble(flask.Blueprint):
             for x in models or []]
 
         for p in paths:
-            map(import_string, find_modules(p, True, True))
+            for mod in find_modules(p, True, True):
+                logger.debug("Autodiscover: %s", mod)
+                import_string(mod)
 
         for view in KibbleMeta._autodiscover:
             if view.model and (all_models or view.kind() in models):
                 self.register_view(view)
+            else:
+                logger.debug("Autodiscover skipping: %r", view)
 
     def _context_processor(self):
         return {'kibble': self}
@@ -148,12 +189,13 @@ class Kibble(flask.Blueprint):
 
         If the view isn't registered, returns an empty string.
 
-        :param model: A ``ndb.Model`` subclass or string
+        :param model: A ``ndb.Model`` subclass or string. For ancestral
+                      objects, this can be a path.
         :param action: The name of the action to link to. e.g. 'create'.
         :param instance: A :py:class:`ndb.Model` instance or
             :py:class:`ndb.Key` to link to.
         """
-        if issubclass(model, ndb.Model):
+        if isinstance(model, type) and issubclass(model, ndb.Model):
             model = model._get_kind()
 
         view = self.registry.get(model, {}).get(action)
