@@ -12,6 +12,15 @@ class Authenticator(object):
         """
         return True
 
+    def can_upload_file(self, file):
+        """
+        Check if the user is eligible to upload a file. If not, the uploaded
+        file will be deleted.
+
+        :param file: A Blobinfo or Fileinfo object.
+        """
+        return True
+
     def has_permission_for(self, model, action, key=None, **view_args):
         """
         Should return true if the current user has the permissions for

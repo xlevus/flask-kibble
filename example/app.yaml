@@ -1,6 +1,6 @@
 # vim: set nospell:
 
-application: flask-kibble
+application: flask-kibble-example
 version: dev
 runtime: python27
 api_version: 1
@@ -20,5 +20,5 @@ libraries:
 handlers:
 
 - url: /.*
-  script: web.app
+  script: address_book.web.app
 
