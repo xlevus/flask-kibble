@@ -56,7 +56,7 @@ $('.jsupload').each(function(i, elem){
         url: $elem.data('url'),
         previewsContainer: '.dropzone-upload-junk',
         paramName: inpt.attr('name'),
-        clickable: '.upload-button',
+        clickable: $elem.find('.upload-button').get(0),
         init: function(){
             this.on('addedfile', function(){
                 $elem.children('.upload-preview').removeClass('hidden');
