@@ -2,7 +2,8 @@ import logging
 import os
 from collections import defaultdict
 
-from google.appengine.ext import ndb
+from google.appengine.ext import ndb, blobstore
+
 from werkzeug import parse_options_header
 
 import flask
@@ -23,10 +24,19 @@ def upload():
 
     for field, filedata in flask.request.files.iteritems():
         parsed_header = parse_options_header(filedata.content_type)
-        payload[field] = {
-            'blobkey': parsed_header[1]['blob-key'],
-            'filename': filedata.filename,
-        }
+
+        blobkey = parsed_header[1]['blob-key']
+        blobinfo = blobstore.BlobInfo.get(blobkey)
+        if not flask.g.kibble.auth.can_upload_file(blobinfo):
+            blobinfo.delete()
+            payload[field] = {
+                'error': 'permission denied',
+            }
+        else:
+            payload[field] = {
+                'blobkey': blobkey,
+                'filename': filedata.filename,
+            }
 
     return flask.jsonify(payload)
 

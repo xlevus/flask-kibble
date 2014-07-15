@@ -48,16 +48,27 @@ $('.field-FieldList').each(function(i, elem){
 });
 
 $('.jsupload').each(function(i, elem){
-    var elem = $(elem);
-    var btn = elem.children('a');
-    var inpt = elem.children('input');
-    var dz = new Dropzone(btn.get(0), {
-        url: inpt.data('url'),
-        preview_template: ' ',
-    });
-
-    dz.on('success', function(file, resp){
-        console.log(file);
-        console.log(resp);
+    var $elem = $(elem);
+    var inpt = $elem.find('input[type=hidden]');
+    var label = $elem.find('input[type=text]');
+    
+    var dz = new Dropzone(elem, {
+        url: $elem.data('url'),
+        previewsContainer: '.dropzone-upload-junk',
+        paramName: inpt.attr('name'),
+        clickable: '.upload-button',
+        init: function(){
+            this.on('addedfile', function(){
+                $elem.children('.upload-preview').removeClass('hidden');
+            });
+            this.on('uploadprogress', function(f, prog, bytes){
+                $elem.find('[role=progressbar]').css('width', prog+'%')
+            });
+            this.on('success', function(f, resp){
+                label.val(resp[inpt.attr('name')].filename);
+                inpt.val(resp[inpt.attr('name')].blobkey);
+                $elem.children('.upload-preview').addClass('hidden');
+            });
+        }
     });
 });
