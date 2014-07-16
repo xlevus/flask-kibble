@@ -19,7 +19,7 @@ def index():
     return flask.render_template('kibble/index.html')
 
 
-def upload():
+def upload(gcs_bucket=None):
     payload = {}
 
     for field, filedata in flask.request.files.iteritems():
@@ -42,7 +42,8 @@ def upload():
 
 
 class Kibble(flask.Blueprint):
-    def __init__(self, name, import_name, auth, label=None, **kwargs):
+    def __init__(self, name, import_name, auth, label=None,
+                 default_gcs_bucket=None, **kwargs):
         """
         The central point of the Kibble admin. Manages permissions of views.
 
@@ -51,6 +52,8 @@ class Kibble(flask.Blueprint):
         :param auth: A ``flask_kibble.Authenticator`` subclass to provide
             authentication and permissions.
         :param label: The label of the Kibble admin. Will default to the name.
+        :param default_gcs_bucket: The default GCS bucket to use when
+            uploading files.
         """
 
         kwargs.setdefault(
@@ -64,6 +67,7 @@ class Kibble(flask.Blueprint):
         super(Kibble, self).__init__(name, import_name, **kwargs)
         self.label = label or self.name.title()
         self.auth = auth
+        self.gcs_bucket = default_gcs_bucket
 
         self.registry = defaultdict(dict)
 

@@ -53,7 +53,8 @@ class JSUploadWidget(object):
         kwargs['name'] = field.name
         ctx = {
             'upload_url': blobstore.create_upload_url(
-                flask.url_for('.upload')),
+                flask.url_for('.upload'),
+                gs_bucket_name=flask.g.kibble.gcs_bucket),
             'filename': '',
             'value': str(field.data or ''),
             'field_args': kwargs,

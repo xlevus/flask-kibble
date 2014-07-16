@@ -26,7 +26,6 @@ function RepeatedFormField(node){
             {interpolate : /\{\{(.+?)\}\}/g});
 
         $(row).insertBefore($(this).parents('tr:first'));
-        AutoWidget.refresh();
         row_count();
         return false;
     });
