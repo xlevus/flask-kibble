@@ -1,4 +1,5 @@
 import mock
+from cStringIO import StringIO
 from google.appengine.ext import ndb
 
 from .base import TestCase, TestAuthenticator
@@ -111,3 +112,31 @@ class BlueprintIndexTestCase(TestCase):
         self.assertRedirects(resp, self.authenticator.get_login_url())
 
 
+class BlueprintUploadTestCase(TestCase):
+    def create_app(self):
+        return self._create_app(DummyView)
+
+    def test_get(self):
+        resp = self.client.get('/_upload/')
+        self.assert405(resp)
+
+    def test_post(self):
+        from google.appengine.ext import blobstore
+        ct = 'message/external-body; '\
+            'blob-key="BLOBKEY"; '\
+            'access-type="X-AppEngine-BlobKey"'
+
+        f = (StringIO("file"), 'test.txt', ct)
+
+        with mock.patch.object(self.authenticator, 'can_upload_file') as cuf:
+            resp = self.client.post('/_upload/', data={'file': f})
+
+            self.assert200(resp)
+            self.assertEqual(resp.json, {
+                'file': {
+                    'blobkey': 'BLOBKEY',
+                    'filename': 'test.txt',
+                },
+            })
+
+            cuf.assert_called_once_with(blobstore.BlobInfo.get('BLOBKEY'))

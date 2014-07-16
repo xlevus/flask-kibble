@@ -46,7 +46,7 @@ class CreateTestCase(TestCase):
         self.assert200(resp_create)
 
         self.authenticator.has_permission_for.assert_called_once_with(
-            TestModel, 'create')
+            TestModel, 'create', ancestor_key=None)
 
         self.assertTemplateUsed('kibble/create.html')
 
@@ -58,7 +58,7 @@ class CreateTestCase(TestCase):
         resp = self.client.get('/testmodel/new/')
         self.assert403(resp)
         self.authenticator.has_permission_for.assert_called_once_with(
-            TestModel, 'create')
+            TestModel, 'create', ancestor_key=None)
 
     def test_post_invalid_form(self):
         data = MultiDict({'name': ''})
@@ -71,8 +71,8 @@ class CreateTestCase(TestCase):
     @mock.patch.object(TestCreate, 'get_success_redirect', return_value='/t/')
     @mock.patch.object(TestCreate, 'save_model')
     def test_post_valid_data(self, save_model, get_success_redirect):
-        def _save(form, inst=None):
-            inst = TestModel()
+        def _save(form, inst=None, ancestor_key=None):
+            inst = TestModel(parent=ancestor_key)
             form.populate_obj(inst)
             inst.put()
             return inst
@@ -89,7 +89,7 @@ class CreateTestCase(TestCase):
         #    self.kibble.url_for(TestModel, 'edit', inst),
         #    inst), "success")
 
-        save_model.assert_called_once_with(mock.ANY, None)
+        save_model.assert_called_once_with(mock.ANY, None, None)
 
         # Check that the keys match, as they're effectively the same
         # but asserting the instances are equal doesn't work
@@ -114,12 +114,12 @@ class EditTestCase(TestCase):
     def test_url(self):
         self.assertEqual(
             flask.url_for('kibble.testmodel_edit', key=self.inst.key),
-            '/testmodel/test/')
+            '/testmodel-test/')
 
     @mock.patch('flask_kibble.edit.FieldsetIterator')
     @mock.patch.object(TestEdit, 'form')
     def test_get(self, form, fieldset_iterator):
-        resp = self.client.get('/testmodel/test/')
+        resp = self.client.get('/testmodel-test/')
         self.assert200(resp)
         self.authenticator.has_permission_for.assert_called_once_with(
             TestModel, 'edit', key=self.inst.key)
@@ -133,20 +133,20 @@ class EditTestCase(TestCase):
 
     def test_get_missing_perm(self):
         self.authenticator.has_permission_for.return_value = False
-        resp = self.client.get('/testmodel/test/')
+        resp = self.client.get('/testmodel-test/')
         self.assert403(resp)
 
     @mock.patch.object(TestEdit, 'get_success_redirect', return_value='/t/')
     @mock.patch.object(TestEdit, 'save_model')
     def test_post_valid_data(self, save_model, get_success_redirect):
-        def _save(form, inst):
+        def _save(form, inst, ancestor_key=None):
             form.populate_obj(inst)
             inst.put()
             return inst
         save_model.side_effect = _save
 
         data = MultiDict({'name': 'Test2'})
-        resp = self.client.post('/testmodel/test/', data=data)
+        resp = self.client.post('/testmodel-test/', data=data)
 
         self.assertRedirects(resp, '/t/')
         inst = self.inst.key.get()
@@ -155,7 +155,7 @@ class EditTestCase(TestCase):
         #    self.kibble.url_for(TestModel, 'edit', inst),
         #    inst), "success")
 
-        save_model.assert_called_once_with(mock.ANY, inst)
+        save_model.assert_called_once_with(mock.ANY, inst, None)
         get_success_redirect.assert_called_once_with(inst)
 
     def test_get_success_redirect(self):
@@ -165,7 +165,7 @@ class EditTestCase(TestCase):
 
         self.assertEqual(
             view.get_success_redirect(self.inst),
-            '/testmodel/test/')
+            '/testmodel-test/')
 
     def test_get_success_with_list(self):
         """

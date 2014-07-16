@@ -34,7 +34,8 @@ class BaseKibbleViewTestCase(TestCase):
 
         self.assertEqual(v.templates, [
             'kibble/dummy.html',
-            'kibble/testmodel_dummy.html',
+            'kibble/testmodel/dummy.html',  # TODO: Remove duplicate?
+            'kibble/testmodel/dummy.html',
         ])
 
     def test_has_permission_for(self):
@@ -60,18 +61,22 @@ class BaseKibbleViewTestCase(TestCase):
         v = self.get_view()
 
         v.url_for()
-        url_for.assert_called_once_with('.testmodel_dummy', key=None)
+        url_for.assert_called_once_with('.testmodel_dummy', key=None,
+                                        ancestor_key=None)
         url_for.reset_mock()
 
         v.url_for(self.inst)
-        url_for.assert_called_once_with('.testmodel_dummy', key=self.inst.key)
+        url_for.assert_called_once_with('.testmodel_dummy', key=self.inst.key,
+                                        ancestor_key=None)
         url_for.reset_mock()
 
         v.url_for(self.inst.key)
-        url_for.assert_called_once_with('.testmodel_dummy', key=self.inst.key)
+        url_for.assert_called_once_with('.testmodel_dummy', key=self.inst.key,
+                                        ancestor_key=None)
         url_for.reset_mock()
 
         v.url_for(blueprint='fudge')
-        url_for.assert_called_once_with('fudge.testmodel_dummy', key=None)
+        url_for.assert_called_once_with('fudge.testmodel_dummy', key=None,
+                                        ancestor_key=None)
         url_for.reset_mock()
 

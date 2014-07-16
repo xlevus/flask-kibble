@@ -36,20 +36,23 @@ class TestAuthenticator(kibble.Authenticator):
 
 class TestCase(FTestCase):
     def _pre_setup(self):
-        self.testbed = testbed.Testbed()
-        self.testbed.activate()
+        try:
+            self.testbed = testbed.Testbed()
+            self.testbed.activate()
 
-        policy = datastore_stub_util.PseudoRandomHRConsistencyPolicy(
-            probability=1)
-        self.testbed.init_datastore_v3_stub(consistency_policy=policy)
+            policy = datastore_stub_util.PseudoRandomHRConsistencyPolicy(
+                probability=1)
+            self.testbed.init_datastore_v3_stub(consistency_policy=policy)
 
-        ctx = ndb.get_context()
-        ctx.set_cache_policy(False)
-        ctx.set_memcache_policy(False)
+            ctx = ndb.get_context()
+            ctx.set_cache_policy(False)
+            ctx.set_memcache_policy(False)
 
-        self.testbed.init_memcache_stub()
+            self.testbed.init_memcache_stub()
 
-        super(TestCase, self)._pre_setup()
+            super(TestCase, self)._pre_setup()
+        except Exception, e:
+            from nose.tools import set_trace; set_trace();
 
     def _post_teardown(self):
         super(TestCase, self)._post_teardown()
