@@ -24,7 +24,12 @@ class Fieldset(object):
 
     def __iter__(self):
         for field in self.fields:
-            yield self.form[field]
+            try:
+                field = self.form[field]
+            except KeyError:
+                pass  # Field is missing, ignore it.
+            else:
+                yield field
 
     def __bool__(self):
         return len(self.fields) > 0
@@ -68,6 +73,12 @@ class FormView(KibbleView):
     #: to :py:func:`wtforms_ndb.model_form`.
     form_field_args = None
 
+    #: An array of fields to only use when generating the form.
+    only_fields = None
+
+    #: An array of fields to skip when generating the form.
+    exclude_fields = None
+
     #: An array of dictionaries specifying fieldsets. These should
     #: contain at least a ``name`` and ``fields`` values.
     #: All fields not specified will be grouped into an unordered
@@ -88,7 +99,9 @@ class FormView(KibbleView):
         if not self.form:
             self.form = forms.KibbleModelConverter.model_form(
                 self.model,
-                field_args=self.form_field_args)
+                field_args=self.form_field_args,
+                only=self.only_fields,
+                exclude=self.exclude_fields)
 
     def save_model(self, form, instance=None, ancestor_key=None):
         """
