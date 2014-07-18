@@ -2,6 +2,12 @@ import flask
 from google.appengine.ext import ndb
 
 from .base import KibbleView
+from .edit import FieldsetIterator
+from .util.forms import BaseCSRFForm
+
+
+class BaseOperationForm(BaseCSRFForm):
+    pass
 
 
 class Operation(KibbleView):
@@ -14,6 +20,11 @@ class Operation(KibbleView):
     #: If true, the user will be taken to an intermediate confirmation page
     #: otherwise, the operation will be performed immediately.
     require_confirmation = True
+
+    #: The form used when requiring confirmation. By default this is an empty
+    #: csrf-protected form
+    confirmation_form = BaseOperationForm
+    confirmation_fieldsets = []
 
     _url_patterns = [
         ("/{key}/{action}/", {}),
@@ -33,7 +44,7 @@ class Operation(KibbleView):
             'kibble/%s_%s.html' % (self.kind().lower(), self.action)
         ]
 
-    def run(self, instance):
+    def run(self, instance, form=None):
         """
         Perform the operation on the given instance.
 
@@ -87,12 +98,15 @@ class Operation(KibbleView):
 
     def dispatch_request(self, key):
         instance = key.get()
+        form = self.confirmation_form(flask.request.form, obj=instance)
         if instance is None:
             flask.abort(404)
 
-        if not self.require_confirmation or flask.request.method == 'POST':
+        if not self.require_confirmation or \
+                (flask.request.method == 'POST' and form.validate()):
             try:
-                result = self.run(instance)
+                result = self.run(
+                    instance, form if self.require_confirmation else None)
                 if isinstance(result, ndb.Future):
                     result = result.get_result()
                 success = True
@@ -110,5 +124,7 @@ class Operation(KibbleView):
 
         ctx = self.base_context()
         ctx['instance'] = instance
+        ctx['form'] = form
+        ctx['fieldsets'] = FieldsetIterator(form, self.confirmation_fieldsets)
         return flask.render_template(self.templates, **ctx)
 

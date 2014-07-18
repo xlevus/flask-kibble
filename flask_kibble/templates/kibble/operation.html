@@ -1,4 +1,5 @@
 {% extends "kibble/base.html" %}
+{% from "kibble/macros/render_form.html" import render_form %}
 
 {% block page_header %}Confirm {{ view.action|title }}{% endblock %}
 
@@ -8,6 +9,10 @@
             <p>Are you sure you want to {{ view.action }} {{ view.kind() }}: {{ instance }}?</p>
 
             <form method='POST' action='{{ request.path }}'>
+                {% block form_body %}
+                    {{ render_form(form, fieldsets) }}
+                {% endblock %}
+
                 <button type='submit' class='btn {{ view.button_class }}'>
                     {% if view.button_icon %}
                     <span class='glyphicon {{ view.button_icon }}'></span>

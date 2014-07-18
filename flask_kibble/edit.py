@@ -45,14 +45,14 @@ class FieldsetIterator(object):
     :param kibble_view: The kibble view instance.
     :param form: The form.
     """
-    def __init__(self, kibble_view, form):
-        self.kibble_view = kibble_view
+    def __init__(self, form, fieldsets):
+        self.fieldsets = fieldsets
         self.form = form
 
         self._fields = set(self.form._fields.keys())
 
     def __iter__(self):
-        for fieldset in self.kibble_view.fieldsets:
+        for fieldset in self.fieldsets:
             self._fields.difference_update(fieldset.get('fields', []))
 
             yield Fieldset(self.form, **fieldset)
@@ -165,7 +165,7 @@ class FormView(KibbleView):
 
         ctx = self.base_context()
         ctx['form'] = form
-        ctx['fieldsets'] = FieldsetIterator(self, form)
+        ctx['fieldsets'] = FieldsetIterator(form, self.fieldsets)
         ctx['instance'] = instance
 
         return flask.render_template(self.templates, **ctx)
