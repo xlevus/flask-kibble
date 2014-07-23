@@ -61,6 +61,7 @@ class TestCase(FTestCase):
         app = flask.Flask(__name__)
 
         app.config['SECRET_KEY'] = 'test_secret'
+        app.config['CSRF_SECRET_KEY'] = 'test_secret'
         app.config['DEBUG'] = True
 
         self.authenticator = mock.Mock(wraps=TestAuthenticator())

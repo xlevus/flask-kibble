@@ -106,13 +106,17 @@ class Operation(KibbleView):
                 (flask.request.method == 'POST' and form.validate()):
             try:
                 result = self.run(
-                    instance, form if self.require_confirmation else None)
+                    instance,
+                    form if self.require_confirmation else None)
+
                 if isinstance(result, ndb.Future):
                     result = result.get_result()
+
                 success = True
-            except self.Failure, result:
+            except self.Failure, e:
+                result = e
                 success = False
-            finally:
+            else:
                 if isinstance(result, flask.current_app.response_class):
                     return result
 
