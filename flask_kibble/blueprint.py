@@ -175,9 +175,9 @@ class Kibble(flask.Blueprint):
             model = view_class.model
             action = view_class.action
         else:
-            # For non-CBVs, use the view name as the permission values.
+            # For non-CBVs, use the endpoint name
             model = None
-            action = view_func.__name__
+            action = flask.request.endpoint
 
         if not self.auth.has_permission_for(
                 model, action,
@@ -186,6 +186,16 @@ class Kibble(flask.Blueprint):
             logger.debug("User is missing permission for %r",
                          flask.request.endpoint)
             return flask.render_template('kibble/403.html'), 403
+
+    def all_permissions(self):
+        endpoints = ['index', 'static']
+        for ep in endpoints:
+            yield None, self.name + '.' + ep
+
+        for actions in self.registry.itervalues():
+            for action, view_cls in actions.iteritems():
+                yield view_cls.model, action
+
 
     def url_for(self, model, action, instance=None):
         """

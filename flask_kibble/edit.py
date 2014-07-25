@@ -155,8 +155,11 @@ class FormView(KibbleView):
             instance=instance,
             kind=self.kind())
 
+    def get_form_instance(self, instance=None):
+        return self.form(flask.request.form, obj=instance)
+
     def _form_logic(self, instance=None, ancestor_key=None):
-        form = self.form(flask.request.form, obj=instance)
+        form = self.get_form_instance(instance)
 
         if flask.request.method == 'POST' and form.validate():
             instance = self.save_model(form, instance, ancestor_key)

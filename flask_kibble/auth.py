@@ -26,7 +26,8 @@ class Authenticator(object):
         Should return true if the current user has the permissions for
         the Model/Action/ViewArgs.
 
-        :param model: The model class that is being operated on
+        :param model: The model class that is being operated on, or None
+            (for non-CBVs).
         :param action: The KibbleView.action that is being executed or the
             name of the view (for non-CBVs)
         :param key: The ndb.Key of the object currently operating on.
