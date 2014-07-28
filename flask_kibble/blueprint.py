@@ -159,6 +159,11 @@ class Kibble(flask.Blueprint):
         app.url_map.converters.setdefault('ndbkey', NDBKeyConverter)
 
     def _before_request(self):
+        # TODO: Write test for this
+        if flask.request.endpoint == self.name + '.static':
+            # Don't do any permission checks on the static endpoint.
+            return
+
         flask.g.kibble = self         # Set global var
 
         if not self.auth.is_logged_in():

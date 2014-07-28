@@ -71,6 +71,9 @@ class ModelAuthenticatior(kibble.Authenticator):
             return True
 
         u = KibbleUser.get_by_id(users.get_current_user().email())
+        if u is None:
+            return False
+
         return '{}:{}'.format(model._get_kind() if model else 'view', action) in u.permissions
 
     def get_login_url(self):
