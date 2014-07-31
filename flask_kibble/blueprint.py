@@ -201,7 +201,6 @@ class Kibble(flask.Blueprint):
             for action, view_cls in actions.iteritems():
                 yield view_cls.model, action
 
-
     def url_for(self, model, action, instance=None):
         """
         Get the URL for a specific Model/Action/Instance.

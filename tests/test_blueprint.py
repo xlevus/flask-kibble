@@ -97,7 +97,7 @@ class BlueprintIndexTestCase(TestCase):
         self.assertTemplateUsed('kibble/index.html')
 
         self.authenticator.has_permission_for.assert_called_once_with(
-            None, 'index')
+            None, 'kibble.index')
 
     def test_index_noperm(self):
         # Maybe the user should always have the index permission?

@@ -2,8 +2,7 @@ import logging
 import flask
 
 from .base import KibbleView
-
-from flask_kibble.util import forms
+from .util.forms import KibbleModelConverter, BaseCSRFForm
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +64,14 @@ class FormView(KibbleView):
     #: Action name
     action = 'list'
 
+    #: A :py:class:`wtforms_ndb.ModelConverter` class used to convert the
+    #: NDB model to a form
+    model_converter = KibbleModelConverter
+
+    #: The base formclass to generate the form from. By default this is an
+    #: empty CSRF protected form.
+    base_form = BaseCSRFForm
+
     #: The :py:class:`wtforms.Form` class to use. If not provided
     #: one will be generated through :py:func:`wtforms_ndb.model_form`.
     form = None
@@ -95,13 +102,6 @@ class FormView(KibbleView):
 
     def __init__(self, *args, **kwargs):
         super(FormView, self).__init__(*args, **kwargs)
-
-        if not self.form:
-            self.form = forms.KibbleModelConverter.model_form(
-                self.model,
-                field_args=self.form_field_args,
-                only=self.only_fields,
-                exclude=self.exclude_fields)
 
     def save_model(self, form, instance=None, ancestor_key=None):
         """
@@ -155,8 +155,24 @@ class FormView(KibbleView):
             instance=instance,
             kind=self.kind())
 
+    def get_form_class(self):
+        if not self.form:
+            return self.model_converter.model_form(
+                self.model,
+                base_class=self.base_form,
+                field_args=self.form_field_args,
+                only=self.only_fields,
+                exclude=self.exclude_fields)
+        return self.form
+
     def get_form_instance(self, instance=None):
-        return self.form(flask.request.form, obj=instance)
+        """
+        Returns an instance of the form for the view.
+
+        :param instance: The instance to edit or None.
+        """
+        formcls = self.get_form_class()
+        return formcls(flask.request.form, obj=instance)
 
     def _form_logic(self, instance=None, ancestor_key=None):
         form = self.get_form_instance(instance)

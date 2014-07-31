@@ -1,3 +1,4 @@
+import logging
 import mock
 import flask
 
@@ -51,8 +52,8 @@ class TestCase(FTestCase):
             self.testbed.init_memcache_stub()
 
             super(TestCase, self)._pre_setup()
-        except Exception, e:
-            from nose.tools import set_trace; set_trace();
+        except Exception:
+            logging.exception("Error on setup")
 
     def _post_teardown(self):
         super(TestCase, self)._post_teardown()
@@ -62,6 +63,7 @@ class TestCase(FTestCase):
 
         app.config['SECRET_KEY'] = 'test_secret'
         app.config['CSRF_SECRET_KEY'] = 'test_secret'
+        app.config['CSRF_ENABLED'] = False
         app.config['DEBUG'] = True
 
         self.authenticator = mock.Mock(wraps=TestAuthenticator())

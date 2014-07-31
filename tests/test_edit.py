@@ -124,7 +124,7 @@ class EditTestCase(TestCase):
         self.authenticator.has_permission_for.assert_called_once_with(
             TestModel, 'edit', key=self.inst.key)
 
-        fieldset_iterator.assert_called_once_with(mock.ANY, form())
+        fieldset_iterator.assert_called_once_with(form(), TestEdit.fieldsets)
 
         self.assertTemplateUsed('kibble/edit.html')
         self.assertContext('form', form())
@@ -193,8 +193,8 @@ class FieldsetIteratorTestCase(TestCase):
 
     def get_iterator(self):
         view = TestEdit()
-        form = view.form()
-        return edit.FieldsetIterator(view, form)
+        form = view.get_form_instance()
+        return edit.FieldsetIterator(form, TestEdit.fieldsets)
 
     def test_iter(self):
         fsi = self.get_iterator()

@@ -57,7 +57,7 @@ class OperationTestCase(TestCase):
         resp = self.client.post('/testmodel-test/dummy/')
         self.assertRedirects(resp, '/dummy-redirect/')
 
-        self.run.assert_called_once_with(self.instance)
+        self.run.assert_called_once_with(self.instance, mock.ANY)
         self.get_message.assert_called_once_with(
             self.instance, mock.sentinel.RUN)
 
@@ -67,22 +67,30 @@ class OperationTestCase(TestCase):
         self.assertFlashes("dummy-message", "success")
 
     def test_post_response_class(self):
+        """
+        run() returns a response class. This should be displayed
+        directly to the user.
+        """
         self.run.return_value = flask.make_response("OK")
 
         resp = self.client.post('/testmodel-test/dummy/')
         self.assert200(resp)
         self.assertEqual(resp.data, "OK")
 
-        self.run.assert_called_once_with(self.instance)
+        self.run.assert_called_once_with(self.instance, mock.ANY)
 
     def test_post_failure(self):
+        """
+        run() raises Failure. Flash a failure message to the user
+        and redirect them back to wherever they were.
+        """
         failure = kibble.Operation.Failure("")
         self.run.side_effect = failure
 
         resp = self.client.post('/testmodel-test/dummy/')
         self.assertRedirects(resp, '/dummy-redirect/')
 
-        self.run.assert_called_once_with(self.instance)
+        self.run.assert_called_once_with(self.instance, mock.ANY)
         self.get_message.assert_called_once_with(
             self.instance, failure)
 
@@ -91,4 +99,15 @@ class OperationTestCase(TestCase):
 
         self.assertFlashes("dummy-message", "error")
 
+    @mock.patch.object(DummyOperation, 'confirmation_form')
+    def test_post_bad_form(self, confirmation_form):
+        """
+        Form is invalid, don't call run(), return the rendered form back
+        to the user.
+        """
+        confirmation_form().validate.return_value = False
 
+        resp = self.client.post('/testmodel-test/dummy/')
+        self.assertFalse(self.run.called)
+
+        self.assert200(resp)

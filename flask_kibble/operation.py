@@ -105,6 +105,7 @@ class Operation(KibbleView):
         if not self.require_confirmation or \
                 (flask.request.method == 'POST' and form.validate()):
             try:
+                # The view has been POSTed to, and is valid. Do stuff.
                 result = self.run(
                     instance,
                     form if self.require_confirmation else None)
@@ -114,9 +115,11 @@ class Operation(KibbleView):
 
                 success = True
             except self.Failure, e:
+                # A failure has occurred.
                 result = e
                 success = False
-            else:
+            finally:
+                # Flash the message, and redirect the user.
                 if isinstance(result, flask.current_app.response_class):
                     return result
 
@@ -126,6 +129,8 @@ class Operation(KibbleView):
                 return flask.redirect(
                     self.get_redirect(instance, result))
 
+        # View requires confirmation or the form is invalid.
+        # Render the form to the user.
         ctx = self.base_context()
         ctx['instance'] = instance
         ctx['form'] = form

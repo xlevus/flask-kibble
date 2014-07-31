@@ -13,8 +13,11 @@ from google.appengine.ext import blobstore
 
 class BaseCSRFForm(wtforms.Form):
     class Meta:
-        csrf = True
         csrf_class = SessionCSRF
+
+        @property
+        def csrf(self):
+            return flask.current_app.config.get('CSRF_ENABLED', True)
 
         @property
         def csrf_secret(self):
