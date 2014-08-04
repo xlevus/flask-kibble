@@ -35,6 +35,14 @@ class OperationTestCase(TestCase):
         self.get_message = msgp.start()
         self.addCleanup(msgp.stop)
 
+        post_signal_p = mock.patch.object(DummyOperation, 'post_signal')
+        self.post_signal = post_signal_p.start()
+        self.addCleanup(post_signal_p.stop)
+
+        pre_signal_p = mock.patch.object(DummyOperation, 'pre_signal')
+        self.pre_signal = pre_signal_p.start()
+        self.addCleanup(pre_signal_p.stop)
+
     def create_app(self):
         return self._create_app(DummyOperation)
 
@@ -42,6 +50,15 @@ class OperationTestCase(TestCase):
         self.assertEqual(
             flask.url_for('kibble.testmodel_dummy', key=self.instance),
             '/testmodel-test/dummy/')
+
+    def assertPreSignalSent(self):
+        self.pre_signal.send.assert_called_once_with(
+            DummyOperation, key=self.instance.key)
+
+    def assertPostSignalSent(self):
+        self.post_signal.send.assert_called_once_with(
+            DummyOperation, key=self.instance.key,
+            result=self.run.return_value)
 
     def test_get(self):
         resp = self.client.get('/testmodel-test/dummy/')
@@ -53,6 +70,9 @@ class OperationTestCase(TestCase):
         self.assertFalse(self.get_message.called)
         self.assertFalse(self.get_redirect.called)
 
+        self.assertFalse(self.pre_signal.send.called)
+        self.assertFalse(self.post_signal.send.called)
+
     def test_post(self):
         resp = self.client.post('/testmodel-test/dummy/')
         self.assertRedirects(resp, '/dummy-redirect/')
@@ -63,6 +83,9 @@ class OperationTestCase(TestCase):
 
         self.get_redirect.assert_called_once_with(
             self.instance, mock.sentinel.RUN)
+
+        self.assertPreSignalSent()
+        self.assertPostSignalSent()
 
         self.assertFlashes("dummy-message", "success")
 
@@ -76,6 +99,9 @@ class OperationTestCase(TestCase):
         resp = self.client.post('/testmodel-test/dummy/')
         self.assert200(resp)
         self.assertEqual(resp.data, "OK")
+
+        self.assertPreSignalSent()
+        self.assertPostSignalSent()
 
         self.run.assert_called_once_with(self.instance, mock.ANY)
 
@@ -97,6 +123,9 @@ class OperationTestCase(TestCase):
         self.get_redirect.assert_called_once_with(
             self.instance, failure)
 
+        self.assertPreSignalSent()
+        # self.assertPostSignalSent()
+
         self.assertFlashes("dummy-message", "error")
 
     @mock.patch.object(DummyOperation, 'confirmation_form')
@@ -111,3 +140,7 @@ class OperationTestCase(TestCase):
         self.assertFalse(self.run.called)
 
         self.assert200(resp)
+
+        self.assertFalse(self.pre_signal.send.called)
+        self.assertFalse(self.post_signal.send.called)
+

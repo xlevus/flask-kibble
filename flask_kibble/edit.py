@@ -178,7 +178,21 @@ class FormView(KibbleView):
         form = self.get_form_instance(instance)
 
         if flask.request.method == 'POST' and form.validate():
+
+            self.pre_signal.send(
+                self.__class__,
+                instance=instance,
+                ancestor_key=ancestor_key,
+                key=instance.key if instance else None)
+
             instance = self.save_model(form, instance, ancestor_key)
+
+            self.post_signal.send(
+                self.__class__,
+                instance=instance,
+                ancestor_key=ancestor_key,
+                key=instance.key if instance else None)
+
             flask.flash(self.get_success_message(instance), 'success')
             return flask.redirect(self.get_success_redirect(instance))
 
