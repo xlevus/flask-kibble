@@ -1,5 +1,6 @@
 import wtforms
 import flask
+from werkzeug.utils import cached_property
 
 from google.appengine.api import users
 from google.appengine.ext import ndb
@@ -23,6 +24,7 @@ class KibbleUser(ndb.Model):
     def __unicode__(self):
         return self.email
 
+    @cached_property
     def all_permissions(self):
         groups = ndb.get_multi(self.groups)
 
@@ -91,11 +93,15 @@ class ModelAuthenticatior(kibble.Authenticator):
             return True
 
         u = KibbleUser.get_by_id(users.get_current_user().email())
-        if u is None:
+        if u is None or not u.enabled:
             return False
 
-        return '{}:{}'.format(
-            model._get_kind() if model else 'view', action) in u.permissions
+        if u.superuser:
+            return True
+
+        return (
+            '{}:{}'.format(model._get_kind() if model else 'view', action)
+            in u.all_permissions)
 
     def get_login_url(self):
         return users.create_login_url(flask.url_for('.index'))
