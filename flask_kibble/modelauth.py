@@ -4,7 +4,12 @@ import flask
 from google.appengine.api import users
 from google.appengine.ext import ndb
 import flask_kibble as kibble
-from flask_kibble.util.forms import ModelConverter
+from flask_kibble.util.forms import KibbleModelConverter
+
+
+class KibbleUserGroup(ndb.Model):
+    name = ndb.StringProperty()
+    permissions = ndb.StringProperty(repeated=True)
 
 
 class KibbleUser(ndb.Model):
@@ -13,8 +18,19 @@ class KibbleUser(ndb.Model):
     superuser = ndb.BooleanProperty()
     permissions = ndb.StringProperty(repeated=True)
 
+    groups = ndb.KeyProperty(KibbleUserGroup, repeated=True)
+
     def __unicode__(self):
         return self.email
+
+    def all_permissions(self):
+        groups = ndb.get_multi(self.groups)
+
+        s = set(self.permissions)
+        for g in groups:
+            s.update(g.permissions)
+
+        return s
 
 
 class KibbleUserList(kibble.List):
@@ -22,7 +38,11 @@ class KibbleUserList(kibble.List):
     list_display = ['email', 'enabled', 'superuser']
 
 
-class KibbleUserForm(ModelConverter.model_form(KibbleUser)):
+class KibbleUserForm(KibbleModelConverter.model_form(KibbleUser)):
+    permissions = wtforms.SelectMultipleField()
+
+
+class KibbleGroupForm(KibbleModelConverter.model_form(KibbleUserGroup)):
     permissions = wtforms.SelectMultipleField()
 
 
@@ -38,7 +58,7 @@ class _UserEditBase(object):
         form = self.form(flask.request.form, obj=instance)
         form.permissions.choices = [
             ("{}:{}".format(m._get_kind() if m else 'view', a),)*2 for m, a in
-             flask.g.kibble.all_permissions()
+            flask.g.kibble.all_permissions()
         ]
         return form
 
@@ -74,7 +94,8 @@ class ModelAuthenticatior(kibble.Authenticator):
         if u is None:
             return False
 
-        return '{}:{}'.format(model._get_kind() if model else 'view', action) in u.permissions
+        return '{}:{}'.format(
+            model._get_kind() if model else 'view', action) in u.permissions
 
     def get_login_url(self):
         return users.create_login_url(flask.url_for('.index'))
