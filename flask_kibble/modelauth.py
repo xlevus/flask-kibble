@@ -30,14 +30,10 @@ class KibbleUser(ndb.Model):
 
         s = set(self.permissions)
         for g in groups:
-            s.update(g.permissions)
+            if g:
+                s.update(g.permissions)
 
         return s
-
-
-class KibbleUserList(kibble.List):
-    model = KibbleUser
-    list_display = ['email', 'enabled', 'superuser']
 
 
 class KibbleUserForm(KibbleModelConverter.model_form(KibbleUser)):
@@ -72,6 +68,28 @@ class _UserEditBase(object):
         return instance
 
 
+class _GroupEditBase(object):
+    model = KibbleUserGroup
+    fieldsets = [
+        {'name': 'Group', 'fields': ['name', 'permissions']}
+    ]
+    form = KibbleGroupForm
+
+    def get_form_instance(self, instance=None):
+        form = self.form(flask.request.form, obj=instance)
+        form.permissions.choices = [
+            ("{}:{}".format(m._get_kind() if m else 'view', a),)*2 for m, a in
+            flask.g.kibble.all_permissions()
+        ]
+        return form
+
+
+class KibbleUserList(kibble.List):
+    model = KibbleUser
+    list_display = ['email', 'enabled', 'superuser']
+    linked_actions = ['create', 'edit', 'delete']
+
+
 class KibbleUserEdit(_UserEditBase, kibble.Edit):
     pass
 
@@ -82,6 +100,24 @@ class KibbleUserCreate(_UserEditBase, kibble.Create):
 
 class KibbleUserDelete(kibble.Delete):
     model = KibbleUser
+
+
+class KibbleGroupList(kibble.List):
+    model = KibbleUserGroup
+    list_display = ['name']
+    linked_actions = ['create', 'edit', 'delete']
+
+
+class KibbleGroupEdit(_GroupEditBase, kibble.Edit):
+    pass
+
+
+class KibbleGroupCreate(_GroupEditBase, kibble.Create):
+    pass
+
+
+class KibbleGroupDelete(kibble.Delete):
+    model = KibbleUserGroup
 
 
 class ModelAuthenticatior(kibble.Authenticator):
