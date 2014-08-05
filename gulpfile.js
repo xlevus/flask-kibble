@@ -1,6 +1,8 @@
 var gulp = require("gulp");
 
 var paths = {
+    css: ['frontend/app/*.css'],
+    js: ['frontend/app/*.js'],
     dest: 'flask_kibble/static'
 }
 
@@ -36,6 +38,28 @@ gulp.task("libs", function(){
         .pipe(fontFilter)
             .pipe(flatten())
             .pipe(gulp.dest(paths.dest + '/fonts'));
-})
+});
 
-gulp.task("default", ['libs']);
+gulp.task('css', function(){
+    var concat = require('gulp-concat');
+
+    return gulp.src(paths.css)
+        .pipe(concat('kibble.css'))
+        .pipe(gulp.dest(paths.dest + '/css'));
+});
+
+gulp.task('js', function(){
+    var concat = require('gulp-concat');
+
+    return gulp.src(paths.js)
+        .pipe(concat('kibble.js'))
+        .pipe(gulp.dest(paths.dest + '/js'));
+});
+
+gulp.task('clean', function(){
+    var del = require('del');
+    del(paths.dest, function() {});
+});
+
+gulp.task("default", ['libs', 'css', 'js']);
+
