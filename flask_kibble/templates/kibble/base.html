@@ -10,7 +10,7 @@
     <title>{{ kibble.name.title() }}</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="{{ url_for(".static", filename="bower_components/bootstrap/dist/css/bootstrap.css") }}" rel="stylesheet">
+    <link href="{{ url_for(".static", filename="css/libs.css") }}" rel="stylesheet">
 
     <!-- Custom styles for this template -->
     <link href="{{ url_for(".static", filename="kibble/base.css") }}" rel="stylesheet">
@@ -64,10 +64,6 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="{{ url_for(".static", filename="bower_components/jquery/dist/jquery.js") }}"></script>
-    <script src="{{ url_for(".static", filename="bower_components/underscore/underscore.js") }}"></script>
-    <script src="{{ url_for(".static", filename="bower_components/dropzone/downloads/dropzone.js") }}"></script>
-    <script src="{{ url_for(".static", filename="bower_components/bootstrap/dist/js/bootstrap.min.js") }}"></script>
-    <script src="{{ url_for(".static", filename="kibble/base.js") }}"></script>
+    <script src="{{ url_for(".static", filename="js/libs.min.js") }}"></script>
   </body>
 </html>
