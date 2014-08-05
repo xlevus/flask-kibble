@@ -1,5 +1,6 @@
-bower_components
 packages
+node_modules
+bower_components
 
 *.py[cod]
 
