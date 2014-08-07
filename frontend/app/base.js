@@ -71,3 +71,28 @@ $('.jsupload').each(function(i, elem){
         }
     });
 });
+
+
+$('body').on('click', 'a.popupcreate', function(e){
+    e.preventDefault();
+    
+    var $this = $(this);
+
+    var name = $this.prev().attr('id');
+    var url = $(this).attr('href');
+    url = url + ((url.indexOf('?') == -1) ? '?_popup=1':'&_popup=1' );
+
+    var win = window.open(url, name, 'height=500,width=800,resizeable=yes,scrollbars=yes');
+    win.focus();
+});
+
+function dismissAddAnotherPopup(win, repr, id){
+    var target = $('#'+win.name);
+    var sel = $('<option></option>');
+    sel.html(repr);
+    sel.val(id);
+    sel.attr('selected', 'true');
+    target.append(sel);
+    win.close();
+}
+

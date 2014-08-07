@@ -1,0 +1,13 @@
+<div class="input-group">
+    <select {{ html_params|safe }}>
+        {% for val, label, selected in field.iter_choices() %}  
+            {{ widget.render_option(val, label, selected)|safe }}
+        {% endfor %}
+    </select>
+
+    {% with url = g.kibble.url_for(kind, "create") %}
+        {% if url %}
+            <a href='{{ url }}' class='popupcreate btn btn-small input-group-addon'><i class='glyphicon glyphicon-plus'></i></a>
+        {% endif %}
+    {% endwith %}
+</div>

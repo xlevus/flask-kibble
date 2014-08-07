@@ -194,6 +194,12 @@ class FormView(KibbleView):
                 key=instance.key if instance else None)
 
             flask.flash(self.get_success_message(instance), 'success')
+
+            if self._is_popup():
+                return flask.render_template(
+                    'kibble/dismiss_popup.html',
+                    instance=instance)
+
             return flask.redirect(self.get_success_redirect(instance))
 
         ctx = self.base_context()

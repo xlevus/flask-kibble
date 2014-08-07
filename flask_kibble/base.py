@@ -145,6 +145,7 @@ class KibbleView(View):
         """
         return {
             'view': self,
+            'is_popup': self._is_popup(),
         }
 
     @classmethod
@@ -209,4 +210,7 @@ class KibbleView(View):
                 except KeyError:
                     pass
         return views
+
+    def _is_popup(self):
+        return ('_popup' in flask.request.args)
 
