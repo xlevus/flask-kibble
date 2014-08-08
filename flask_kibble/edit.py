@@ -195,6 +195,18 @@ class FormView(KibbleView):
 
             flask.flash(self.get_success_message(instance), 'success')
 
+            cont = flask.request.form.get('__continue', None)
+            if cont == "new":
+                return flask.redirect(flask.request.url)
+
+            if cont == "edit":
+                return flask.redirect(
+                    flask.g.kibble.url_for(
+                        self.model, 
+                        'edit',
+                        instance=instance,
+                        _popup=self._is_popup()))
+
             if self._is_popup():
                 return flask.render_template(
                     'kibble/dismiss_popup.html',

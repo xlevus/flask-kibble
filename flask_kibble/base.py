@@ -176,7 +176,6 @@ class KibbleView(View):
             provided, the current requests blueprint will be used. (optional)
         :returns: View URL
         """
-
         if cls.ancestors:
             if isinstance(ancestor_key, ndb.Model):
                 ancestor_key = ancestor_key.key
