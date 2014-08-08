@@ -7,12 +7,13 @@
     </button>
 {% endmacro %}
 
-{% macro action_link(view, instance=None, ancestor=None, text=True, from=None) -%}
+{% macro action_link(view, instance=None, ancestor=None, text=True, from=None, button=True) -%}
     {% set url = view.url_for(instance, ancestor, _popup=request.args.get('_popup', None)) %}
     {% set perm = view.has_permission_for(instance) %}
 
+    {% if button or perm %}
     <a href='{% if perm %}{{ url }}{% else %}#{% endif %}' 
-        class='btn {{ view.button_class }} {% if not perm %}disabled{% endif %}'>
+        class='{% if button %}btn {{ view.button_class }} {% if not perm %}disabled{% endif %}{% endif %}'>
             {% if view.button_icon %}
                 <span class='glyphicon glyphicon-{{ view.button_icon }}'></span>
             {% endif %}
@@ -23,5 +24,6 @@
                 {{ view.action|title }}
             {% endif %}
     </a>
+   {% endif %}
 {%- endmacro %}
 

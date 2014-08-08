@@ -21,7 +21,7 @@
 
     {% if not is_popup %}
       <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-        <div class="container">
+        <div class="container-fluid">
           <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="sr-only">Toggle navigation</span>
@@ -40,27 +40,47 @@
       </div>
     {% endif %}
 
-    <div class="container">
-      {% if not is_popup %}
-        {% with messages = get_flashed_messages(True) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class='alert alert-{{ category }}'>
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-      {% endif %}
+    <div class="container-fluid">
+      <div class='row'>
+        {% if not is_popup %}
+          <div class='col-sm-3 col-md-2 sidebar'>
+            <ul class='nav nav-sidebar'>
+              {% for kind, actions in kibble.registry|dictsort %}
+                <li><span class='navrow'>
+                    {{ kind.title() }}
+                    <span class='pull-right'>
+                    {% for name, view_cls in actions|dictsort if not view_cls._requires_instance %}
+                        {{ action_link(view_cls, text=False, button=False) }}
+                    {% endfor %}
+                  </span>
+                  </span>
+                </li>
+              {% endfor %}
+            </ul> 
+          </div>
+          <div class='col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main'>
+            {% with messages = get_flashed_messages(True) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class='alert alert-{{ category }}'>
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+        {% else %}
+          <div class='col-sm-12 main'>
+        {% endif %}
+          <div class="page-header">
+            {% block header_buttons %}{% endblock %}
+            <h1>{% block page_header %}{% endblock %}</h1>
+          </div>
 
-      <div class="page-header">
-        {% block header_buttons %}{% endblock %}
-        <h1>{% block page_header %}{% endblock %}</h1>
+          {% block body %}
+
+          {% endblock %}
+        </div>
       </div>
-
-      {% block body %}
-
-      {% endblock %}
 
     </div><!-- /.container -->
 
