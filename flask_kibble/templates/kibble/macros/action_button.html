@@ -8,7 +8,7 @@
 {% endmacro %}
 
 {% macro action_link(view, instance=None, ancestor=None, text=True, from=None) -%}
-    {% set url = view.url_for(instance, ancestor) %}
+    {% set url = view.url_for(instance, ancestor, _popup=request.args.get('_popup', None)) %}
     {% set perm = view.has_permission_for(instance) %}
 
     <a href='{% if perm %}{{ url }}{% else %}#{% endif %}' 

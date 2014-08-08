@@ -122,9 +122,9 @@ class KibbleView(View):
         The views templates.
 
         Defaults to:
-            * ``kibble/{action}.html``
             * ''kibble/{path.lower}/{action}.html``
             * ``kibble/{kind.lower}/{action}.html``
+            * ``kibble/{action}.html``
         """
         kwargs = {
             'action': self.action,
@@ -132,9 +132,9 @@ class KibbleView(View):
             'kind': self.kind().lower(),
         }
         return [
-            'kibble/{action}.html'.format(**kwargs),
             'kibble/{path}/{action}.html'.format(**kwargs),
             'kibble/{kind}/{action}.html'.format(**kwargs),
+            'kibble/{action}.html'.format(**kwargs),
         ]
 
     def base_context(self):
@@ -166,7 +166,7 @@ class KibbleView(View):
             key=key)
 
     @classmethod
-    def url_for(cls, key=None, ancestor_key=None, blueprint=''):
+    def url_for(cls, key=None, ancestor_key=None, blueprint='', **kwargs):
         """
         Get the URL for this view.
 
@@ -190,7 +190,8 @@ class KibbleView(View):
         return flask.url_for(
             '%s.%s' % (blueprint, cls.view_name()),
             key=key,
-            ancestor_key=ancestor_key)
+            ancestor_key=ancestor_key,
+            **kwargs)
 
     @cached_property
     def _linked_actions(self):

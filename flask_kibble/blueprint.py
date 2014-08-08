@@ -201,7 +201,7 @@ class Kibble(flask.Blueprint):
             for action, view_cls in actions.iteritems():
                 yield view_cls.model, action
 
-    def url_for(self, model, action, instance=None):
+    def url_for(self, model, action, instance=None, ancestor=None, **kwargs):
         """
         Get the URL for a specific Model/Action/Instance.
 
@@ -221,5 +221,6 @@ class Kibble(flask.Blueprint):
         if not view:
             return ""
 
-        return view.url_for(instance, blueprint=self.name)
+        return view.url_for(
+                instance, ancestor, blueprint=self.name, **kwargs)
 
