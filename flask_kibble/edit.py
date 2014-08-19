@@ -202,7 +202,7 @@ class FormView(KibbleView):
             if cont == "edit":
                 return flask.redirect(
                     flask.g.kibble.url_for(
-                        self.model, 
+                        self.model,
                         'edit',
                         instance=instance,
                         _popup=self._is_popup()))

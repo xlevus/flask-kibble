@@ -62,7 +62,7 @@ class BlueprintTestCase(TestCase):
         self.assertEqual(
             self.kibble.url_for(TestModel, 'dummy'),
             mock.sentinel.URL_FOR)
-        dummy_url_for.assert_called_once_with(None, blueprint='kibble')
+        dummy_url_for.assert_called_once_with(None, None, blueprint='kibble')
         dummy_url_for.reset_mock()
 
         # Get URL for instance
@@ -70,7 +70,17 @@ class BlueprintTestCase(TestCase):
             self.kibble.url_for(TestModel, 'dummy', mock.sentinel.INSTANCE),
             mock.sentinel.URL_FOR)
         dummy_url_for.assert_called_once_with(
-            mock.sentinel.INSTANCE, blueprint='kibble')
+            mock.sentinel.INSTANCE, None, blueprint='kibble')
+        dummy_url_for.reset_mock()
+
+        # URL for ancestor
+        self.assertEqual(
+            self.kibble.url_for(TestModel, 'dummy', mock.sentinel.INSTANCE,
+                                mock.sentinel.ANCESTOR),
+            mock.sentinel.URL_FOR)
+        dummy_url_for.assert_called_once_with(
+            mock.sentinel.INSTANCE, mock.sentinel.ANCESTOR, blueprint='kibble')
+        dummy_url_for.reset_mock()
 
         # View not installed. Return empty string
         self.assertEqual(

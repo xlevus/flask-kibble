@@ -33,9 +33,9 @@ class BaseKibbleViewTestCase(TestCase):
         v = self.get_view()
 
         self.assertEqual(v.templates, [
-            'kibble/dummy.html',
             'kibble/testmodel/dummy.html',  # TODO: Remove duplicate?
             'kibble/testmodel/dummy.html',
+            'kibble/dummy.html',
         ])
 
     def test_has_permission_for(self):

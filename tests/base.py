@@ -33,6 +33,8 @@ class TestAuthenticator(kibble.Authenticator):
 
 
 class TestCase(GAETestCase):
+    render_templates = False
+
     def _create_app(self, *kibble_views):
         app = flask.Flask(__name__)
 
