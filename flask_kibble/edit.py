@@ -1,3 +1,4 @@
+from functools import partial
 import logging
 import flask
 
@@ -123,7 +124,7 @@ class FormView(KibbleView):
         instance.put()
         return instance
 
-    def get_success_redirect(self, instance):
+    def get_success_response(self, instance):
         """
         Called when the instance has been saved. Should return
         the URL to redirect to afterwards.
@@ -131,11 +132,36 @@ class FormView(KibbleView):
         :param instance: The successfully saved instance.
         :returns: URL to redirect to.
         """
-        return (
-            flask.g.kibble.url_for(self.model, 'list')
-            or flask.g.kibble.url_for(self.model, 'edit', instance)
-            or flask.url_for('.index')
-        )
+        url = None
+        cont = flask.request.form.get('__continue', None)
+
+        url_for = partial(
+            flask.g.kibble.url_for,
+            _popup=self._is_popup(),
+            _embed=self._is_embed())
+
+        if cont == "edit":
+            # User has hit "Save and continue editing"
+            url = url_for(self.model, 'edit', instance=instance)
+
+        elif cont == "new":
+            # User has hit "save and create another"
+            url = url_for(self.model, 'create')
+
+        if url:
+            # One of the above url_for's have returned a URL, so
+            # redirect to it.
+            # n.b. If the user has no permissions, no url will be returned.
+            return flask.redirect(url)
+
+        if self._is_popup():
+            # We're in a popup, so dismiss it.
+            return flask.make_response(flask.render_template(
+                'kibble/dismiss_popup.html',
+                instance=instance))
+
+        return flask.redirect(
+            (url_for(self.model, 'list') or flask.url_for('.index')))
 
     def get_success_message(self, instance):
         """
@@ -195,24 +221,7 @@ class FormView(KibbleView):
 
             flask.flash(self.get_success_message(instance), 'success')
 
-            cont = flask.request.form.get('__continue', None)
-            if cont == "new":
-                return flask.redirect(flask.request.url)
-
-            if cont == "edit":
-                return flask.redirect(
-                    flask.g.kibble.url_for(
-                        self.model,
-                        'edit',
-                        instance=instance,
-                        _popup=self._is_popup()))
-
-            if self._is_popup():
-                return flask.render_template(
-                    'kibble/dismiss_popup.html',
-                    instance=instance)
-
-            return flask.redirect(self.get_success_redirect(instance))
+            return self.get_success_response(instance)
 
         ctx = self.base_context()
         ctx['form'] = form

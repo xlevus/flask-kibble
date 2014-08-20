@@ -106,9 +106,11 @@ class CreateTestCase(TestCase):
         self.assertNoPreSignalSent()
         self.assertNoPostSignalSent()
 
-    @mock.patch.object(TestCreate, 'get_success_redirect', return_value='/t/')
+    @mock.patch.object(TestCreate, 'get_success_response')
     @mock.patch.object(TestCreate, 'save_model')
-    def test_post_valid_data(self, save_model, get_success_redirect):
+    def test_post_valid_data(self, save_model, get_success_response):
+        get_success_response.return_value = "SUCCESS"
+
         def _save(form, inst=None, ancestor_key=None):
             inst = TestModel(parent=ancestor_key)
             form.populate_obj(inst)
@@ -118,8 +120,7 @@ class CreateTestCase(TestCase):
 
         data = MultiDict({'name': 'Test2'})
         resp = self.client.post('/testmodel/new/', data=data)
-
-        self.assertRedirects(resp, '/t/')
+        self.assertEqual(resp.data, 'SUCCESS')
 
         inst = TestModel.query().get()
 
@@ -132,11 +133,62 @@ class CreateTestCase(TestCase):
         # Check that the keys match, as they're effectively the same
         # but asserting the instances are equal doesn't work
         self.assertEqual(
-            get_success_redirect.call_args[0][0].key,
+            get_success_response.call_args[0][0].key,
             inst.key)
 
         self.assertPreSignalSent()
         self.assertPostSignalSent(inst.key, inst)
+
+    def test_get_success_response(self):
+        view = TestCreate()
+        inst = TestModel(id='test', name='test')
+        inst.put()
+        flask.g.kibble = self.kibble
+
+        trq = (lambda u, **k: self.app.test_request_context(
+            "/testmodel-test/"+u, method="POST", **k))
+
+        # Basic success. No list view registered
+        with trq(''):
+            r1 = view.get_success_response(inst)
+            self.assertEqual(r1.status_code, 302)
+            self.assertEqual(r1.location, '/')
+
+        # Popup with no __continue value
+        with trq('?_popup=1', data={}):
+            r2 = view.get_success_response(inst)
+            self.assertEqual(r2.status_code, 200)
+            self.assertTemplateUsed('kibble/dismiss_popup.html')
+
+        for url_args in ('', '?_popup=1', '?_embed=1'):
+            # Save and create another
+            with trq(url_args, data={'__continue': 'new'}):
+                r3 = view.get_success_response(inst)
+                self.assertEqual(r3.status_code, 302)
+                self.assertEqual(r3.location, '/testmodel/new/' + url_args)
+
+            # Save and continue editing
+            with trq(url_args, data={'__continue': 'edit'}):
+                r4 = view.get_success_response(inst)
+                self.assertEqual(r4.status_code, 302)
+                self.assertEqual(r4.location, '/testmodel-test/' + url_args)
+
+        # Register a list view
+        class TestList(kibble.List):
+            model = TestModel
+        self.kibble.register_view(TestList)
+        self.app.add_url_rule('/testmodel/', endpoint='kibble.testmodel_list')
+
+        # Basic success. List view registered
+        with trq(''):
+            r1 = view.get_success_response(inst)
+            self.assertEqual(r1.status_code, 302)
+            self.assertEqual(r1.location, '/testmodel/')
+
+        with trq('?_embed=1'):
+            r1 = view.get_success_response(inst)
+            self.assertEqual(r1.status_code, 302)
+            self.assertEqual(r1.location, '/testmodel/?_embed=1')
 
 
 class EditTestCase(TestCase):
@@ -211,9 +263,11 @@ class EditTestCase(TestCase):
         self.assertNoPreSignalSent()
         self.assertNoPostSignalSent()
 
-    @mock.patch.object(TestEdit, 'get_success_redirect', return_value='/t/')
+    @mock.patch.object(TestEdit, 'get_success_response')
     @mock.patch.object(TestEdit, 'save_model')
-    def test_post_valid_data(self, save_model, get_success_redirect):
+    def test_post_valid_data(self, save_model, get_success_response):
+        get_success_response.return_value = 'SUCCESS'
+
         def _save(form, inst, ancestor_key=None):
             form.populate_obj(inst)
             inst.put()
@@ -222,8 +276,8 @@ class EditTestCase(TestCase):
 
         data = MultiDict({'name': 'Test2'})
         resp = self.client.post('/testmodel-test/', data=data)
+        self.assertEqual(resp.data, "SUCCESS")
 
-        self.assertRedirects(resp, '/t/')
         inst = self.inst.key.get()
 
         # self.assertFlashes("<a href='%s'>'%s'</a> saved" % (
@@ -231,39 +285,62 @@ class EditTestCase(TestCase):
         #     inst), "success")
 
         save_model.assert_called_once_with(mock.ANY, inst, None)
-        get_success_redirect.assert_called_once_with(inst)
+        get_success_response.assert_called_once_with(inst)
 
         self.assertPreSignalSent(
             self.inst.key, mock.ANY)
         self.assertPostSignalSent(inst.key, inst)
 
-    def test_get_success_redirect(self):
-        flask.g.kibble = self.kibble
-
+    def test_get_success_response(self):
         view = TestEdit()
-
-        self.assertEqual(
-            view.get_success_redirect(self.inst),
-            '/testmodel-test/')
-
-    def test_get_success_with_list(self):
-        """
-        When a model-list view is registered for the current model,
-        redirect to that instead.
-        """
+        inst = TestModel(id='test', name='test')
+        inst.put()
         flask.g.kibble = self.kibble
 
-        # Ham up a test list view.
+        trq = (lambda u, **k: self.app.test_request_context(
+            "/testmodel/new/"+u, method="POST", **k))
+
+        # Basic success. No list view registered
+        with trq(''):
+            r1 = view.get_success_response(inst)
+            self.assertEqual(r1.status_code, 302)
+            self.assertEqual(r1.location, '/')
+
+        # Popup with no __continue value
+        with trq('?_popup=1', data={}):
+            r2 = view.get_success_response(inst)
+            self.assertEqual(r2.status_code, 200)
+            self.assertTemplateUsed('kibble/dismiss_popup.html')
+
+        for url_args in ('', '?_popup=1', '?_embed=1'):
+            # Save and create another
+            with trq(url_args, data={'__continue': 'new'}):
+                r3 = view.get_success_response(inst)
+                self.assertEqual(r3.status_code, 302)
+                self.assertEqual(r3.location, '/testmodel/new/' + url_args)
+
+            # Save and continue editing
+            with trq(url_args, data={'__continue': 'edit'}):
+                r4 = view.get_success_response(inst)
+                self.assertEqual(r4.status_code, 302)
+                self.assertEqual(r4.location, '/testmodel-test/' + url_args)
+
+        # Register a list view
         class TestList(kibble.List):
             model = TestModel
         self.kibble.register_view(TestList)
         self.app.add_url_rule('/testmodel/', endpoint='kibble.testmodel_list')
 
-        view = TestEdit()
+        # Basic success. List view registered
+        with trq(''):
+            r1 = view.get_success_response(inst)
+            self.assertEqual(r1.status_code, 302)
+            self.assertEqual(r1.location, '/testmodel/')
 
-        self.assertEqual(
-            view.get_success_redirect(self.inst),
-            '/testmodel/')
+        with trq('?_embed=1'):
+            r1 = view.get_success_response(inst)
+            self.assertEqual(r1.status_code, 302)
+            self.assertEqual(r1.location, '/testmodel/?_embed=1')
 
 
 class FieldsetIteratorTestCase(TestCase):

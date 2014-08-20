@@ -212,5 +212,16 @@ class KibbleView(View):
         return views
 
     def _is_popup(self):
-        return ('_popup' in flask.request.args)
+        """
+        Checks if the current request is in a popup state.
+        For the sake of url-building convenince, returns either 1 or None.
+        """
+        return (1 if '_popup' in flask.request.args else None)
+
+    def _is_embed(self):
+        """
+        Checks if the current request is in a embedded state.
+        For the sake of url-building convenince, returns either 1 or None.
+        """
+        return (1 if '_embed' in flask.request.args else None)
 
