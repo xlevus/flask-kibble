@@ -135,18 +135,15 @@ class FormView(KibbleView):
         url = None
         cont = flask.request.form.get('__continue', None)
 
-        url_for = partial(
-            flask.g.kibble.url_for,
-            _popup=self._is_popup(),
-            _embed=self._is_embed())
+        url_for = flask.g.kibble.url_for
 
         if cont == "edit":
             # User has hit "Save and continue editing"
-            url = url_for(self.model, 'edit', instance=instance)
+            url = url_for(self.path(), 'edit', instance=instance)
 
         elif cont == "new":
             # User has hit "save and create another"
-            url = url_for(self.model, 'create')
+            url = url_for(self.path(), 'create')
 
         if url:
             # One of the above url_for's have returned a URL, so
@@ -161,7 +158,7 @@ class FormView(KibbleView):
                 instance=instance))
 
         return flask.redirect(
-            (url_for(self.model, 'list') or flask.url_for('.index')))
+            (url_for(self.path(), 'list') or flask.url_for('.index')))
 
     def get_success_message(self, instance):
         """

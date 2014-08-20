@@ -146,6 +146,7 @@ class KibbleView(View):
         return {
             'view': self,
             'is_popup': self._is_popup(),
+            'is_embed': self._is_embed(),
         }
 
     @classmethod
@@ -176,6 +177,10 @@ class KibbleView(View):
             provided, the current requests blueprint will be used. (optional)
         :returns: View URL
         """
+
+        kwargs.setdefault('_popup', cls._is_popup())
+        kwargs.setdefault('_embed', cls._is_embed())
+
         if cls.ancestors:
             if isinstance(ancestor_key, ndb.Model):
                 ancestor_key = ancestor_key.key
@@ -211,6 +216,7 @@ class KibbleView(View):
                     pass
         return views
 
+    @classmethod
     def _is_popup(self):
         """
         Checks if the current request is in a popup state.
@@ -218,6 +224,7 @@ class KibbleView(View):
         """
         return (1 if '_popup' in flask.request.args else None)
 
+    @classmethod
     def _is_embed(self):
         """
         Checks if the current request is in a embedded state.

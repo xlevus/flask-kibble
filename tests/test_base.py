@@ -61,22 +61,38 @@ class BaseKibbleViewTestCase(TestCase):
         v = self.get_view()
 
         v.url_for()
-        url_for.assert_called_once_with('.testmodel_dummy', key=None,
-                                        ancestor_key=None)
+        url_for.assert_called_once_with(
+            '.testmodel_dummy',
+            key=None,
+            ancestor_key=None,
+            _popup=None,
+            _embed=None)
         url_for.reset_mock()
 
         v.url_for(self.inst)
-        url_for.assert_called_once_with('.testmodel_dummy', key=self.inst.key,
-                                        ancestor_key=None)
+        url_for.assert_called_once_with(
+            '.testmodel_dummy',
+            key=self.inst.key,
+            ancestor_key=None,
+            _popup=None,
+            _embed=None)
         url_for.reset_mock()
 
         v.url_for(self.inst.key)
-        url_for.assert_called_once_with('.testmodel_dummy', key=self.inst.key,
-                                        ancestor_key=None)
+        url_for.assert_called_once_with(
+            '.testmodel_dummy',
+            key=self.inst.key,
+            ancestor_key=None,
+            _popup=None,
+            _embed=None)
         url_for.reset_mock()
 
         v.url_for(blueprint='fudge')
-        url_for.assert_called_once_with('fudge.testmodel_dummy', key=None,
-                                        ancestor_key=None)
+        url_for.assert_called_once_with(
+            'fudge.testmodel_dummy',
+            key=None,
+            ancestor_key=None,
+            _popup=None,
+            _embed=None)
         url_for.reset_mock()
 
