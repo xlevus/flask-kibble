@@ -53,6 +53,9 @@ class KibbleView(View):
     #: The associated :py:class:`ndb.Model` class this action deals with
     model = None
 
+    #: A grouping value for the index page.
+    group = None
+
     #: An array of ancestor :py:class:`ndb.Model` classes.
     ancestors = []
 

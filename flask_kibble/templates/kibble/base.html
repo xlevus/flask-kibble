@@ -47,7 +47,9 @@
         {% if not is_popup and not is_embed %}
           <div class='col-sm-3 col-md-2 sidebar'>
             <ul class='nav nav-sidebar'>
-              {% for kind, actions in kibble.registry|dictsort %}
+
+            {% for header, group in kibble.registry.grouped()|dictsort %}
+              {% for kind, actions in group|dictsort %}
                 <li><span class='navrow'>
                     {{ kind.title() }}
                     <span class='pull-right'>
@@ -58,6 +60,7 @@
                   </span>
                 </li>
               {% endfor %}
+            {% endfor %}
             </ul> 
           </div>
           <div class='col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main'>

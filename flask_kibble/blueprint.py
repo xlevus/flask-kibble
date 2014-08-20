@@ -41,6 +41,19 @@ def upload(gcs_bucket=None):
     return flask.jsonify(payload)
 
 
+class KibbleRegistry(defaultdict):
+    def __init__(self):
+        super(KibbleRegistry, self).__init__(dict)
+
+    def grouped(self):
+        groups = defaultdict(lambda: defaultdict(dict))
+
+        for kind, actions in self.iteritems():
+            for action, klass in actions.iteritems():
+                groups[klass.group][kind][action] = klass
+        return groups
+
+
 class Kibble(flask.Blueprint):
     def __init__(self, name, import_name, auth, label=None,
                  default_gcs_bucket=None, **kwargs):
@@ -69,7 +82,7 @@ class Kibble(flask.Blueprint):
         self.auth = auth
         self.gcs_bucket = default_gcs_bucket
 
-        self.registry = defaultdict(dict)
+        self.registry = KibbleRegistry()
 
         self.add_url_rule('/', view_func=index, endpoint='index')
         self.add_url_rule('/_upload/',
@@ -81,6 +94,7 @@ class Kibble(flask.Blueprint):
 
         self.before_request(self._before_request)
         self.context_processor(self._context_processor)
+
 
     def register_view(self, view_class):
         """
@@ -223,4 +237,5 @@ class Kibble(flask.Blueprint):
             return ""
 
         return view.url_for(instance, ancestor, blueprint=self.name, **kwargs)
+
 
