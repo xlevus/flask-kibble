@@ -11,7 +11,7 @@
     {% set url = view.url_for(instance, ancestor) %}
     {% set perm = view.has_permission_for(instance) %}
 
-    {% if button or perm %}
+    {% if (button or perm) and url %}
     <a href='{% if perm %}{{ url }}{% else %}#{% endif %}' 
         class='{% if button %}btn {{ view.button_class }} {% if not perm %}disabled{% endif %}{% endif %}'>
             {% if view.button_icon %}

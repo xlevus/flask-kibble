@@ -88,6 +88,9 @@ class KibbleView(View):
     #: when rendering buttons.
     _requires_instance = True
 
+    #: Does the view require an ancestor key if `ancestors` are present?
+    _requires_ancestor = False
+
     @classmethod
     def kind(cls):
         """
@@ -185,6 +188,10 @@ class KibbleView(View):
         kwargs.setdefault('_embed', cls._is_embed())
 
         if cls.ancestors:
+            if (key or ancestor_key) is None and cls._ancestor_required():
+                # No ancestor provided
+                return None
+
             if isinstance(ancestor_key, ndb.Model):
                 ancestor_key = ancestor_key.key
                 key = None
@@ -234,4 +241,8 @@ class KibbleView(View):
         For the sake of url-building convenince, returns either 1 or None.
         """
         return (1 if '_embed' in flask.request.args else None)
+
+    @classmethod
+    def _ancestor_required(cls):
+        return cls._requires_ancestor and len(cls.ancestors) != 0
 

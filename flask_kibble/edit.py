@@ -100,6 +100,7 @@ class FormView(KibbleView):
     fieldsets = []
 
     _methods = ['GET', 'POST']
+    _requires_ancestor = True
 
     def __init__(self, *args, **kwargs):
         super(FormView, self).__init__(*args, **kwargs)
