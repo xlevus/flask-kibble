@@ -1,3 +1,4 @@
+import logging
 import wtforms
 import flask
 from werkzeug.utils import cached_property
@@ -6,6 +7,9 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 import flask_kibble as kibble
 from flask_kibble.util.forms import KibbleModelConverter
+
+
+logger = logging.getLogger(__name__)
 
 
 class KibbleUserGroup(ndb.Model):
@@ -140,14 +144,17 @@ class ModelAuthenticatior(kibble.Authenticator):
 
         u = KibbleUser.get_by_id(users.get_current_user().email())
         if u is None or not u.enabled:
+            logger.debug("User %s is disabled", u)
             return False
 
         if u.superuser:
             return True
 
-        return (
-            '{}:{}'.format(model._get_kind() if model else 'view', action)
-            in u.all_permissions)
+        perm = '{}:{}'.format(model._get_kind() if model else 'view', action)
+        if perm not in u.all_permissions:
+            logger.debug("User %s failed permission check %r", u, perm)
+            return False
+        return True
 
     def get_login_url(self):
         return users.create_login_url(flask.url_for('.index'))
