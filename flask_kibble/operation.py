@@ -23,8 +23,8 @@ class Operation(KibbleView):
 
     #: The form used when requiring confirmation. By default this is an empty
     #: csrf-protected form
-    confirmation_form = BaseOperationForm
-    confirmation_fieldsets = []
+    form = BaseOperationForm
+    fieldsets = []
 
     _url_patterns = [
         ("/{key}/{action}/", {}),
@@ -43,6 +43,20 @@ class Operation(KibbleView):
             'kibble/%s.html' % self.action,
             'kibble/%s_%s.html' % (self.kind().lower(), self.action)
         ]
+
+    def get_form_class(self):
+        if not self.form:
+            return BaseOperationForm
+        return self.form
+
+    def get_form_instance(self, instance=None):
+        """
+        Returns an instance of the form for the view.
+
+        :param instance: The instance to edit or None.
+        """
+        formcls = self.get_form_class()
+        return formcls(flask.request.form, obj=instance)
 
     def run(self, instance, form=None):
         """
@@ -98,9 +112,10 @@ class Operation(KibbleView):
 
     def dispatch_request(self, key):
         instance = key.get()
-        form = self.confirmation_form(flask.request.form, obj=instance)
         if instance is None:
             flask.abort(404)
+
+        form = self.get_form_instance(instance)
 
         if not self.require_confirmation or \
                 (flask.request.method == 'POST' and form.validate()):
@@ -118,9 +133,8 @@ class Operation(KibbleView):
                 self.post_signal.send(self.__class__, key=key, result=result)
 
                 success = True
-            except self.Failure, e:
+            except self.Failure, result:
                 # A failure has occurred.
-                result = e
                 success = False
             finally:
                 # Flash the message, and redirect the user.
@@ -138,6 +152,6 @@ class Operation(KibbleView):
         ctx = self.base_context()
         ctx['instance'] = instance
         ctx['form'] = form
-        ctx['fieldsets'] = FieldsetIterator(form, self.confirmation_fieldsets)
+        ctx['fieldsets'] = FieldsetIterator(form, self.fieldsets)
         return flask.render_template(self.templates, **ctx)
 

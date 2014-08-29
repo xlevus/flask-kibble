@@ -7,3 +7,4 @@ from .edit import Edit, Create
 from .operation import Operation
 from .delete import Delete
 
+from .util.forms import BaseCSRFForm
