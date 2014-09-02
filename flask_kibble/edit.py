@@ -1,4 +1,4 @@
-from functools import partial
+from werkzeug import cached_property
 import logging
 import flask
 
@@ -14,6 +14,9 @@ class Fieldset(object):
         self.form = form
         self.fields = fields or []
         self._kwargs = kwargs
+
+    def __repr__(self):
+        return "<Fieldset %s %s>" % (self.name, self._present_fields)
 
     def __getattr__(self, attr):
         try:
@@ -31,8 +34,12 @@ class Fieldset(object):
             else:
                 yield field
 
-    def __bool__(self):
-        return len(self.fields) > 0
+    def __len__(self):
+        return len(self._present_fields)
+
+    @cached_property
+    def _present_fields(self):
+        return [f for f in self.fields if f in self.form._fields]
 
 
 class FieldsetIterator(object):
@@ -55,7 +62,10 @@ class FieldsetIterator(object):
         for fieldset in self.fieldsets:
             self._fields.difference_update(fieldset.get('fields', []))
 
-            yield Fieldset(self.form, **fieldset)
+            fs = Fieldset(self.form, **fieldset)
+            if len(fs):
+                logger.debug('FIELDSET: %s', fs)
+                yield fs
 
         if self._fields:
             yield Fieldset(self.form, None, self._fields)
@@ -158,8 +168,11 @@ class FormView(KibbleView):
                 'kibble/dismiss_popup.html',
                 instance=instance))
 
-        return flask.redirect(
-            (url_for(self.path(), 'list') or flask.url_for('.index')))
+        url = url_for(self.path(), 'list', ancestor=instance.key.parent())
+        if url:
+            return flask.redirect(url)
+
+        return flask.redirect(flask.url_for('.index'))
 
     def get_success_message(self, instance):
         """
@@ -179,7 +192,7 @@ class FormView(KibbleView):
             instance=instance,
             kind=self.kind())
 
-    def get_form_class(self):
+    def get_form_class(self, instance=None):
         if not self.form:
             return self.model_converter.model_form(
                 self.model,
@@ -195,7 +208,7 @@ class FormView(KibbleView):
 
         :param instance: The instance to edit or None.
         """
-        formcls = self.get_form_class()
+        formcls = self.get_form_class(instance)
         return formcls(flask.request.form, obj=instance)
 
     def _form_logic(self, instance=None, ancestor_key=None):
