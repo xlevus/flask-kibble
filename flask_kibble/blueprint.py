@@ -5,6 +5,7 @@ from collections import defaultdict
 from google.appengine.ext import ndb, blobstore
 
 from werkzeug import parse_options_header
+from .base import KibbleView
 
 import flask
 
@@ -94,7 +95,6 @@ class Kibble(flask.Blueprint):
 
         self.before_request(self._before_request)
         self.context_processor(self._context_processor)
-
 
     def register_view(self, view_class):
         """
@@ -189,7 +189,7 @@ class Kibble(flask.Blueprint):
         view_func = flask.current_app.view_functions[flask.request.endpoint]
         view_class = getattr(view_func, 'view_class', None)
 
-        if view_class:
+        if view_class and issubclass(view_class, KibbleView):
             # for CBVs, use the model and action parameters.
             model = view_class.model
             action = view_class.action
