@@ -22,7 +22,7 @@
         <![endif]-->
     {% endblock head_tag %}
     </head>
-  <body {% if is_popup or is_embed %}class='popup'{% endif %}>
+    <body {% if is_popup or is_embed %}class='popup'{% endif %}{% block body_tag_attrs %}{% endblock %}>
     {% block body_tag %}
 
     {% if not is_popup and not is_embed %}
