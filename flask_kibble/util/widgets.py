@@ -49,6 +49,24 @@ class TabluarFormListWidget(object):
         return f
 
 
+class TabularFormWidget(object):
+    template = 'kibble/widgets/tabularform.html'
+
+    def __init__(self, fieldsets=None):
+        self.fieldsets = fieldsets or []
+
+    def __call__(self, field, **kwargs):
+        from flask_kibble.edit import FieldsetIterator
+
+        html = flask.render_template(
+            self.template,
+            field=field,
+            fieldsets=FieldsetIterator(field.form, self.fieldsets),
+            kwargs=kwargs,
+        )
+        return HTMLString(html)
+
+
 class KeyWidget(wtforms.widgets.Select):
     template = 'kibble/widgets/key.html'
 
