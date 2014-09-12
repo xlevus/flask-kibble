@@ -44,7 +44,7 @@ class Operation(KibbleView):
             'kibble/%s_%s.html' % (self.kind().lower(), self.action)
         ]
 
-    def get_form_class(self):
+    def get_form_class(self, instance=None):
         if not self.form:
             return BaseOperationForm
         return self.form
@@ -55,7 +55,7 @@ class Operation(KibbleView):
 
         :param instance: The instance to edit or None.
         """
-        formcls = self.get_form_class()
+        formcls = self.get_form_class(instance)
         return formcls(flask.request.form, obj=instance)
 
     def run(self, instance, form=None):

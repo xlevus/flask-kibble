@@ -211,6 +211,16 @@ class FormView(KibbleView):
         formcls = self.get_form_class(instance)
         return formcls(flask.request.form, obj=instance)
 
+    def get_form_fieldsets(self, instance=None):
+        """
+        Returns the fieldsets for the form.
+
+        :param instance: The instance being edited.
+
+        :returns: Fieldset array
+        """
+        return self.fieldsets
+
     def _form_logic(self, instance=None, ancestor_key=None):
         form = self.get_form_instance(instance)
 
@@ -236,7 +246,9 @@ class FormView(KibbleView):
 
         ctx = self.base_context()
         ctx['form'] = form
-        ctx['fieldsets'] = FieldsetIterator(form, self.fieldsets)
+        ctx['fieldsets'] = FieldsetIterator(
+            form,
+            self.get_form_fieldsets(instance))
         ctx['instance'] = instance
 
         return flask.render_template(self.templates, **ctx)
