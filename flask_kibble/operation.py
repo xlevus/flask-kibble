@@ -1,9 +1,12 @@
+import logging
 import flask
 from google.appengine.ext import ndb
 
 from .base import KibbleView
 from .edit import FieldsetIterator
 from .util.forms import BaseCSRFForm
+
+logger = logging.getLogger(__name__)
 
 
 class BaseOperationForm(BaseCSRFForm):
@@ -136,16 +139,16 @@ class Operation(KibbleView):
             except self.Failure, result:
                 # A failure has occurred.
                 success = False
-            finally:
-                # Flash the message, and redirect the user.
-                if isinstance(result, flask.current_app.response_class):
-                    return result
 
-                flask.flash(
-                    self.get_message(instance, result),
-                    'success' if success else 'error')
-                return flask.redirect(
-                    self.get_redirect(instance, result))
+            # Flash the message, and redirect the user.
+            if isinstance(result, flask.current_app.response_class):
+                return result
+
+            flask.flash(
+                self.get_message(instance, result),
+                'success' if success else 'error')
+            return flask.redirect(
+                self.get_redirect(instance, result))
 
         # View requires confirmation or the form is invalid.
         # Render the form to the user.
