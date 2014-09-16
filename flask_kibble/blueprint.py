@@ -227,6 +227,10 @@ class Kibble(flask.Blueprint):
         :param instance: A :py:class:`ndb.Model` instance or
             :py:class:`ndb.Key` to link to.
         """
+        if isinstance(model, ndb.Model) and instance is None:
+            instance = model.key
+            model = '/'.join(model.key.flat()[::2])
+
         if isinstance(model, type) and issubclass(model, ndb.Model):
             model = model._get_kind()
 

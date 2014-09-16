@@ -221,7 +221,7 @@ class FormView(KibbleView):
         """
         return self.fieldsets
 
-    def _form_logic(self, instance=None, ancestor_key=None):
+    def _get_context(self, instance=None, ancestor_key=None):
         form = self.get_form_instance(instance)
 
         if flask.request.method == 'POST' and form.validate():
@@ -250,7 +250,10 @@ class FormView(KibbleView):
             form,
             self.get_form_fieldsets(instance))
         ctx['instance'] = instance
+        return ctx
 
+    def _form_logic(self, instance=None, ancestor_key=None):
+        ctx = self._get_context(instance, ancestor_key)
         return flask.render_template(self.templates, **ctx)
 
 

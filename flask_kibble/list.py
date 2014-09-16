@@ -106,7 +106,7 @@ class List(KibbleView):
         """
         return self.model.query(ancestor=ancestor_key)
 
-    def dispatch_request(self, page, ancestor_key):
+    def _get_context(self, page, ancestor_key):
         context = self.base_context()
         if ancestor_key:
             ancestor = ancestor_key.get_async()
@@ -127,5 +127,10 @@ class List(KibbleView):
         context['ancestor_key'] = ancestor_key
         context['ancestor'] = ancestor.get_result() if ancestor_key else None
 
-        return flask.render_template(self.templates, **context)
+        return context
+
+    def dispatch_request(self, page, ancestor_key):
+        ctx = self._get_context(page, ancestor_key)
+        return flask.render_template(self.templates, **ctx)
+
 
