@@ -290,5 +290,5 @@ class KibbleView(View):
             futures.append(key.get_async())
             key = key.parent()
         objs = yield futures
-        raise ndb.Return(objs)
+        raise ndb.Return(objs[::-1])
 
