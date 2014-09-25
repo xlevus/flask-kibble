@@ -56,6 +56,10 @@ class KibbleView(View):
     #: A grouping value for the index page.
     group = None
 
+    #: Hidden classes will not be visible on the index and menu pages
+    #: Can still be explicitly linked to with linked_actions.
+    hidden = False
+
     #: An array of ancestor :py:class:`ndb.Model` classes.
     ancestors = []
 

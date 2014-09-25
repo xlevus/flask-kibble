@@ -51,6 +51,8 @@ class KibbleRegistry(defaultdict):
 
         for kind, actions in self.iteritems():
             for action, klass in actions.iteritems():
+                if klass.hidden:
+                    continue
                 groups[klass.group][kind][action] = klass
         return groups
 
@@ -154,14 +156,14 @@ class Kibble(flask.Blueprint):
 
         for p in paths:
             for mod in find_modules(p, True, True):
-                logger.debug("Autodiscover: %s", mod)
+                # logger.debug("Autodiscover: %s", mod)
                 import_string(mod)
 
         for view in KibbleMeta._autodiscover:
             if view.model and (all_models or view.kind() in models):
                 self.register_view(view)
-            else:
-                logger.debug("Autodiscover skipping: %r", view)
+            # else:
+            #    logger.debug("Autodiscover skipping: %r", view)
 
     def _context_processor(self):
         return {'kibble': self}
