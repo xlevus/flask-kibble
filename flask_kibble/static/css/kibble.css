@@ -81,6 +81,20 @@ body.popup {
   background-color: #eee;
 }
 
+.nav-sidebar > li.active > span {
+    background-color: #428bca;
+    color: #fff;
+}
+.nav-sidebar > li.active > span.navrow  a {
+    color: #fff;
+}
+.nav-sidebar > li.active > span.navrow .text-muted {
+    color: #ccc;
+}
+.nav-sidebar > li.active > span.navrow:hover  a {
+    color: #428bca;
+}
+
 
 /*
  * Main content

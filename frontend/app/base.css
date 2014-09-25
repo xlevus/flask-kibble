@@ -59,11 +59,12 @@ body.popup {
   margin-bottom: 20px;
   margin-left: -20px;
 }
+
 .nav-sidebar > li > a {
 }
-.nav-sidebar > .active > a,
-.nav-sidebar > .active > a:hover,
-.nav-sidebar > .active > a:focus {
+.nav-sidebar > .active  a,
+.nav-sidebar > .active  a:hover,
+.nav-sidebar > .active  a:focus {
   color: #fff;
   background-color: #428bca;
 }
@@ -81,6 +82,36 @@ body.popup {
   background-color: #eee;
 }
 
+.nav-sidebar > li.active > span {
+    background-color: #428bca;
+    color: #fff;
+}
+.nav-sidebar > li.active > span.navrow  a {
+    color: #fff;
+}
+.nav-sidebar > li.active > span.navrow .text-muted {
+    color: #ccc;
+}
+.nav-sidebar > li.active > span.navrow:hover  a {
+    color: #428bca;
+}
+
+.nav-sidebar > li > a {
+  display: inline;
+}
+
+.nav-sidebar > li > span.navrow {
+  display: block;
+  padding: 10px 15px;
+}
+
+.nav-sidebar > li > span.navrow:hover {
+  background-color: #eee;
+}
+
+.nav-sidebar > li.active > span {
+    background-color: #428bca;
+}
 
 /*
  * Main content

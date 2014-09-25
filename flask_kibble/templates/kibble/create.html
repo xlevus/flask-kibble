@@ -1,9 +1,9 @@
 {% extends "kibble/base.html" %}
 
 {% from "kibble/macros/render_form.html" import render_form %}
-{% from "kibble/macros/action_button.html" import action_link %}
+{% from "kibble/macros/action_button.html" import action_link, view_label %}
 
-{% block page_header %}New {{ view.kind() }}{% endblock %}
+{% block page_header %}New {{ view_label(view) }}{% endblock %}
 
 {% block header_buttons %}
     <div class='pull-right'>

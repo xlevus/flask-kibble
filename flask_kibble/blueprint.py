@@ -53,6 +53,7 @@ class KibbleRegistry(defaultdict):
             for action, klass in actions.iteritems():
                 if klass.hidden:
                     continue
+
                 groups[klass.group][kind][action] = klass
         return groups
 

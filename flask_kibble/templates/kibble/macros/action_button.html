@@ -27,3 +27,14 @@
    {% endif %}
 {%- endmacro %}
 
+{% macro view_label(view_cls, link_last=False) %}
+    <span class='text-muted'>
+        {% for ancestor in view_cls.ancestor_labels() %}{{ ancestor }} &raquo;{% endfor %}
+    </span>
+
+    {% if link_last and not view_cls._requires_instance -%}
+        <a href='{{ view_cls.url_for() }}'>{{ view_cls.kind_label() }}</a>
+    {%- else -%}
+        {{ view_cls.kind_label() }}
+    {%- endif %}
+{% endmacro %}

@@ -1,6 +1,16 @@
 {% extends "kibble/create.html" %}
 
-{% block page_header %}Edit {{ view.kind() }}: {{ instance }}{% endblock %}
+{% block page_header %}
+Edit 
+{{ view.kind_label() }}:
+<span class='text-muted'>
+    {% for ancestor in ancestors %}
+    {{ ancestor }} &raquo;
+    {% endfor %}
+</span>
+
+{{ instance }}
+{% endblock %}
 
 {% block header_buttons %}
     <div class='pull-right'>
