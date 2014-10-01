@@ -20,7 +20,7 @@ class CreateTestCase(TestCase):
     def create_app(self):
         return self._create_app(TestDelete, TestDeleteRecursive)
 
-    @mock.patch.object(TestDelete.confirmation_form.Meta, 'csrf', False)
+    @mock.patch.object(TestDelete.form.Meta, 'csrf', False)
     def test_delete(self):
         inst = TestModel(name='test', id=1).put()
         child = TestModel(parent=inst, name='test2', id=2).put()
@@ -30,7 +30,7 @@ class CreateTestCase(TestCase):
         self.assertIsNone(inst.get())
         self.assertIsNotNone(child.get())
 
-    @mock.patch.object(TestDelete.confirmation_form.Meta, 'csrf', False)
+    @mock.patch.object(TestDelete.form.Meta, 'csrf', False)
     def test_delete_recursive(self):
         inst = TestModel(name='test', id=1).put()
         child = TestModel(parent=inst, name='test2', id=2).put()

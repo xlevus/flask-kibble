@@ -128,7 +128,7 @@ class OperationTestCase(TestCase):
 
         self.assertFlashes("dummy-message", "error")
 
-    @mock.patch.object(DummyOperation, 'confirmation_form')
+    @mock.patch.object(DummyOperation, 'form')
     def test_post_bad_form(self, confirmation_form):
         """
         Form is invalid, don't call run(), return the rendered form back

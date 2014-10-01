@@ -181,16 +181,11 @@ class FormView(KibbleView):
         :param instance: The successfully saved instance.
         :returns: Message to flash.
         """
-        url = flask.g.kibble.url_for(self.model, 'edit', instance)
-        if url:
-            tmpl = u"{kind} <a href='{url}'>'{instance}'</a> saved."
-        else:
-            tmpl = u"{kind} '{instance}' saved."
+        tmpl = u"{kind} '{instance}' saved."
 
         return tmpl.format(
-            url=url,
             instance=instance,
-            kind=self.kind())
+            kind=self.kind_label())
 
     def get_form_class(self, instance=None):
         if not self.form:

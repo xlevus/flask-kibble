@@ -60,9 +60,10 @@ class BlueprintTestCase(TestCase):
 
         # get url from view w/o instance
         self.assertEqual(
-            self.kibble.url_for(TestModel, 'dummy'),
+            self.kibble.url_for(TestModel, 'dummy', foo='bar'),
             mock.sentinel.URL_FOR)
-        dummy_url_for.assert_called_once_with(None, None, blueprint='kibble')
+        dummy_url_for.assert_called_once_with(
+            None, None, blueprint='kibble', foo='bar')
         dummy_url_for.reset_mock()
 
         # Get URL for instance
@@ -92,6 +93,17 @@ class BlueprintTestCase(TestCase):
             pass
 
         self.assertEqual(self.kibble.url_for(OtherModel, 'other'), '')
+        dummy_url_for.reset_mock()
+
+        # Pass in kind as instance w/ no key
+        inst1 = TestModel(name='t1')
+        inst1.put()
+        self.assertEqual(
+            self.kibble.url_for(inst1, 'dummy'),
+            mock.sentinel.URL_FOR)
+        dummy_url_for.assert_called_once_with(
+            inst1.key, None, blueprint='kibble')
+        dummy_url_for.reset_mock()
 
 
 class BlueprintIndexTestCase(TestCase):
