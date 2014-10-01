@@ -26,7 +26,7 @@ class Paginator(QueryComposer):
     def __init__(self, *args, **kwargs):
         super(Paginator, self).__init__(*args, **kwargs)
 
-        self._total_objects = self.kibble_view.get_query().count_async()
+        self._total_objects = self._query.count_async()
 
     def get_query_params(self):
         return {
