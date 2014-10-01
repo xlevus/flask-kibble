@@ -5,6 +5,7 @@ from google.appengine.ext import ndb
 
 from .base import KibbleView
 from . import query_composers
+from .util.futures import wait_futures
 
 
 class Table(object):
@@ -54,10 +55,10 @@ class Table(object):
             if callable(attr):
                 attr = attr(*args)
 
-            if isinstance(attr, ndb.Future):
-                attr = yield attr
-
             retval.append(attr)
+
+        retval = yield wait_futures(retval)
+
         raise ndb.Return((instance, retval))
 
     def __iter__(self):
