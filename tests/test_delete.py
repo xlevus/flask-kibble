@@ -34,11 +34,15 @@ class CreateTestCase(TestCase):
     def test_delete_recursive(self):
         inst = TestModel(name='test', id=1).put()
         child = TestModel(parent=inst, name='test2', id=2).put()
-        childchild = TestModel(parent=child, name='test3', id=3).put()
+        child2 = TestModel(parent=inst, name='test2', id=3).put()
+        child3 = TestModel(parent=inst, name='test2', id=4).put()
+        childchild = TestModel(parent=child, name='test3', id=5).put()
 
         resp = self.client.post('/testmodel-1/delete_recursive/')
 
         self.assertIsNone(inst.get())
         self.assertIsNone(child.get())
+        self.assertIsNone(child2.get())
+        self.assertIsNone(child3.get())
         self.assertIsNone(childchild.get())
 

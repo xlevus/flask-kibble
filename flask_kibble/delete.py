@@ -22,13 +22,8 @@ class Delete(Operation):
 
     @ndb.tasklet
     def _delete(self, key):
-        futures = []
-        futures.append(key.delete_async())
+        descendents = yield ndb.Query(ancestor=key).fetch_async(keys_only=True)
 
-        qit = ndb.Query(ancestor=key).iter(keys_only=True)
-        while (yield qit.has_next_async()):
-            k = qit.next()
-            futures.append(self._delete(k))
+        yield [x.delete_async() for x in descendents]
 
-        yield futures
         raise ndb.Return(None)
