@@ -54,9 +54,6 @@ class KibbleView(View):
     #: The associated :py:class:`ndb.Model` class this action deals with
     model = None
 
-    #: A grouping value for the index page.
-    group = None
-
     #: Hidden classes will not be visible on the index and menu pages
     #: Can still be explicitly linked to with linked_actions.
     hidden = False
@@ -122,8 +119,8 @@ class KibbleView(View):
     def kind_label(cls):
         """
         Returns a user friendly label for the associated :py:class`ndb.Model`.
-        
-        Alternate labels can be defined in the Flask application setting 
+
+        Alternate labels can be defined in the Flask application setting
         ``KIBBLE_KIND_LABELS``.
         """
         return cls._make_label(cls.model)
@@ -144,6 +141,11 @@ class KibbleView(View):
         ``<ancestor.lower>_<kind.lower>_<action>`` for ancestor views.
         """
         return cls.path().lower().replace('/', '_') + '_' + cls.action
+
+    @classmethod
+    def group(cls):
+        return flask.current_app.config.get('KIBBLE_KIND_GROUPS', {}).get(
+            cls.kind(), None)
 
     @classmethod
     def path(cls):

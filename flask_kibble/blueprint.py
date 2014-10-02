@@ -54,7 +54,7 @@ class KibbleRegistry(defaultdict):
                 if klass.hidden:
                     continue
 
-                groups[klass.group][kind][action] = klass
+                groups[klass.group()][kind][action] = klass
         return groups
 
 

@@ -50,7 +50,6 @@ class KibbleGroupForm(KibbleModelConverter.model_form(KibbleUserGroup)):
 
 class _UserEditBase(object):
     model = KibbleUser
-    group = 'Authentication'
 
     fieldsets = [
         {'name': 'User', 'fields': ['email', 'enabled', 'superuser']},
@@ -76,7 +75,6 @@ class _UserEditBase(object):
 
 class _GroupEditBase(object):
     model = KibbleUserGroup
-    group = 'Authentication'
 
     fieldsets = [
         {'name': 'Group', 'fields': ['name', 'permissions']}
@@ -94,7 +92,6 @@ class _GroupEditBase(object):
 
 class KibbleUserList(kibble.List):
     model = KibbleUser
-    group = 'Authentication'
 
     list_display = ['email', 'enabled', 'superuser']
     linked_actions = ['create', 'edit', 'delete']
@@ -110,12 +107,10 @@ class KibbleUserCreate(_UserEditBase, kibble.Create):
 
 class KibbleUserDelete(kibble.Delete):
     model = KibbleUser
-    group = 'Authentication'
 
 
 class KibbleGroupList(kibble.List):
     model = KibbleUserGroup
-    group = 'Authentication'
 
     list_display = ['name']
     linked_actions = ['create', 'edit', 'delete']
@@ -131,7 +126,6 @@ class KibbleGroupCreate(_GroupEditBase, kibble.Create):
 
 class KibbleGroupDelete(kibble.Delete):
     model = KibbleUserGroup
-    group = 'Authentication'
 
 
 class ModelAuthenticatior(kibble.Authenticator):
