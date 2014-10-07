@@ -1,14 +1,18 @@
+{% macro label(field) %}
+<label class='control-label col-sm-2' for='{{ field.label.field_id }}'>{{ field.label.text }}{% if field.flags.required %} *{% endif %}</label>
+{% endmacro %}
+
 {% macro render_field(form, field) %}
   {% if field.type == 'FieldList' %}
     <div class='form-group field-{{ field.type }} {% if field.errors %}has-error{% endif %}'>
-        {{ field.label(class="control-label col-sm-2") }}
+        {{ label(field) }}
         <div class='col-sm-10'>
             {{ field }}
         </div>
     </div>
   {% else %}
     <div class='form-group field-{{ field.type }} {% if field.errors %}has-error{% endif %}'>
-        {{ field.label(class="control-label col-sm-2") }}
+        {{ label(field) }}
         <div class='col-sm-10'>
             {{ field(class="form-control") }}
             {% if field.errors %}
