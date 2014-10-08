@@ -1,3 +1,4 @@
+import sys
 import flask
 
 
@@ -36,7 +37,15 @@ class Paginator(QueryComposer):
 
     @property
     def per_page(self):
-        return min(self.kibble_view.page_size, 50)
+        page_size = self.kibble_view.page_size
+        if 'page-size' in flask.request.args:
+            try:
+                page_size = int(flask.request.args['page-size'])
+            except ValueError:
+                pass
+        return min(
+            page_size,
+            getattr(self.kibble_view, "max_page_size", sys.maxint))
 
     @property
     def total_objects(self):
