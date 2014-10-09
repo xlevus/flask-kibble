@@ -1,6 +1,8 @@
 Flask-Kibble
 --------------
 
+[![Build Status](https://travis-ci.org/xlevus/flask-kibble.svg)](https://travis-ci.org/xlevus/flask-kibble)
+
 Auto-Generated admin for Flask and Google Appengine's NDB library.
 
 
