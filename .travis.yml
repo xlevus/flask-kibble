@@ -1,0 +1,19 @@
+language: python
+
+python:
+  - "2.7"
+
+before_install:
+    - pip install -I git+https://github.com/xlevus/gae-setuptools.git 
+
+# command to install dependencies
+install: 
+    - pip install -r requirements.txt
+    - pip install git+https://github.com/xlevus/flask-gae.git
+    - pip install blinker nose flask-testing mock
+
+# command to run tests
+script: nosetests
+
+# vim:nospell
+#
