@@ -1,0 +1,8 @@
+blinker
+nose
+flask-testing
+mock
+git+https://github.com/xlevus/flask-gae.git
+git+https://github.com/xlevus/gae-setuptools.git 
+
+-r requirements.txt
