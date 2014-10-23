@@ -3,7 +3,8 @@ from functools import partial
 import flask
 
 import wtforms
-from wtforms.widgets import HTMLString, html_params
+from wtforms.widgets import html_params
+from markupsafe import Markup
 from google.appengine.ext import blobstore
 
 
@@ -23,7 +24,7 @@ class JSUploadWidget(object):
         if field.data:
             ctx['filename'] = blobstore.BlobInfo(field.data).filename
 
-        return HTMLString(
+        return Markup(
             flask.render_template(self.template,
                                   **ctx))
 
@@ -39,10 +40,10 @@ class TabluarFormListWidget(object):
             empty_row=partial(self.empty_row, field),
             base64=b64encode,
         )
-        return HTMLString(html)
+        return Markup(html)
 
     def empty_row(self, field, token='{{ row_count }}'):
-        token = HTMLString(token)
+        token = Markup(token)
         inner_form = field.unbound_field.args[0]
         prefix = field.name + '-' + token
         f = inner_form(prefix=prefix)
@@ -64,7 +65,7 @@ class TabularFormWidget(object):
             fieldsets=FieldsetIterator(field.form, self.fieldsets),
             kwargs=kwargs,
         )
-        return HTMLString(html)
+        return Markup(html)
 
 
 class KeyWidget(wtforms.widgets.Select):
@@ -87,5 +88,5 @@ class KeyWidget(wtforms.widgets.Select):
             widget=self,
             field=field)
 
-        return HTMLString(html)
+        return Markup(html)
 
