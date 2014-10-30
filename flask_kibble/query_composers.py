@@ -137,6 +137,9 @@ class Paginator(QueryComposer):
 
 
 class Filter(QueryComposer):
+    """
+    Filter on column values.
+    """
     context_var = 'filter'
 
     def __init__(self, *filters, **kwargs):
@@ -149,10 +152,14 @@ class Filter(QueryComposer):
             f.preload()
 
     def __nonzero__(self):
-        return bool(self.filters)
+        return bool(self._filters)
 
     def __iter__(self):
-        return iter(getattr(self, 'filters', []))
+        return iter(self._filters)
+
+    @property
+    def _filters(self):
+        return getattr(self, 'filters', [])
 
     def get_query(self):
         q = self.query

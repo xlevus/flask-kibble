@@ -2,6 +2,7 @@ import flask
 from werkzeug.utils import cached_property
 
 from google.appengine.ext import ndb
+from google.appengine.api.datastore_errors import NeedIndexError
 
 from .base import KibbleView
 from . import query_composers
@@ -11,8 +12,13 @@ from .util.futures import wait_futures
 class Table(object):
     def __init__(self, kibble_view, query, query_params):
         self.kibble_view = kibble_view
+        self.missing_index = False
 
-        self._rows = query.map_async(self._map, **query_params)
+        try:
+            self._rows = query.map_async(self._map, **query_params)
+        except NeedIndexError, e:
+            self._rows = None
+            self.missing_index = True
 
     @property
     def row_count(self):
@@ -117,7 +123,7 @@ class List(KibbleView):
 
         for composer_cls in self.query_composers:
             composer = composer_cls(
-                _kibble_view=self, 
+                _kibble_view=self,
                 _query=query)
             context[composer.context_var] = composer
 

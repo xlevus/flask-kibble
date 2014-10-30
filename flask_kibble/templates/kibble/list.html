@@ -31,42 +31,46 @@
     <div class='row'>
         <div class='col-md-{% if filter %}10{% else %}12{% endif %}'>
             <table class='table table-striped'>
-                
-                {% for instance, columns in table %}
-                    {% if loop.first %}
-                        <tr>
-                            {% for header in table.headers %}
-                                <th>{{ header }}</th>
-                            {% endfor %}
+                <tr>
+                    {% for header in table.headers %}
+                        <th>{{ header }}</th>
+                    {% endfor %}
 
+                    {% for action in view._linked_actions if action._requires_instance %}
+                        <th width='1px'>{{ action.action|title }}</th>
+                    {% endfor %}
+                </tr>
+
+                {% if table.missing_index %}
+                    <td colspan="{{ table.headers|length }}">
+                        A required index is missing.
+                    </td>
+                {% else %}
+                
+                    {% for instance, columns in table %}
+                        
+                        <tr>
+                            {% for column in columns %}
+                                <td>
+                                    {% with edit_url = kibble.url_for(view.path(), "edit", instance, _popup=request.args.get('_popup', None)) %}
+                                        {% if edit_url and loop.first and view.link_first %}<a href='{{ edit_url }}'>{% endif %}
+                                            {{ column|default("<i>(null)</i>"|safe, True) }}
+                                        {% if edit_url and loop.first and view.link_first %}</a>{% endif %}
+                                    {% endwith %}
+                                </td>
+                            {% endfor %}
                             {% for action in view._linked_actions if action._requires_instance %}
-                                <th width='1px'>{{ action.action|title }}</th>
+                                <td>{{ action_link(action, instance, text=False) }}</td>
                             {% endfor %}
                         </tr>
-                    {% endif %}
-
-                    <tr>
-                        {% for column in columns %}
-                            <td>
-                                {% with edit_url = kibble.url_for(view.path(), "edit", instance, _popup=request.args.get('_popup', None)) %}
-                                    {% if edit_url and loop.first and view.link_first %}<a href='{{ edit_url }}'>{% endif %}
-                                        {{ column|default("<i>(null)</i>"|safe, True) }}
-                                    {% if edit_url and loop.first and view.link_first %}</a>{% endif %}
-                                {% endwith %}
+                    {% else %}
+                        <tr>
+                            <td colspan="{{ table.headers|length }}">
+                                There appears to be nothing here
                             </td>
-                        {% endfor %}
-                        {% for action in view._linked_actions if action._requires_instance %}
-                            <td>{{ action_link(action, instance, text=False) }}</td>
-                        {% endfor %}
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="{{ table.headers|length }}">
-                            There appears to be nothing here
-                        </td>
-                    </tr>
-                {% endfor %}
-                
+                        </tr>
+                    {% endfor %}
+                {% endif %}
             </table>
 
             {{ render_paginator(paginator) }}
