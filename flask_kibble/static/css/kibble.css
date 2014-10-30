@@ -133,4 +133,17 @@ body.popup {
   border-radius: 50%;
 }
 
+.filter ul li {
+    padding-left: 4px;
+}
+
+.filter ul li.active {
+    font-weight: bold;
+    border-left: 4px solid #ccc;
+}
+
+.filter-title {
+    margin-bottom: 4px;
+    border-bottom: 1px solid #ccc;
+}
 

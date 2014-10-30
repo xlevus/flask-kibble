@@ -80,14 +80,12 @@ class List(KibbleView):
     #: Link to the object in the first column.
     link_first = True
 
-    #: Number of results to display per page.
-    page_size = 20
-
     #: A list of query composers to perform query operations
     #: e.g. Filtering, sorting, pagination. See
     #: :mod:`~flask_kibble.query_composers` for more information.
     query_composers = [
-        query_composers.Paginator
+        query_composers.Filter,
+        query_composers.Paginator,
     ]
 
     button_icon = 'list'
@@ -118,7 +116,9 @@ class List(KibbleView):
         query_params = {}
 
         for composer_cls in self.query_composers:
-            composer = composer_cls(self, query)
+            composer = composer_cls(
+                _kibble_view=self, 
+                _query=query)
             context[composer.context_var] = composer
 
             query = composer.get_query()

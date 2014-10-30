@@ -63,8 +63,12 @@ class ListTestCase(TestCase):
 
         # Check get_query were called on each query composer with the previous
         # query.
-        qc1.assert_called_once_with(mock.ANY, get_query())
-        qc2.assert_called_once_with(mock.ANY, qc1().get_query())
+        qc1.assert_called_once_with(
+            _kibble_view=mock.ANY,
+            _query=get_query())
+        qc2.assert_called_once_with(
+            _kibble_view=mock.ANY,
+            _query=qc1().get_query())
 
         # Check get_query_params were called on each query composer
         qc1().get_query_params.assert_called_once_with()
