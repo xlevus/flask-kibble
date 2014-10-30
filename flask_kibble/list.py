@@ -12,13 +12,8 @@ from .util.futures import wait_futures
 class Table(object):
     def __init__(self, kibble_view, query, query_params):
         self.kibble_view = kibble_view
-        self.missing_index = False
 
-        try:
-            self._rows = query.map_async(self._map, **query_params)
-        except NeedIndexError, e:
-            self._rows = None
-            self.missing_index = True
+        self._rows = query.map_async(self._map, **query_params)
 
     @property
     def row_count(self):
@@ -70,6 +65,18 @@ class Table(object):
     def __iter__(self):
         for row in self._rows.get_result():
             yield row
+
+
+class MissingIndexTable(Table):
+    def __init__(self, kibble_view, query, query_params):
+        self.kibble_view = kibble_view
+
+    @property
+    def row_count(self):
+        return 0
+
+    def __iter__(self):
+        raise StopIteration()
 
 
 class List(KibbleView):
@@ -137,5 +144,13 @@ class List(KibbleView):
 
     def dispatch_request(self, page, ancestor_key):
         context = self._get_context(page, ancestor_key)
-        return flask.render_template(self.templates, **context)
+        try:
+            return flask.render_template(self.templates, **context)
+        except NeedIndexError:
+            context['_extends'] = "kibble/list.html"
+            context['table'] = MissingIndexTable(self, None, None)
+            context['paginator'] = None
+            return flask.render_template(
+                'kibble/list.need_index.html',
+                **context)
 

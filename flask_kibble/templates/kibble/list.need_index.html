@@ -1,0 +1,9 @@
+{% extends _extends %}
+
+{% block table_inner %}
+    <tr>
+        <td colspan="{{ table.headers|length + view._instance_actions|length }}">
+            The required index is missing.
+        </td>
+    </tr>
+{% endblock %}

@@ -265,6 +265,14 @@ class KibbleView(View):
                     pass
         return views
 
+    @property
+    def _ancestor_actions(self):
+        return [x for x in self._linked_actions if x._requires_ancestor]
+
+    @property
+    def _instance_actions(self):
+        return [x for x in self._linked_actions if x._requires_instance]
+
     @classmethod
     def _is_popup(self):
         """

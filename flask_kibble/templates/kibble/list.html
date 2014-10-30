@@ -40,15 +40,8 @@
                         <th width='1px'>{{ action.action|title }}</th>
                     {% endfor %}
                 </tr>
-
-                {% if table.missing_index %}
-                    <td colspan="{{ table.headers|length }}">
-                        A required index is missing.
-                    </td>
-                {% else %}
-                
+                {% block table_inner %}
                     {% for instance, columns in table %}
-                        
                         <tr>
                             {% for column in columns %}
                                 <td>
@@ -59,7 +52,7 @@
                                     {% endwith %}
                                 </td>
                             {% endfor %}
-                            {% for action in view._linked_actions if action._requires_instance %}
+                            {% for action in view._instance_actions %}
                                 <td>{{ action_link(action, instance, text=False) }}</td>
                             {% endfor %}
                         </tr>
@@ -70,7 +63,7 @@
                             </td>
                         </tr>
                     {% endfor %}
-                {% endif %}
+                {% endblock %}
             </table>
 
             {{ render_paginator(paginator) }}
