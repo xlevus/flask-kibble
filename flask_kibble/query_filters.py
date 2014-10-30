@@ -33,12 +33,22 @@ class BaseFilter(object):
         """
         return value
 
-    def value_from_url(self, url_value):
+    def url_to_value(self, url_value):
         """
         Convert a url-safe value from the URL to a pythonic value.
 
         :param url_value: URLsafe representation of pythonic filter value.
         """
+        return url_value
+
+    def get(self, *args):
+        """
+        Retrieve the url-safe value from the URL.
+
+        :param default: If the value is not present in the URL, this will be
+            returned.
+        """
+        return self.url_to_value(flask.request.args.get(self.field, *args))
 
     def url_for_value(self, value):
         """
@@ -68,33 +78,45 @@ class BaseFilter(object):
 
     def filter(self, model, query):
         """
-        Perform the filter on the query.
+        Perform the filter on the query. If the value evaluates to false
+        no filter be applied.
 
         :param model: The model class to filter.
-        :param query:
+        :param query: The query to apply the filter to.
+        :rtype: :py:class:`google.appengine.ext.ndb.Query`
+        :return: Query
         """
-        val = self.get_value()
+        val = self.get(None)
         if val:
-            prop = getattr(model, self.field)
-            return query.filter(prop == val)
+            return query.filter(self.model_property(model) == val)
         return query
 
-    def get_value(self, default=None):
-        return flask.request.args.get(self.field, default)
-
     def render(self):
+        """
+        Render the filter as HTML.
+        """
         return ''
 
 
 class ChoicesFilter(BaseFilter):
+    """
+    A filter for a pre-defined set of values to filter on.
+
+    :param field: The field name to filter on
+    :param chocies: A list of (value, Label) pairs.
+    """
     def __init__(self, field, choices):
         super(ChoicesFilter, self).__init__(field)
-        self.choices = choices
+        self._choices = choices
+
+    @property
+    def choices(self):
+        return iter(self._choices)
 
     def _render_choice(self, value, label):
         return Markup("<li  class='{klass}'><a href='{url}'>{label}</a></li>")\
             .format(
-                klass='active' if value == self.get_value() else '',
+                klass='active' if value == self.get() else '',
                 url=self.url_for_value(value),
                 label=label)
 
@@ -109,18 +131,22 @@ class ChoicesFilter(BaseFilter):
 
 
 class BoolFilter(ChoicesFilter):
+    """
+    A filter for boolean properties.
+    """
+
     def __init__(self, field):
         BaseFilter.__init__(self, field)
 
     @property
     def choices(self):
-        return [('t', 'True'), ('f', 'False')]
+        return iter([('t', 'True'), ('f', 'False')])
 
     def filter(self, model, query):
         val = {
             't': True,
             'f': False,
-        }.get(self.get_value())
+        }.get(self.get(None))
 
         if isinstance(val, bool):
             prop = getattr(model, self.field)
@@ -129,29 +155,35 @@ class BoolFilter(ChoicesFilter):
 
 
 class KeyFilter(ChoicesFilter):
+    """
+    A filter for :py:class:`google.appengine.ext.ndb.KeyPropery` properties.
+
+    :param field: The field to filter on.
+    :param query: A :py:class:`google.appengine.ext.ndb.Query` or
+        :py:class:`google.appengine.ext.ndb.Model` to use as choices.
+    """
+
     def __init__(self, field, query):
         BaseFilter.__init__(self, field)
+
         if isinstance(query, type) and issubclass(query, ndb.Model):
             query = query.query()
+
         self.query = query
 
-    def _make_key(self, key):
-        return key.urlsafe()
+    def preload(self):
+        self._query = self.query.fetch_async()
+
+    def value_to_url(self, key):
+        if key:
+            return key.urlsafe()
+
+    def url_to_value(self, url_value):
+        if url_value:
+            return ndb.Key(urlsafe=url_value)
 
     @property
     def choices(self):
-        qit = self.query.iter()
-        while qit.has_next():
-            row = qit.next()
-            yield (self._make_key(row.key), unicode(row))
-
-    def filter(self, model, query):
-        val = self.get_value()
-        if val:
-            val = ndb.Key(urlsafe=self.get_value())
-            query = query.filter(
-                getattr(model, self.field) == val)
-        return query
-
-
+        for row in self._query.get_result():
+            yield (row.key, unicode(row))
 
