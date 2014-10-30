@@ -146,7 +146,11 @@ class List(KibbleView):
         context = self._get_context(page, ancestor_key)
         try:
             return flask.render_template(self.templates, **context)
+
         except NeedIndexError:
+            # We've tried to generate a query that isn't handled by the
+            # application. Render the page with no filters and such, allowing
+            # the user to adjust their queries.
             context['_extends'] = "kibble/list.html"
             context['table'] = MissingIndexTable(self, None, None)
             context['paginator'] = None
