@@ -11,8 +11,6 @@ class TestModel(ndb.Model):
     other_field_2 = ndb.StringProperty(default='other2')
     other_field_3 = ndb.StringProperty(default='other3')
 
-    inner = ndb.StructuredProperty(InnerModel, required=False)
-
     def model_member(self):
         return "Model Member %s" % self.name
 
@@ -23,3 +21,6 @@ class TestModel(ndb.Model):
     def __unicode__(self):
         return self.name
 
+
+class ComplexTestModel(TestModel):
+    inner = ndb.StructuredProperty(InnerModel, required=False)

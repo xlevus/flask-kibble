@@ -14,7 +14,9 @@ class BaseFilter(object):
         can be specified with ``.``.
     :param str title: Column title, if ``None`` will be created based on field
         name.
+    :param type: Callable to coerce strings from URL to a type.
     """
+
     def __init__(self, field, title=None, type=unicode):
         self.field = field
         self.title = title or field.replace('_', ' ').title()

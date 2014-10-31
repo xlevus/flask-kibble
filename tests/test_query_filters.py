@@ -4,7 +4,7 @@ import mock
 from google.appengine.ext import ndb
 
 from .base import TestCase
-from .models import TestModel
+from .models import ComplexTestModel as TestModel
 
 from flask_kibble import query_filters as qf
 
