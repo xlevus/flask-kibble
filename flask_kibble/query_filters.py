@@ -15,9 +15,10 @@ class BaseFilter(object):
     :param str title: Column title, if ``None`` will be created based on field
         name.
     """
-    def __init__(self, field, title=None):
+    def __init__(self, field, title=None, type=unicode):
         self.field = field
         self.title = title or field.replace('_', ' ').title()
+        self.type = type
 
     def preload(self):
         """
@@ -29,6 +30,8 @@ class BaseFilter(object):
         """
         Generate a url-safe value for the given pythonic value.
 
+        This should perform the opposite as :py:member:`url_to_value`.
+
         :param value: Pythonic type for the given filter value.
         """
         return value
@@ -37,9 +40,14 @@ class BaseFilter(object):
         """
         Convert a url-safe value from the URL to a pythonic value.
 
+        This should perform the opposite as :py:member:`value_to_url`.
+
         :param url_value: URLsafe representation of pythonic filter value.
         """
-        return url_value
+        try:
+            return self.type(url_value)
+        except ValueError:
+            return None
 
     def get(self, *args):
         """
