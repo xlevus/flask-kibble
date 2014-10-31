@@ -2,6 +2,7 @@ import flask
 from werkzeug.utils import cached_property
 
 from google.appengine.ext import ndb
+from google.appengine.api.datastore_errors import NeedIndexError
 
 from .base import KibbleView
 from . import query_composers
@@ -66,6 +67,18 @@ class Table(object):
             yield row
 
 
+class MissingIndexTable(Table):
+    def __init__(self, kibble_view, query, query_params):
+        self.kibble_view = kibble_view
+
+    @property
+    def row_count(self):
+        return 0
+
+    def __iter__(self):
+        raise StopIteration()
+
+
 class List(KibbleView):
     #: Action name
     action = 'list'
@@ -80,14 +93,12 @@ class List(KibbleView):
     #: Link to the object in the first column.
     link_first = True
 
-    #: Number of results to display per page.
-    page_size = 20
-
     #: A list of query composers to perform query operations
     #: e.g. Filtering, sorting, pagination. See
     #: :mod:`~flask_kibble.query_composers` for more information.
     query_composers = [
-        query_composers.Paginator
+        query_composers.Filter,
+        query_composers.Paginator,
     ]
 
     button_icon = 'list'
@@ -118,7 +129,9 @@ class List(KibbleView):
         query_params = {}
 
         for composer_cls in self.query_composers:
-            composer = composer_cls(self, query)
+            composer = composer_cls(
+                _kibble_view=self,
+                _query=query)
             context[composer.context_var] = composer
 
             query = composer.get_query()
@@ -131,5 +144,17 @@ class List(KibbleView):
 
     def dispatch_request(self, page, ancestor_key):
         context = self._get_context(page, ancestor_key)
-        return flask.render_template(self.templates, **context)
+        try:
+            return flask.render_template(self.templates, **context)
+
+        except NeedIndexError:
+            # We've tried to generate a query that isn't handled by the
+            # application. Render the page with no filters and such, allowing
+            # the user to adjust their queries.
+            context['_extends'] = "kibble/list.html"
+            context['table'] = MissingIndexTable(self, None, None)
+            context['paginator'] = None
+            return flask.render_template(
+                'kibble/list.need_index.html',
+                **context)
 
