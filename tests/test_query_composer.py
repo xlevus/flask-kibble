@@ -149,9 +149,62 @@ class TestPaginator(QueryComposerTestCase):
                 '/abcd/?foo=bar&baz=bong&page=2')
 
     def test_get_query_params(self):
-        self.fail("Not tested")
+        view = self.create_view()
+        query = self.create_query()
+
+        with self.app.test_request_context('/?page=5'):
+            p1 = self.create_composer(view, query)
+            self.assertEqual(p1.get_query_params(), {
+                'limit': p1.per_page,
+                'offset': 80,
+            })
 
 
 class FilterTestCase(QueryComposerTestCase):
     klass = qc.Filter
 
+    def test_iter(self):
+        view = self.create_view()
+        query = self.create_query()
+
+        filters = [mock.Mock(), mock.Mock(), mock.Mock()]
+        f1 = self.create_composer(view, query, *filters)
+        self.assertEqual(list(f1), filters)
+        [f.preload.assert_called_once_with() for f in filters]
+
+        view.filter_filters = [mock.Mock(), mock.Mock(), mock.Mock()]
+        f2 = self.create_composer(view, query)
+        self.assertEqual(list(f2), view.filter_filters)
+        [f.preload.assert_called_once_with() for f in view.filter_filters]
+
+    def test_bool(self):
+        view = self.create_view()
+        query = self.create_query()
+        f1 = self.create_composer(view, query)
+        self.assertFalse(f1)
+
+        f2 = self.create_composer(view, query, mock.Mock())
+        self.assertTrue(f2)
+
+    def test_get_query(self):
+        view = self.create_view()
+        query = self.create_query()
+
+        filters = [mock.Mock(), mock.Mock(), mock.Mock()]
+        f1 = self.create_composer(view, query, *filters)
+
+        q = f1.get_query()
+
+        filters[0].filter.assert_called_once_with(
+            view.model,
+            query)
+
+        filters[1].filter.assert_called_once_with(
+            view.model,
+            filters[0].filter())
+
+        filters[2].filter.assert_called_once_with(
+            view.model,
+            filters[1].filter())
+
+        self.assertEqual(q, filters[2].filter())
