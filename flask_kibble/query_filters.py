@@ -46,10 +46,7 @@ class BaseFilter(object):
 
         :param url_value: URLsafe representation of pythonic filter value.
         """
-        try:
-            return self.type(url_value)
-        except ValueError:
-            return None
+        return url_value
 
     def get(self, *args):
         """
