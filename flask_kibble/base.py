@@ -295,6 +295,13 @@ class KibbleView(View):
 
     @ndb.tasklet
     def _inst_and_ancestors(self, key):
+        """
+        Retrieve the instance for ``key`` and all it's ancestors.
+
+        :param key: :py:class:`google.appengine.ext.ndb.Key` to retrieve.
+        :returns: Array of :py:class:`google.appengine.ext.ndb.Model` instances
+            with the topmost ancestor first, and the instance last.
+        """
         futures = []
         while key:
             futures.append(key.get_async())

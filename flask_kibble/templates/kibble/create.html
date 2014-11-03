@@ -9,7 +9,7 @@
     <div class='pull-right'>
         {% for action in view._linked_actions if not action._requires_instance %}
             {% if action.has_permission_for() %}
-                {{ action_link(action, ancestor=ancestor, from=view) }}
+                {{ action_link(action, from=view) }}
             {% endif %}
         {% endfor %}
     </div>
