@@ -31,8 +31,9 @@ class KibbleModelConverter(ModelConverter):
 
     def convert_StructuredProperty(self, model, prop, field_args):
         if prop._repeated:
-            field_args.setdefault('LIST', {})['widget'] = \
-                widgets.TabluarFormListWidget()
+            field_args.setdefault('LIST', {}).setdefault(
+                'widget',
+                widgets.TabluarFormListWidget())
 
         return super(KibbleModelConverter, self).\
             convert_StructuredProperty(model, prop, field_args)

@@ -32,6 +32,10 @@ class JSUploadWidget(object):
 class TabluarFormListWidget(object):
     template = 'kibble/widgets/tabularformlist.html'
 
+    def __init__(self, template=None, **context):
+        self.template = template or self.template
+        self.context = context
+
     def __call__(self, field, **kwargs):
         html = flask.render_template(
             self.template,
@@ -39,6 +43,7 @@ class TabluarFormListWidget(object):
             kwargs=kwargs,
             empty_row=partial(self.empty_row, field),
             base64=b64encode,
+            **self.context
         )
         return Markup(html)
 
