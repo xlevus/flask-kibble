@@ -150,11 +150,13 @@ class FormView(KibbleView):
 
         if cont == "edit":
             # User has hit "Save and continue editing"
-            url = url_for(self.path(), 'edit', instance=instance)
+            url = url_for(self.path(), 'edit', instance=instance,
+                          _embed=self._is_embed())
 
         elif cont == "new":
             # User has hit "save and create another"
-            url = url_for(self.path(), 'create')
+            url = url_for(self.path(), 'create',
+                          _embed=self._is_embed())
 
         if url:
             # One of the above url_for's have returned a URL, so
@@ -168,7 +170,8 @@ class FormView(KibbleView):
                 'kibble/dismiss_popup.html',
                 instance=instance))
 
-        url = url_for(self.path(), 'list', ancestor=instance.key.parent())
+        url = url_for(self.path(), 'list', ancestor=instance.key.parent(),
+                      _embed=self._is_embed())
         if url:
             return flask.redirect(url)
 

@@ -1,10 +1,26 @@
-{% macro render_filter(filter) %}
+{% macro render_filter_choice(filter, value, label) %}
+    <li {% if value == filter.get() %}class='active'{% endif %}>
+        <a href='{{ filter.url_for_value(value) }}'>{{ label }}</a>
+    </li> 
+{% endmacro %}
+
+{% macro render_filter(filters) %}
 <div class='col-md-2'>
     <dl>
-        {% for col in filter %}
+        {% for col in filters %}
             <dt class='filter-title'>{{ col.title }}</dt>
-            <dd class='filter'>{{ col.render() }}</dd>
+            <dd class='filter'>
+                <ul class='list-unstyled'>
+                    {{ render_filter_choice(col, None, 'All') }}
+                    {%- for value, label in col.choices -%}
+                        {{ render_filter_choice(col, value, label) }}
+                    {%- else -%}
+                        {{ col.render() }}
+                    {%- endfor -%}
+                </ul>
+            </dd>
         {% endfor %}
     </dl>
 </div>
 {% endmacro %}
+

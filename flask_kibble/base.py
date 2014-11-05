@@ -223,8 +223,8 @@ class KibbleView(View):
         :returns: View URL
         """
 
-        kwargs.setdefault('_popup', cls._is_popup())
-        kwargs.setdefault('_embed', cls._is_embed())
+        kwargs.setdefault('_popup', cls._is_popup())    # Popups should persist
+        # kwargs.setdefault('_embed', cls._is_embed())  # Embed shouldn't
 
         if cls.ancestors:
             if (key or ancestor_key) is None and cls._ancestor_required():
@@ -276,7 +276,9 @@ class KibbleView(View):
     @classmethod
     def _is_popup(self):
         """
-        Checks if the current request is in a popup state.
+        Checks if the current request is in a popup state. Links in a popop
+        should link to another popup.
+
         For the sake of url-building convenince, returns either 1 or None.
         """
         return (1 if '_popup' in flask.request.args else None)
@@ -284,7 +286,9 @@ class KibbleView(View):
     @classmethod
     def _is_embed(self):
         """
-        Checks if the current request is in a embedded state.
+        Checks if the current request is in a embedded state. Links in embedded
+        pages should break-out of the embed.
+
         For the sake of url-building convenince, returns either 1 or None.
         """
         return (1 if '_embed' in flask.request.args else None)

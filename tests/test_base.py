@@ -65,8 +65,7 @@ class BaseKibbleViewTestCase(TestCase):
             '.testmodel_dummy',
             key=None,
             ancestor_key=None,
-            _popup=None,
-            _embed=None)
+            _popup=None)
         url_for.reset_mock()
 
         v.url_for(self.inst)
@@ -74,8 +73,7 @@ class BaseKibbleViewTestCase(TestCase):
             '.testmodel_dummy',
             key=self.inst.key,
             ancestor_key=None,
-            _popup=None,
-            _embed=None)
+            _popup=None)
         url_for.reset_mock()
 
         v.url_for(self.inst.key)
@@ -83,8 +81,7 @@ class BaseKibbleViewTestCase(TestCase):
             '.testmodel_dummy',
             key=self.inst.key,
             ancestor_key=None,
-            _popup=None,
-            _embed=None)
+            _popup=None)
         url_for.reset_mock()
 
         v.url_for(blueprint='fudge')
@@ -92,7 +89,6 @@ class BaseKibbleViewTestCase(TestCase):
             'fudge.testmodel_dummy',
             key=None,
             ancestor_key=None,
-            _popup=None,
-            _embed=None)
+            _popup=None)
         url_for.reset_mock()
 

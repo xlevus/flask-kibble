@@ -36,7 +36,7 @@
 
 {% macro render_form(form, fieldsets, _field=render_field, _hidden_types=("CSRFTokenField", "HiddenField"), _hidden=_render_hidden) %}
   {% for fieldset in fieldsets %}
-      <div class='panel {{ fieldset.panel_class|default("panel-default") }}'>
+      <div class='panel panel-primary {{ fieldset.panel_class|default("panel-default") }}'>
           {% if fieldset.name %}
               <div class='panel-heading'>{{ fieldset.name }}</div>
           {% endif %}

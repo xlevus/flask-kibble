@@ -1,6 +1,6 @@
 {% macro render_paginator(paginator) %}
     {% if paginator and paginator.pages > 1 %}
-        <ul class="pagination center-block pagination-sm">
+        <ul class="pagination center-block">
             {% if paginator.has_prev %}
                 <li><a href="{{ paginator.url_for_page(1) }}">&#x21E4;</a></li>
                 <li><a href="{{ paginator.url_for_page(paginator.prev) }}">&#x2190;</a></li>

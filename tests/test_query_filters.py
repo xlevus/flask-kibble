@@ -40,10 +40,10 @@ class QueryComposerTestCase(TestCase):
                 self.assertEqual(val, m())
 
         # Test type coercion
-        f2 = self.create_filter(type=int)
-        with self.app.test_request_context('/?field=123'):
-            val = f2.get()
-            self.assertEqual(val, 123)
+        # f2 = self.create_filter(type=int)
+        # with self.app.test_request_context('/?field=123'):
+        #     val = f2.get()
+        #     self.assertEqual(val, 123)
 
     def test_model_property(self):
         # Check ID as you can't do an equality operator on fields
