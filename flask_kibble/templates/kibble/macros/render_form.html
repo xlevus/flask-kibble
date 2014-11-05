@@ -28,13 +28,15 @@
 {% endmacro %}
 
 
-{% macro _render_hidden(form, types) %}
-  {% for field in form if field.type in types %}
-    <div style='display: none'>{{ field }}</div>
+{% macro _render_hidden(fields) %}
+  <div style='display: none'>
+  {% for field in fields %}
+    {{ field }}
   {% endfor %}
+  </div>
 {% endmacro %}
 
-{% macro render_form(form, fieldsets, _field=render_field, _hidden_types=("CSRFTokenField", "HiddenField"), _hidden=_render_hidden) %}
+{% macro render_form(form, fieldsets, _field=render_field, _hidden=_render_hidden) %}
   {% for fieldset in fieldsets %}
       <div class='panel panel-primary {{ fieldset.panel_class|default("panel-default") }}'>
           {% if fieldset.name %}
@@ -56,6 +58,7 @@
       </div>
   {% endfor %}
 
-  {{ _hidden(form, _hidden_types) }}
+  {{ _hidden(fieldsets.hidden_fields) }}
+
 {% endmacro %}
 

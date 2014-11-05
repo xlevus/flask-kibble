@@ -1,6 +1,9 @@
-from werkzeug import cached_property
 import logging
+
+
 import flask
+import wtforms
+from werkzeug import cached_property
 
 from .base import KibbleView
 from .util.forms import KibbleModelConverter, BaseCSRFForm
@@ -58,16 +61,28 @@ class FieldsetIterator(object):
 
         self._fields = set(self.form._fields.keys())
 
+    def _visible_fields(self):
+        return [
+            x for x in self._fields
+            if not isinstance(self.form[x], wtforms.HiddenField)
+        ]
+
+    @property
+    def hidden_fields(self):
+        return [
+            self.form[x] for x in self._fields
+            if isinstance(self.form[x], wtforms.HiddenField)
+        ]
+
     def __iter__(self):
         for fieldset in self.fieldsets:
             self._fields.difference_update(fieldset.get('fields', []))
 
             fs = Fieldset(self.form, **fieldset)
             if len(fs):
-                logger.debug('FIELDSET: %s', fs)
                 yield fs
 
-        if self._fields:
+        if self._visible_fields():
             yield Fieldset(self.form, None, self._fields)
 
 
