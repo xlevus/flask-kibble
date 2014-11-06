@@ -19,7 +19,7 @@
     <div class='row'>
         <form role='form' class='form-horizontal' method='POST' action='{{ request.url }}'>
             {% block form_body %}
-                {{ render_form(form, fieldsets) }}
+                {{ render_form(form, fieldsets, help_text) }}
             {% endblock %}
 
             {% block form_actions %}

@@ -83,7 +83,7 @@ class FieldsetIterator(object):
                 yield fs
 
         if self._visible_fields():
-            yield Fieldset(self.form, None, self._fields)
+            yield Fieldset(self.form, None, self._visible_fields())
 
 
 class FormView(KibbleView):
@@ -123,6 +123,9 @@ class FormView(KibbleView):
     #:      {'name':"Title", 'fields': ['title','slug']},
     #:  ]
     fieldsets = []
+
+    #: Help text per field
+    field_help_text = {}
 
     _methods = ['GET', 'POST']
     _requires_ancestor = True
@@ -271,6 +274,7 @@ class FormView(KibbleView):
             self.get_form_fieldsets(instance))
         ctx['instance'] = instance
         ctx['ancestors'] = ancestors.get_result() if ancestors is not None else []
+        ctx['help_text'] = self.field_help_text
 
         return flask.render_template(self.templates, **ctx)
 
