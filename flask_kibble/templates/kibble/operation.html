@@ -6,7 +6,7 @@
 {% block body %}
     <div class='row'>
         <div class='col-md-12'>
-            <p>Are you sure you want to {{ view.action }} {{ view.kind() }}: {{ instance }}?</p>
+            <p>Are you sure you want to {{ view.action }} {{ view.kind() }}: <strong>{{ instance }}</strong>?</p>
 
             <form method='POST' action='{{ request.path }}'>
                 {% block form_body %}

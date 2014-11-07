@@ -120,6 +120,11 @@ body.popup {
 .main {
   padding: 20px;
 }
+
+.main .flash {
+ margin-top: 15px;
+}
+
 @media (min-width: 768px) {
   .main {
     padding-right: 40px;
