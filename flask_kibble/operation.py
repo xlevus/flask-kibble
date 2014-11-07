@@ -5,6 +5,7 @@ from google.appengine.ext import ndb
 from .base import KibbleView
 from .edit import FieldsetIterator
 from .util.forms import BaseCSRFForm
+from .util.ndb import instance_and_ancestors_async
 
 logger = logging.getLogger(__name__)
 
@@ -114,6 +115,8 @@ class Operation(KibbleView):
             instance=instance)
 
     def dispatch_request(self, key):
+        ancestors = instance_and_ancestors_async(key.parent())
+
         instance = key.get()
         if instance is None:
             flask.abort(404)
@@ -156,5 +159,6 @@ class Operation(KibbleView):
         ctx['instance'] = instance
         ctx['form'] = form
         ctx['fieldsets'] = FieldsetIterator(form, self.fieldsets)
+        ctx['ancestors'] = ancestors.get_result()
         return flask.render_template(self.templates, **ctx)
 

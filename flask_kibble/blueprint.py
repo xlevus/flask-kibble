@@ -1,5 +1,6 @@
-import logging
+import re
 import os
+import logging
 from collections import defaultdict
 
 from google.appengine.ext import ndb, blobstore
@@ -95,6 +96,7 @@ class Kibble(flask.Blueprint):
                           methods=['POST'])
 
         self.record_once(self._register_urlconverter)
+        self.record_once(self._register_jinja_globals)
 
         self.before_request(self._before_request)
         self.context_processor(self._context_processor)
@@ -175,6 +177,12 @@ class Kibble(flask.Blueprint):
         app = setup_state.app
         app.url_map.converters.setdefault('ndbkey', NDBKeyConverter)
 
+    @classmethod
+    def _register_jinja_globals(self, setup_state):
+        from itertools import izip_longest
+        app = setup_state.app
+        app.add_template_global(izip_longest)
+
     def _before_request(self):
         # TODO: Write test for this
         if flask.request.endpoint == self.name + '.static':
@@ -248,5 +256,22 @@ class Kibble(flask.Blueprint):
             return ""
 
         return view.url_for(instance, ancestor, blueprint=self.name, **kwargs)
+
+    KIND_LABEL_RE = re.compile(r'([a-z])([A-Z0-9])')
+
+    def label_for_kind(self, kind):
+        if isinstance(kind, ndb.Model):
+            kind = kind.__class__
+
+        if issubclass(kind, ndb.Model):
+            kind = kind._get_kind()
+
+        label = flask.current_app.config.get('KIBBLE_KIND_LABELS', {}).get(
+            kind)
+
+        if label:
+            return label
+
+        return self.KIND_LABEL_RE.sub(r'\1 \2', kind)
 
 

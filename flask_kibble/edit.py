@@ -7,6 +7,7 @@ from werkzeug import cached_property
 
 from .base import KibbleView
 from .util.forms import KibbleModelConverter, BaseCSRFForm
+from .util.ndb import instance_and_ancestors_async
 
 logger = logging.getLogger(__name__)
 
@@ -239,9 +240,9 @@ class FormView(KibbleView):
 
     def _form_logic(self, instance=None, ancestor_key=None):
         if instance:
-            ancestors = self._inst_and_ancestors(instance.key.parent())
+            ancestors = instance_and_ancestors_async(instance.key.parent())
         elif ancestor_key:
-            ancestors = self._inst_and_ancestors(ancestor_key)
+            ancestors = instance_and_ancestors_async(ancestor_key)
         else:
             ancestors = None
 

@@ -38,3 +38,28 @@
         {{ view_cls.kind_label() }}
     {%- endif %}
 {% endmacro %}
+
+{%- macro breadcrumbs(instance=None, ancestors=[], ancestor_kinds=[], action=None) -%}
+    {%- for ancestor, kind in izip_longest(ancestors or [], ancestor_kinds or []) -%}
+    <li>
+        {%- if ancestor -%}
+        {%- if kind -%}<span class='text-muted'>{{ g.kibble.label_for_kind(kind) }}: </span>{%- endif -%}
+            <a href='{{ g.kibble.url_for(ancestor, 'edit') }}'>{{ ancestor }}</a>
+        {%- else -%}
+            <a href='{{ g.kibble.url_for(kind, 'list') }}'>{{ g.kibble.label_for_kind(kind) }}</a>
+        {%- endif -%}
+    </li>
+    {%- endfor -%}
+
+    {%- if action -%}
+        {%- if instance -%}
+            <li>
+            <span class='text-muted'>{{ g.kibble.label_for_kind(instance) }}: </span>
+            <a href='{{ g.kibble.url_for(instance, 'edit') }}'>{{ instance }}</a></li>
+        {%- endif -%}
+        <li class='active'>{{ action }}</li>
+    {%- else -%}
+        <li class='active'>{{ instance }}</li>
+    {%- endif -%}
+
+{%- endmacro -%}

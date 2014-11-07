@@ -1,4 +1,3 @@
-import re
 from warnings import warn
 import flask
 from flask.views import View
@@ -100,21 +99,6 @@ class KibbleView(View):
         """
         return cls.model._get_kind()
 
-    KIND_LABEL_RE = re.compile(r'([a-z])([A-Z0-9])')
-
-    @classmethod
-    def _make_label(cls, kind):
-        if issubclass(kind, ndb.Model):
-            kind = kind._get_kind()
-
-        label = flask.current_app.config.get('KIBBLE_KIND_LABELS', {}).get(
-            kind)
-
-        if label:
-            return label
-
-        return cls.KIND_LABEL_RE.sub(r'\1 \2', kind)
-
     @classmethod
     def kind_label(cls):
         """
@@ -123,14 +107,14 @@ class KibbleView(View):
         Alternate labels can be defined in the Flask application setting
         ``KIBBLE_KIND_LABELS``.
         """
-        return cls._make_label(cls.model)
+        return flask.g.kibble.label_for_kind(cls.model)
 
     @classmethod
     def ancestor_labels(cls):
         """
         Labels for each of the ancestors in Path.
         """
-        return [cls._make_label(a) for a in cls.ancestors]
+        return [flask.g.kibble.label_for_kind(a) for a in cls.ancestors]
 
     @classmethod
     def view_name(cls):
@@ -296,20 +280,4 @@ class KibbleView(View):
     @classmethod
     def _ancestor_required(cls):
         return cls._requires_ancestor and len(cls.ancestors) != 0
-
-    @ndb.tasklet
-    def _inst_and_ancestors(self, key):
-        """
-        Retrieve the instance for ``key`` and all it's ancestors.
-
-        :param key: :py:class:`google.appengine.ext.ndb.Key` to retrieve.
-        :returns: Array of :py:class:`google.appengine.ext.ndb.Model` instances
-            with the topmost ancestor first, and the instance last.
-        """
-        futures = []
-        while key:
-            futures.append(key.get_async())
-            key = key.parent()
-        objs = yield futures
-        raise ndb.Return(objs[::-1])
 

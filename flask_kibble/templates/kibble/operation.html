@@ -1,5 +1,10 @@
 {% extends "kibble/base.html" %}
 {% from "kibble/macros/render_form.html" import render_form %}
+{% from "kibble/macros/action_button.html" import breadcrumbs %}
+
+{% block breadcrumbs %}
+    {{ breadcrumbs(instance, ancestors, view.ancestors, view.action|title) }}
+{% endblock %}
 
 {% block page_header %}Confirm {{ view.action|title }}{% endblock %}
 

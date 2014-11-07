@@ -1,8 +1,7 @@
 {% from "kibble/macros/action_button.html" import action_link, view_label %}
 
-{% macro main_menu(kibble) %}
+{% macro main_menu(kibble, view=None) %}
 <ul class='nav nav-sidebar'>
-
 {% for header, group in kibble.registry.grouped()|dictsort %}
   {% for kind, actions in group|dictsort %}
     {% with primary_view_cls = actions['list'] or actions.values()[0] %}
@@ -20,5 +19,4 @@
   {% endfor %}
 {% endfor %}
 </ul> 
-
 {% endmacro %}

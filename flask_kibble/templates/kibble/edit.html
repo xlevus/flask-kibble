@@ -1,15 +1,7 @@
 {% extends "kibble/create.html" %}
 
 {% block page_header %}
-Edit 
-{{ view.kind_label() }}:
-<span class='text-muted'>
-    {% for ancestor in ancestors %}
-    {{ ancestor }} &raquo;
-    {% endfor %}
-</span>
-
-{{ instance }}
+Edit {{ view.kind_label() }}: {{ instance }}
 {% endblock %}
 
 {% block header_buttons %}

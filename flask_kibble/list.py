@@ -7,6 +7,7 @@ from google.appengine.api.datastore_errors import NeedIndexError
 from .base import KibbleView
 from . import query_composers
 from .util.futures import wait_futures
+from .util.ndb import instance_and_ancestors_async
 
 
 class Table(object):
@@ -121,8 +122,9 @@ class List(KibbleView):
     def _get_context(self, page, ancestor_key):
         context = self.base_context()
         if ancestor_key:
-            ancestor = ancestor_key.get_async()
+            ancestors = instance_and_ancestors_async(ancestor_key)
         else:
+            ancestors = None
             ancestor = None
 
         query = self.get_query(ancestor_key)
@@ -139,7 +141,7 @@ class List(KibbleView):
 
         context['table'] = Table(self, query, query_params)
         context['ancestor_key'] = ancestor_key
-        context['ancestor'] = ancestor.get_result() if ancestor_key else None
+        context['ancestors'] = ancestors.get_result() if ancestors else None
         return context
 
     def dispatch_request(self, page, ancestor_key):
