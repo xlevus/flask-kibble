@@ -29,7 +29,7 @@
 
 {% macro view_label(view_cls, link_last=False) %}
     <span class='text-muted'>
-        {% for ancestor in view_cls.ancestor_labels() %}{{ ancestor }} &raquo;{% endfor %}
+        {% for ancestor in view_cls.ancestor_labels() %}{{ ancestor }} / {% endfor %}
     </span>
 
     {% if link_last and not view_cls._requires_instance -%}

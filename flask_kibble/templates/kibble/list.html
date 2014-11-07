@@ -29,7 +29,13 @@
 
 {% block body %}
     <div class='row'>
-        <div class='col-md-{% if filter %}10{% else %}12{% endif %}'>
+        {% if filter %}
+          <div class='col-md-2 col-md-push-10 col-sm-12'>
+            {{ render_filter(filter) }}
+          </div>
+        {% endif %}
+
+        <div class='{% if filter %}col-md-10 col-md-pull-2{% else %}col-md-12{% endif %}'>
             <table class='table table-striped'>
                 <tr>
                     {% for header in table.headers %}
@@ -68,8 +74,5 @@
 
             {{ render_paginator(paginator) }}
         </div>
-        {% if filter %}
-            {{ render_filter(filter) }}
-        {% endif %}
     </div>
 {% endblock %}

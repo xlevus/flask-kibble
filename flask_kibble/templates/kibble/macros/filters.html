@@ -5,9 +5,9 @@
 {% endmacro %}
 
 {% macro render_filter(filters) %}
-<div class='col-md-2'>
-    <dl>
-        {% for col in filters %}
+<div class='row'>
+    {% for col in filters %}
+        <dl class='col-xs-4 col-md-12'>
             <dt class='filter-title'>{{ col.title }}</dt>
             <dd class='filter'>
                 <ul class='list-unstyled'>
@@ -19,8 +19,8 @@
                     {%- endfor -%}
                 </ul>
             </dd>
-        {% endfor %}
-    </dl>
+        </dl>
+    {% endfor %}
 </div>
 {% endmacro %}
 

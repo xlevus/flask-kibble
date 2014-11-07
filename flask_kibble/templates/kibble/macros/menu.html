@@ -1,0 +1,24 @@
+{% from "kibble/macros/action_button.html" import action_link, view_label %}
+
+{% macro main_menu(kibble) %}
+<ul class='nav nav-sidebar'>
+
+{% for header, group in kibble.registry.grouped()|dictsort %}
+  {% for kind, actions in group|dictsort %}
+    {% with primary_view_cls = actions['list'] or actions.values()[0] %}
+        <li {% if view and primary_view_cls.kind() == view.kind() -%}
+            class='active'{% endif %}><span class='navrow'>
+                {{ view_label(primary_view_cls, (primary_view_cls.action == 'list')) }}
+            <span class='pull-right'>
+            {% for name, view_cls in actions|dictsort if not view_cls._requires_instance %}
+                {{ action_link(view_cls, text=False, button=False) }}
+            {% endfor %}
+        </span>
+        </span>
+        </li>
+    {% endwith %}
+  {% endfor %}
+{% endfor %}
+</ul> 
+
+{% endmacro %}

@@ -16,22 +16,20 @@
 {% endblock %}
 
 {% block body %}
-    <div class='row'>
-        <form role='form' class='form-horizontal' method='POST' action='{{ request.url }}'>
-            {% block form_body %}
-                {{ render_form(form, fieldsets, help_text) }}
-            {% endblock %}
+    <form role='form' class='form-horizontal' method='POST' action='{{ request.url }}'>
+        {% block form_body %}
+            {{ render_form(form, fieldsets, help_text) }}
+        {% endblock %}
 
-            {% block form_actions %}
-                <div class='form-group form-actions'>
-                    <div class='col-sm-offset-2 col-sm-10'>
-                        <button type='submit' class='btn btn-lg btn-primary'>Save <i class='glyphicon glyphicon-save'></i></button>
-                        <button type='submit' name='__continue' value='edit' class='btn btn-lg btn-info'>
-                            Save and Continue
-                        </button>
-                    </div>
+        {% block form_actions %}
+            <div class='form-group form-actions'>
+                <div class='col-sm-offset-2 col-sm-10'>
+                    <button type='submit' class='btn btn-lg btn-primary'>Save <i class='glyphicon glyphicon-save'></i></button>
+                    <button type='submit' name='__continue' value='edit' class='btn btn-lg btn-info'>
+                        Save and Continue
+                    </button>
                 </div>
-            {% endblock %}
-        </form>
-    </div>
+            </div>
+        {% endblock %}
+    </form>
 {% endblock %}
