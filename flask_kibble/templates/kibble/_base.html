@@ -46,7 +46,7 @@
 
         {% endif %}
 
-            {% if not is_embed -%}
+            {% if not is_embed and request.path != url_for('.index') -%}
                 <ol class='breadcrumb'>
                     <li><a href='{{ url_for('.index') }}'>{{ kibble.label }}</a></li>
                     {%- block breadcrumbs -%}{%- endblock -%}
