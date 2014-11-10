@@ -260,11 +260,12 @@ class Kibble(flask.Blueprint):
     KIND_LABEL_RE = re.compile(r'([a-z])([A-Z0-9])')
 
     def label_for_kind(self, kind):
-        if isinstance(kind, ndb.Model):
-            kind = kind.__class__
+        if not isinstance(kind, (str, unicode)):
+            if isinstance(kind, ndb.Model):
+                kind = kind.__class__
 
-        if issubclass(kind, ndb.Model):
-            kind = kind._get_kind()
+            if issubclass(kind, ndb.Model):
+                kind = kind._get_kind()
 
         label = flask.current_app.config.get('KIBBLE_KIND_LABELS', {}).get(
             kind)
