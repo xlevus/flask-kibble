@@ -260,11 +260,28 @@ class Kibble(flask.Blueprint):
     KIND_LABEL_RE = re.compile(r'([a-z])([A-Z0-9])')
 
     def label_for_kind(self, kind):
+        """
+        Utility function for getting a display label for a given ndb instance
+        or class.
+
+        If the setting `KIBBLE_KIND_LABELS` is set, labels can be changed from
+        the default camel-case split. e.g. ::
+
+            KIBBLE_KIND_LABELS = {
+                'WeirdNamedKind': 'Nice Thing',
+            }
+        """
         if not isinstance(kind, (str, unicode)):
+            # Convert an instance to it's class
             if isinstance(kind, ndb.Model):
                 kind = kind.__class__
 
-            if issubclass(kind, ndb.Model):
+            # Polymodels behave differently. Use their _class_name().
+            if issubclass(kind, ndb.polymodel.PolyModel):
+                kind = kind._class_name()
+
+            # Otherwise, use _get_kind()
+            elif issubclass(kind, ndb.Model):
                 kind = kind._get_kind()
 
         label = flask.current_app.config.get('KIBBLE_KIND_LABELS', {}).get(
