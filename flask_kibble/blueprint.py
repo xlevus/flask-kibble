@@ -116,7 +116,6 @@ class Kibble(flask.Blueprint):
 
         # Check for duplicates
         if action in self.registry[path]:
-            import pdb; pdb.set_trace();
             raise ValueError("%s already has view for %s:%s" % (
                 self, path, action))
 
