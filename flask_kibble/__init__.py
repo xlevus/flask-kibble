@@ -11,3 +11,5 @@ from .util.forms import BaseCSRFForm
 
 from . import query_composers
 from . import query_filters
+
+from . import polymodel

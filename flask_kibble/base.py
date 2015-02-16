@@ -97,8 +97,6 @@ class KibbleView(View):
         """
         Returns the name of the associated :py:class:`ndb.Model`.
         """
-        if issubclass(cls.model, ndb.polymodel.PolyModel):
-            return cls.model._class_name()
         return cls.model._get_kind()
 
     @classmethod
