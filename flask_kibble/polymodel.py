@@ -156,13 +156,13 @@ class PolymodelCreate(base_base.KibbleView):
         classes = []
 
         for cls_key, views in PolymodelMeta.cls_map.items():
-            if self.action not in views:
+            if 'create' not in views:
                 continue
 
             base_path = tuple(self.model._class_key())
 
             if cls_key[:len(base_path)] == base_path:
-                model = views[self.action].model
+                model = views['create'].model
                 classes.append((model, self.url_for(
                     ancestor_key=ancestor_key,
                     poly_kind=cls_key[-1].lower())))
