@@ -4,6 +4,7 @@ import logging
 from collections import defaultdict
 
 from google.appengine.ext import ndb, blobstore
+from google.appengine.ext.ndb import polymodel
 
 from werkzeug import parse_options_header
 from .base import KibbleView
@@ -277,7 +278,7 @@ class Kibble(flask.Blueprint):
                 kind = kind.__class__
 
             # Polymodels behave differently. Use their _class_name().
-            if issubclass(kind, ndb.polymodel.PolyModel):
+            if issubclass(kind, polymodel.PolyModel):
                 kind = kind._class_name()
 
             # Otherwise, use _get_kind()
