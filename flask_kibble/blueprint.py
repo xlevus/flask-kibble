@@ -124,7 +124,7 @@ class Kibble(flask.Blueprint):
         ancest_kinds = [x._get_kind() for x in view_class.ancestors]
 
         key = "<ndbkey({0}):key>".format(",".join([
-            "'%s'" % x for x in ancest_kinds + [kind]]))
+            "'%s'" % x for x in ancest_kinds + [view_class.model._get_kind()]]))
         ancestor_key = "<ndbkey({0}):ancestor_key>".format(
             ",".join(["'%s'" % x for x in ancest_kinds]))
 

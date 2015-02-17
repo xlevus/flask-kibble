@@ -1,0 +1,22 @@
+{% extends "kibble/base.html" %}
+
+{% from "kibble/macros/action_button.html" import breadcrumbs, action_link %}
+
+{% block breadcrumbs %}
+    {{ breadcrumbs(instance, ancestors, view.ancestors, view.action|title) }}
+{% endblock %}
+
+{% block page_header %}Create new {{ kibble.label_for_kind(view.model) }}{% endblock %}
+
+{% block body %}
+    <div class='row'>
+        <div class='col-md-12'>
+            <p>Please select a type to create</p>
+            <ul>
+                {% for model, url in classes %}
+                    <li><a href='{{ url }}'>{{ kibble.label_for_kind(model) }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}
