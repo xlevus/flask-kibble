@@ -1,3 +1,26 @@
+"""
+Basic PolyModel support for Kibble.
+
+As Poly classes all have the same Kind, things don't entirely work.
+
+In order to use PolyModels you need to do two things :
+
+    1. Subclass `kibble.polymodel.Create` and `kibble.polymodel.Edit` views
+       for each subclass of PolyModel you want to create/edit.
+
+    2. Create a `kibble.polymodel.PolymodelList`,
+       `kibble.polymodel.PolymodelCreate` and `kibble.polymodel.PolymodelEdit`
+       views for the 'root' class you want.
+
+The views for the parent classes dispatch requests to the subclass views based
+on the kind of the instance, or requested url parameter.
+
+Notes:
+    * Permissions are /probably/ all tied around Polymodel, not the actual
+      classes
+    * You'll probably get some funky shit WRT to ancestors.
+"""
+
 import flask
 import logging
 import blinker
@@ -85,6 +108,8 @@ class PolymodelEdit(base_base.KibbleView):
     """
     action = 'edit'
 
+    button_icon = 'pencil'
+
     _url_patterns = [
         ("/{key}/", {}),
     ]
@@ -112,6 +137,8 @@ class PolymodelCreate(base_base.KibbleView):
     type.
     """
     action = 'new'
+
+    button_icon = 'plus-sign'
 
     _url_patterns = [
         ('/{kind_lower}/new/<poly_kind>/', {'ancestor_key': None}),
