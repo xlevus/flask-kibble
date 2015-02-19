@@ -25,7 +25,6 @@ import flask
 import logging
 import blinker
 from collections import defaultdict
-#from google.appengine.ext import ndb
 from google.appengine.ext.ndb import polymodel
 
 from . import base as base_base
@@ -77,23 +76,21 @@ class Edit(PolymodelMixin, base_edit.Edit):
     pass
 
 
-
 def _dispatch_polyrequest(action, poly_kind, base_kind, **kwargs):
-    base_key = tuple(base_kind._class_key())
+    # base_key = tuple(base_kind._class_key())
 
     for cls_key, views in PolymodelMeta.cls_map.items():
         if action not in views:
             continue
 
-        if cls_key[-1].lower() == poly_kind.lower() and \
-                cls_key[:len(base_key)] == base_key:
+        if cls_key[-1].lower() == poly_kind.lower():
+            # and cls_key[:len(base_key)] == base_key:
             v = views[action]()
             return v.dispatch_request(**kwargs)
 
     logger.debug("No %r view for PolyModel subclass %r found",
-                    action, poly_kind)
+                 action, poly_kind)
     flask.abort(404)
-
 
 
 class PolymodelList(base_list.List):
@@ -165,10 +162,6 @@ class PolymodelCreate(base_base.KibbleView):
             'kibble/polymodel/{kind}/{action}.html'.format(**kwargs),
             'kibble/polymodel/{action}.html'.format(**kwargs),
         ]
-
-    def _sub_kinds(cls):
-        root_key = tuple(cls._class_key())
-        l = len(root_key)
 
     def dispatch_request(self, ancestor_key, poly_kind):
         if poly_kind:
