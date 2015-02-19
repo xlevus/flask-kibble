@@ -253,7 +253,7 @@ class Kibble(flask.Blueprint):
         view = self.registry.get(model, {}).get(action)
 
         if not view:
-            logger.debug("Url for %r requested, but not registered", model)
+            # logger.debug("Url for %r requested, but not registered", model)
             return ""
 
         return view.url_for(instance, ancestor, blueprint=self.name, **kwargs)

@@ -110,6 +110,7 @@ class PolymodelEdit(base_base.KibbleView):
     _url_patterns = [
         ("/{key}/", {}),
     ]
+    _methods = ['GET', 'POST']
 
     @classmethod
     def kind(cls):
