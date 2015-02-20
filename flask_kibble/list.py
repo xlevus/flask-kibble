@@ -142,11 +142,11 @@ class List(KibbleView):
         elif value is None:
             return Markup("<i class='text-muted'>None</i>")
 
-        elif isinstance(value, date):
-            return value.strftime('%x')
-
         elif isinstance(value, datetime):
             return value.strftime('%c')
+
+        elif isinstance(value, date):
+            return value.strftime('%x')
 
         return value
 
@@ -156,7 +156,7 @@ class List(KibbleView):
             ancestors = instance_and_ancestors_async(ancestor_key)
         else:
             ancestors = None
-            ancestor = None
+            # ancestor = None
 
         query = self.get_query(ancestor_key)
         query_params = {}
