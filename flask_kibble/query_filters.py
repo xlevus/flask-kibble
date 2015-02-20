@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 import flask
 from markupsafe import Markup
 # from werkzeug.utils import cached_property
@@ -194,3 +196,59 @@ class KeyFilter(ChoicesFilter):
         for row in self._query.get_result():
             yield (row.key, unicode(row))
 
+
+class DateTimeFilter(ChoicesFilter):
+    def __init__(self, *args, **kwargs):
+        super(ChoicesFilter, self).__init__(*args, **kwargs)
+
+    @property
+    def choices(self):
+        return iter([
+            ('today', 'Today'),
+            ('week', 'Past 7 days'),
+            ('month', 'This month'),
+            #('year', 'This year'),
+        ])
+
+    def _filter_today(self, model, query):
+        now = datetime.utcnow()
+        start = now.replace(hour=0, minute=0, second=0)
+        end = start + timedelta(days=1)
+
+        prop = self.model_property(model)
+        return query.filter(
+            prop > start,
+            prop < end
+        )
+
+    def _filter_week(self, model, query):
+        now = datetime.utcnow()
+        end = now - timedelta(days=7)
+
+        prop = self.model_property(model)
+        return query.filter(
+            prop < now,
+            prop > end,
+        )
+
+    def _filter_month(self, model, query):
+        now = datetime.utcnow()
+        start = now.replace(day=1, hour=0, minute=0, second=0)
+        end = start.replace(month=start.month+1)
+
+        prop = self.model_property(model)
+        return query.filter(
+            prop > start,
+            prop < end
+        )
+
+    def filter(self, model, query):
+        val = self.get(None)
+        if not val:
+            return query
+
+        filter_func = getattr(self, '_filter_'+val, None)
+        if filter_func:
+            query = filter_func(model, query)
+
+        return query
