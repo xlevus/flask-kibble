@@ -163,7 +163,29 @@ class Filter(QueryComposer):
 
     def get_query(self):
         q = self.query
-        for f in self: 
+        for f in self:
             q = f.filter(self.kibble_view.model, q)
+        return q
+
+
+class Sort(QueryComposer):
+    context_var = 'sort'
+
+    def __init__(self, default_order=None, **kwargs):
+        super(Sort, self).__init__(**kwargs)
+
+        if default_order:
+            self.default_order = default_order
+
+    def _parse_sort(self, sort_string):
+        if sort_string[0] == '-':
+            return -ndb.GenericProperty(sort_string[1:])
+        else:
+            return ndb.GenericProperty(sort_string)
+
+    def get_query(self):
+        q = self.query
+        if getattr(self, 'default_order', None):
+            q = q.order(self._parse_sort(self.default_order))
         return q
 

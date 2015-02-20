@@ -98,6 +98,7 @@ class List(KibbleView):
     #: e.g. Filtering, sorting, pagination. See
     #: :mod:`~flask_kibble.query_composers` for more information.
     query_composers = [
+        query_composers.Sort,
         query_composers.Filter,
         query_composers.Paginator,
     ]
