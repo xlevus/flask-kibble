@@ -1,5 +1,8 @@
+from datetime import date, datetime
+
 import flask
 from werkzeug.utils import cached_property
+from markupsafe import Markup
 
 from google.appengine.ext import ndb
 from google.appengine.api.datastore_errors import NeedIndexError
@@ -120,6 +123,33 @@ class List(KibbleView):
         """
         return self.model.query(ancestor=ancestor_key)
 
+    def _display_value(self, value):
+        """
+        Utility function to format Dates/Booleans/Nulls prettier.
+        """
+        if isinstance(value, bool):
+            if value:
+                return Markup(
+                    '<span class="label label-success">'
+                    '<i class="glyphicon glyphicon-ok"></i>'
+                    '</span>')
+            else:
+                return Markup(
+                    '<span class="label label-danger">'
+                    '<i class="glyphicon glyphicon-remove"></i>'
+                    '</span>')
+
+        elif value is None:
+            return Markup("<i class='text-muted'>None</i>")
+
+        elif isinstance(value, date):
+            return value.strftime('%x')
+
+        elif isinstance(value, datetime):
+            return value.strftime('%c')
+
+        return value
+
     def _get_context(self, page, ancestor_key):
         context = self.base_context()
         if ancestor_key:
@@ -143,6 +173,7 @@ class List(KibbleView):
         context['table'] = Table(self, query, query_params)
         context['ancestor_key'] = ancestor_key
         context['ancestors'] = ancestors.get_result() if ancestors else None
+        context['display_val'] = self._display_value
         return context
 
     def dispatch_request(self, page, ancestor_key):
@@ -157,6 +188,7 @@ class List(KibbleView):
             context['_extends'] = "kibble/list.html"
             context['table'] = MissingIndexTable(self, None, None)
             context['paginator'] = None
+
             return flask.render_template(
                 'kibble/list.need_index.html',
                 **context)
