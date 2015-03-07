@@ -21,3 +21,4 @@ def instance_and_ancestors_async(key):
 def instance_and_ancestors(key):
     return instance_and_ancestors_async(key).get_result()
 
+

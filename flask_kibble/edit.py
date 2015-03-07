@@ -5,6 +5,8 @@ import flask
 import wtforms
 from werkzeug import cached_property
 
+from google.appengine.ext import ndb
+
 from .base import KibbleView
 from .util.forms import KibbleModelConverter, BaseCSRFForm
 from .util.ndb import instance_and_ancestors_async
@@ -131,6 +133,8 @@ class FormView(KibbleView):
     _methods = ['GET', 'POST']
     _requires_ancestor = True
 
+    _transaction_retries = 3
+
     def __init__(self, *args, **kwargs):
         super(FormView, self).__init__(*args, **kwargs)
 
@@ -147,12 +151,25 @@ class FormView(KibbleView):
         :returns: The saved instance
         :rtype: :py:class:`ndb.Model`
         """
-        if instance is None:
-            instance = self.model(parent=ancestor_key)
 
-        form.populate_obj(instance)
-        instance.put()
-        return instance
+        # We've got to perform some hokum here. As dispatch_request
+        # is likely to end up as a xg transaction due to having other
+        # queries on the page, we're kinda forced to do the transaction
+        # here.
+        # As a result, we have to re-query the instance, and write the
+        # changes to the DB. in this closure. See GAE issue 10200.
+        @ndb.transactional(retries=self._transaction_retries)
+        def _tx(key):
+            if key is None:
+                inst = self.model(parent=ancestor_key)
+            else:
+                inst = key.get()
+
+            form.populate_obj(inst)
+            inst.put()
+            return inst
+
+        return _tx(instance.key if instance else None)
 
     def get_success_response(self, instance):
         """
@@ -274,7 +291,9 @@ class FormView(KibbleView):
             form,
             self.get_form_fieldsets(instance))
         ctx['instance'] = instance
-        ctx['ancestors'] = ancestors.get_result() if ancestors is not None else []
+        ctx['ancestors'] = (ancestors.get_result()
+                            if ancestors is not None
+                            else [])
         ctx['help_text'] = self.field_help_text
 
         return flask.render_template(self.templates, **ctx)
