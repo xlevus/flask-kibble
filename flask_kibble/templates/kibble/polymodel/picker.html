@@ -13,8 +13,8 @@
         <div class='col-md-12'>
             <p>Please select a type to create</p>
             <ul>
-                {% for model, url in classes %}
-                    <li><a href='{{ url }}'>{{ kibble.label_for_kind(model) }}</a></li>
+                {% for class in sub_views %}
+                    <li><a href='{{ url_for(request.endpoint, class=class, **request.view_args) }}'>{{ kibble.label_for_kind(class) }}</a></li>
                 {% else %}
                     <li>There seems to be nothing here</li>
                 {% endfor %}
