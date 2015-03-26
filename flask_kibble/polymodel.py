@@ -71,7 +71,7 @@ class PolyClassPicker(object):
                 return v.dispatch_request(*args, **kwargs)
 
         ctx = self.base_context()
-        ctx['sub_views'] = [key[-1] for key in self._sub_views.keys()]
+        ctx['sub_views'] = self._sub_views
 
         return flask.render_template(
             'kibble/polymodel/picker.html',
