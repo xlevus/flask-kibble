@@ -3,10 +3,12 @@
 {% from "kibble/macros/render_form.html" import render_form %}
 {% from "kibble/macros/action_button.html" import action_link, view_label, breadcrumbs %}
 
+{% block head_title %}{{ view.action|title }}: {{ instance or g.kibble.label_for_kind(view.model) }} - {{ super() }}{% endblock %}
+
 {% block page_header %}New {{ view_label(view) }}{% endblock %}
 
 {% block breadcrumbs %}
-    {{ breadcrumbs(instance|default(None), ancestors, view.ancestors) }}
+    {{ breadcrumbs(instance|default(None), ancestors, view.ancestors, view.action|title, model=view.model) }}
 {% endblock %}
 
 {% block header_buttons %}

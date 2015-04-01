@@ -39,25 +39,30 @@
     {%- endif %}
 {% endmacro %}
 
-{%- macro breadcrumbs(instance=None, ancestors=[], ancestor_kinds=[], action=None) -%}
+{%- macro breadcrumbs(instance=None, ancestors=[], ancestor_kinds=[], action=None, model=None) -%}
     {%- for ancestor, kind in izip_longest(ancestors or [], ancestor_kinds or []) -%}
-    <li>
+      <li>
         {%- if ancestor -%}
-        {%- if kind -%}<span class='text-muted'>{{ g.kibble.label_for_kind(kind) }}: </span>{%- endif -%}
-            <a href='{{ g.kibble.url_for(ancestor, 'edit') }}'>{{ ancestor }}</a>
+          {%- if kind -%}<span class='text-muted'>{{ g.kibble.label_for_kind(kind) }}: </span>{%- endif -%}
+          <a href='{{ g.kibble.url_for(ancestor, 'edit') }}'>{{ ancestor }}</a>
         {%- else -%}
             <a href='{{ g.kibble.url_for(kind, 'list') }}'>{{ g.kibble.label_for_kind(kind) }}</a>
         {%- endif -%}
-    </li>
+      </li>
     {%- endfor -%}
 
     {%- if action -%}
         {%- if instance -%}
             <li>
-            <span class='text-muted'>{{ g.kibble.label_for_kind(instance) }}: </span>
-            <a href='{{ g.kibble.url_for(instance, 'edit') }}'>{{ instance }}</a></li>
+              <span class='text-muted'>{{ g.kibble.label_for_kind(instance) }}: </span>
+              <a href='{{ g.kibble.url_for(instance, 'edit') }}'>{{ instance }}</a>
+            </li>
         {%- endif -%}
-        <li class='active'>{{ action }}</li>
+        {% if model and not instance %}
+          <li class='active'>{{ action }} {{ g.kibble.label_for_kind(model) }}</li>
+        {% else %}
+          <li class='active'>{{ action }}</li>
+        {% endif %}
     {%- else -%}
         <li class='active'>{{ instance }}</li>
     {%- endif -%}

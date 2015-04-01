@@ -90,7 +90,13 @@ class Operation(KibbleView):
 
         :returns: The url to redirect to on success.
         """
-        return flask.url_for('.index')
+
+        u = flask.g.kibble.url_for(self.model, 'list')
+
+        if not u:
+            u = flask.url_for('.index')
+
+        return u
 
     def get_message(self, instance, result):
         """
@@ -110,7 +116,7 @@ class Operation(KibbleView):
 
         return m.format(
             verb=self.action,
-            past_tense=self.past_tense,
+            past_tense=self.past_tense or self.action,
             result=result,
             instance=instance)
 

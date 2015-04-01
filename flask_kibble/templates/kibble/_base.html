@@ -11,7 +11,7 @@
         <meta name="description" content="">
         <meta name="author" content="">
 
-        <title>{{ kibble.name.title() }}</title>
+        <title>{% block head_title %}{{ kibble.label }}{% endblock %}</title>
 
         <link href="{{ url_for(".static", filename="css/libs.css") }}" rel="stylesheet">
         <link href="{{ url_for(".static", filename="css/kibble.css") }}" rel="stylesheet">
