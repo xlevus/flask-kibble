@@ -4,6 +4,7 @@ import logging
 from collections import defaultdict
 
 from google.appengine.ext import ndb, blobstore
+from google.appengine.ext.ndb import polymodel
 
 from werkzeug import parse_options_header
 from .base import KibbleView
@@ -123,7 +124,7 @@ class Kibble(flask.Blueprint):
         ancest_kinds = [x._get_kind() for x in view_class.ancestors]
 
         key = "<ndbkey({0}):key>".format(",".join([
-            "'%s'" % x for x in ancest_kinds + [kind]]))
+            "'%s'" % x for x in ancest_kinds + [view_class.model._get_kind()]]))
         ancestor_key = "<ndbkey({0}):ancestor_key>".format(
             ",".join(["'%s'" % x for x in ancest_kinds]))
 
@@ -252,7 +253,7 @@ class Kibble(flask.Blueprint):
         view = self.registry.get(model, {}).get(action)
 
         if not view:
-            logger.debug("Url for %r requested, but not registered", model)
+            # logger.debug("Url for %r requested, but not registered", model)
             return ""
 
         return view.url_for(instance, ancestor, blueprint=self.name, **kwargs)
@@ -264,7 +265,12 @@ class Kibble(flask.Blueprint):
             if isinstance(kind, ndb.Model):
                 kind = kind.__class__
 
-            if issubclass(kind, ndb.Model):
+            # Polymodels behave differently. Use their _class_name().
+            if issubclass(kind, polymodel.PolyModel):
+                kind = kind._class_name()
+
+            # Otherwise, use _get_kind()
+            elif issubclass(kind, ndb.Model):
                 kind = kind._get_kind()
 
         label = flask.current_app.config.get('KIBBLE_KIND_LABELS', {}).get(

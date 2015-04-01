@@ -2,6 +2,8 @@
 {% from "kibble/macros/render_form.html" import render_form %}
 {% from "kibble/macros/action_button.html" import breadcrumbs %}
 
+{% block head_title %}{{ view.action|title }}: {{ instance }} - {{ super() }}{% endblock %}
+
 {% block breadcrumbs %}
     {{ breadcrumbs(instance, ancestors, view.ancestors, view.action|title) }}
 {% endblock %}

@@ -30,8 +30,8 @@ class NDBKeyConverter(BaseConverter):
                 for kind in kinds_lower])
 
             self._regex = re.compile(
-                self.separator.join([r"{0}-([^/]+)".format(kind)
-                for kind in kinds_lower]))
+                self.separator.join(
+                    [r"{0}-([^/]+)".format(kind) for kind in kinds_lower]))
 
     def to_url(self, key):
         if self.urlsafe:
@@ -71,8 +71,6 @@ class NDBKeyConverter(BaseConverter):
                     map(self._coerce_int, ids))
 
         key = ndb.Key(pairs=pairs)
-
-        logger.debug("Key: %r", key)
 
         return key
 

@@ -91,7 +91,7 @@ class FieldsetIterator(object):
 
 class FormView(KibbleView):
     #: Action name
-    action = 'list'
+    # action = 'list'
 
     #: A :py:class:`wtforms_ndb.ModelConverter` class used to convert the
     #: NDB model to a form
