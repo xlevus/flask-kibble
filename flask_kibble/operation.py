@@ -1,6 +1,7 @@
 import logging
 import flask
 from google.appengine.ext import ndb
+from werkzeug.wrappers import Response as WerkzeugResponse
 
 from .base import KibbleView
 from .edit import FieldsetIterator
@@ -150,12 +151,12 @@ class Operation(KibbleView):
                 success = False
 
             # Flash the message, and redirect the user.
-            if isinstance(result, flask.current_app.response_class):
+            if isinstance(result, WerkzeugResponse):
                 return result
 
             flask.flash(
                 self.get_message(instance, result),
-                'success' if success else 'error')
+                'success' if success else 'danger')
             return flask.redirect(
                 self.get_redirect(instance, result))
 

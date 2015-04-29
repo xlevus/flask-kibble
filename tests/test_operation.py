@@ -126,7 +126,7 @@ class OperationTestCase(TestCase):
         self.assertPreSignalSent()
         # self.assertPostSignalSent()
 
-        self.assertFlashes("dummy-message", "error")
+        self.assertFlashes("dummy-message", "danger")
 
     @mock.patch.object(DummyOperation, 'form')
     def test_post_bad_form(self, confirmation_form):
