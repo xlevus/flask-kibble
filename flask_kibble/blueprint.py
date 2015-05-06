@@ -102,6 +102,9 @@ class Kibble(flask.Blueprint):
         self.before_request(self._before_request)
         self.context_processor(self._context_processor)
 
+        self.errorhandler(403)(self.handle_403)
+        self.errorhandler(404)(self.handle_404)
+
     def register_view(self, view_class):
         """
         Register a class with the Kibble blueprint.
@@ -195,7 +198,6 @@ class Kibble(flask.Blueprint):
         if not self.auth.is_logged_in():
             # User not logged in, redirect to the login url.
             logger.debug("User is not logged in.")
-            flask.flash("You are not logged in.", 'warning')
             return flask.redirect(self.auth.get_login_url())
 
         view_func = flask.current_app.view_functions[flask.request.endpoint]
@@ -216,7 +218,7 @@ class Kibble(flask.Blueprint):
 
             logger.debug("User is missing permission for %r",
                          flask.request.endpoint)
-            return flask.render_template('kibble/403.html'), 403
+            flask.abort(403)
 
     def all_permissions(self):
         endpoints = ['index', 'static']
@@ -281,4 +283,9 @@ class Kibble(flask.Blueprint):
 
         return self.KIND_LABEL_RE.sub(r'\1 \2', kind)
 
+    def handle_403(self, error):
+        return flask.render_template('kibble/403.html'), 403
+
+    def handle_404(self, error):
+        return flask.render_template('kibble/404.html'), 404
 
