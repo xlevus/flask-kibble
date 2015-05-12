@@ -207,7 +207,6 @@ class DateTimeFilter(ChoicesFilter):
             ('today', 'Today'),
             ('week', 'Past 7 days'),
             ('month', 'This month'),
-            #('year', 'This year'),
         ])
 
     def _filter_today(self, model, query):
@@ -252,3 +251,30 @@ class DateTimeFilter(ChoicesFilter):
             query = filter_func(model, query)
 
         return query
+
+
+class PolymodelFilter(ChoicesFilter):
+    def __init__(self, base_class):
+        self.base_class = base_class
+        self.title = 'Class'
+        self.field = 'class'
+
+    @property
+    def choices(self):
+        base_key = tuple(self.base_class._class_key())
+        base_len = len(base_key)
+
+        class_map = self.base_class._class_map.keys()
+
+        for cls_key in sorted(class_map):
+            if cls_key[:base_len] == base_key \
+                    and cls_key != base_key:
+                val = cls_key[-1]
+                label = flask.g.kibble.label_for_kind(val)
+                yield val, label
+
+    def filter(self, model, query):
+        val = self.get(None)
+        if not val:
+            return query
+        return query.filter(ndb.GenericProperty('class') == val)
