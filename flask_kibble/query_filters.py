@@ -266,12 +266,16 @@ class PolymodelFilter(ChoicesFilter):
 
         class_map = self.base_class._class_map.keys()
 
+        output = []
+
         for cls_key in sorted(class_map):
             if cls_key[:base_len] == base_key \
                     and cls_key != base_key:
                 val = cls_key[-1]
                 label = flask.g.kibble.label_for_kind(val)
-                yield val, label
+                output.append((val, label))
+
+        return sorted(output, key=lambda x: x[1])
 
     def filter(self, model, query):
         val = self.get(None)
