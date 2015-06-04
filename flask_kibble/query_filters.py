@@ -198,16 +198,35 @@ class KeyFilter(ChoicesFilter):
 
 
 class DateTimeFilter(ChoicesFilter):
-    def __init__(self, *args, **kwargs):
-        super(ChoicesFilter, self).__init__(*args, **kwargs)
+    def __init__(self, field, title=None, past=True, future=True,
+                 present=True, none=False):
+
+        super(ChoicesFilter, self).__init__(field, title=title)
+
+        self.none = none
+        self.past = past
+        self.future = future
+        self.present = present
 
     @property
     def choices(self):
-        return iter([
-            ('today', 'Today'),
-            ('week', 'Past 7 days'),
-            ('month', 'This month'),
-        ])
+        if self.none:
+            yield ('none', 'None')
+
+        if self.past:
+            yield ('past_month', 'Past month')
+            yield ('past_week', 'Past 7 days')
+
+        if self.present:
+            yield ('today', 'Today')
+
+        if self.future:
+            yield ('next_week', 'Next 7 days')
+            yield ('next_month', 'Next month')
+
+    def _filter_none(self, model, query):
+        prop = self.model_property(model)
+        return query.filter(prop == None)  # noqa
 
     def _filter_today(self, model, query):
         now = datetime.utcnow()
@@ -220,7 +239,7 @@ class DateTimeFilter(ChoicesFilter):
             prop < end
         )
 
-    def _filter_week(self, model, query):
+    def _filter_past_week(self, model, query):
         now = datetime.utcnow()
         end = now - timedelta(days=7)
 
@@ -230,14 +249,33 @@ class DateTimeFilter(ChoicesFilter):
             prop > end,
         )
 
-    def _filter_month(self, model, query):
+    def _filter_past_month(self, model, query):
         now = datetime.utcnow()
-        start = now.replace(day=1, hour=0, minute=0, second=0)
-        end = start.replace(month=start.month+1)
+        end = now - timedelta(days=28)
 
         prop = self.model_property(model)
         return query.filter(
-            prop > start,
+            prop < now,
+            prop > end
+        )
+
+    def _filter_next_week(self, model, query):
+        now = datetime.utcnow()
+        end = now - timedelta(days=7)
+
+        prop = self.model_property(model)
+        return query.filter(
+            prop > now,
+            prop < end,
+        )
+
+    def _filter_next_month(self, model, query):
+        now = datetime.utcnow()
+        end = now + timedelta(days=28)
+
+        prop = self.model_property(model)
+        return query.filter(
+            prop > now,
             prop < end
         )
 
