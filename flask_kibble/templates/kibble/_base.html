@@ -26,15 +26,17 @@
     <body {% if is_popup or is_embed %}class='popup'{% endif %}{% block body_tag_attrs %}{% endblock %}>
     {% block body_tag %}
 
-    {% if not is_popup and not is_embed %}
-      <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-        <div class="container-fluid">
-          <div class="navbar-header">
-            <a class="navbar-brand" href="{{ url_for(".index") }}">{{ kibble.label }}</a>
-          </div>
+    {% block navbar %}
+      {% if not is_popup and not is_embed %}
+        <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="{{ url_for(".index") }}">{{ kibble.label }}</a>
+            </div>
+            </div>
         </div>
-      </div>
-    {% endif %}
+      {% endif %}
+    {% endblock %}
 
     <div class="container-fluid">
       <div class='row'>
