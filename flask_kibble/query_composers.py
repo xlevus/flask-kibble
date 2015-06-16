@@ -1,8 +1,7 @@
 import sys
 import flask
-import wtforms
 from werkzeug import cached_property
-from markupsafe import Markup
+# from markupsafe import Markup
 
 from google.appengine.ext import ndb
 
@@ -167,25 +166,117 @@ class Filter(QueryComposer):
             q = f.filter(self.kibble_view.model, q)
         return q
 
+SORT_ASC = '+'
+SORT_DESC = '-'
+
+
+class SortColumn(object):
+    ICONS = {
+        'numeric': {
+            SORT_ASC: 'glyphicon glyphicon-sort-by-order',
+            SORT_DESC: 'glyphicon glyphicon-sort-by-order-alt',
+            None: 'glyphicon glyphicon-sort'
+        },
+        'alphanumeric': {
+            SORT_ASC: 'glyphicon glyphicon-sort-by-alphabet',
+            SORT_DESC: 'glyphicon glyphicon-sort-by-alphabet-alt',
+            None: 'glyphicon glyphicon-sort'
+        },
+        'attributes': {
+            SORT_ASC: 'glyphicon glyphicon-sort-by-attributes',
+            SORT_DESC: 'glyphicon glyphicon-sort-by-attributes-alt',
+            None: 'glyphicon glyphicon-sort'
+        }
+    }
+    def __init__(self, column_header, field=None, default=None,
+                 icon_set='attributes'):
+        self.column_header = column_header
+        self.field = field or column_header
+        self.default = default
+        self.icon_set = icon_set
+
+    def icon(self, order=None):
+        return self.ICONS[self.icon_set][order]
+
+    def apply(self, query, order):
+        prop = ndb.GenericProperty(self.field)
+        if order == SORT_DESC:
+            prop = -prop
+        return query.order(prop)
+
 
 class Sort(QueryComposer):
+    """
+    Sorts queries on specified columns.
+
+        class MyList(kibble.List):
+            sort_columns = (
+                kibble.SortColumn('a_field'),
+            )
+    """
+
     context_var = 'sort'
 
-    def __init__(self, default_order=None, **kwargs):
+    def __init__(self, sortable_columns=None, **kwargs):
         super(Sort, self).__init__(**kwargs)
 
-        if default_order:
-            self.default_order = default_order
+        if sortable_columns:
+            self.sortable_columns = sortable_columns
 
-    def _parse_sort(self, sort_string):
-        if sort_string[0] == '-':
-            return -ndb.GenericProperty(sort_string[1:])
-        else:
-            return ndb.GenericProperty(sort_string)
+    @property
+    def _columns(self):
+        return {
+            s.column_header: s
+            for s in getattr(self, 'columns', ())
+        }
+
+    @property
+    def _default_column(self):
+        for c in self._columns.values():
+            if c.default:
+                return c
+        return None
 
     def get_query(self):
-        q = self.query
-        if getattr(self, 'default_order', None):
-            q = q.order(self._parse_sort(self.default_order))
-        return q
+        order, column = self.current_column()
+        if order and column:
+            return column.apply(self.query, order)
+        return self.query
+
+    def is_sortable(self, column_header):
+        return self._columns.get(column_header, False)
+
+    def current_column(self):
+        c = flask.request.args.get(self.context_var)
+        try:
+            if c:
+                return (c[0], self._columns[c[1:]])
+        except KeyError:
+            pass
+
+        if self._default_column:
+            return self._default_column.default, self._default_column
+        return None, None
+
+    def icon_class(self, column_header):
+        order, curr_column = self.current_column()
+        if column_header != curr_column.column_header:
+            order = None
+        return self._columns[column_header].icon(order)
+
+    def url_for(self, column_header):
+        curr_order, curr_col = self.current_column()
+
+        if column_header != curr_col.column_header:
+            curr_order = None
+
+        next_order = {
+            None: SORT_ASC,
+            SORT_ASC: SORT_DESC,
+            SORT_DESC: SORT_ASC
+        }
+        args = flask.request.view_args.copy()
+        args.update(flask.request.args)
+        args[self.context_var] = next_order[curr_order] + column_header
+        return flask.url_for(flask.request.endpoint, **args)
 

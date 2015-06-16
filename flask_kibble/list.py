@@ -29,7 +29,10 @@ class Table(object):
         for attr_name in self.kibble_view.list_display:
             if callable(attr_name):
                 attr_name = attr_name.__name__
-            headers.append(attr_name.replace("_", " ").strip().title())
+            headers.append((
+                attr_name,
+                attr_name.replace("_", " ").strip().title()
+            ))
         return headers
 
     @ndb.tasklet

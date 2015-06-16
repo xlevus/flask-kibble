@@ -34,8 +34,13 @@
         <div class='{% if filter %}col-md-10 col-md-pull-2 col-sm-12{% else %}col-md-12{% endif %}'>
             <table class='table table-striped'>
                 <tr>
-                    {% for header in table.headers %}
-                        <th>{{ header }}</th>
+                    {% for column_name, column_label in table.headers %}
+                        <th>
+                          {{ column_label }}
+                          {% if sort and sort.is_sortable(column_name) %}
+                            <a href='{{ sort.url_for(column_name) }}'><span class='{{ sort.icon_class(column_name) }}'></span></a>
+                          {% endif %}
+                        </th>
                     {% endfor %}
 
                     {% for action in view._linked_actions if action._requires_instance %}
