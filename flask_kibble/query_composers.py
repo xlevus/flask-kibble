@@ -188,6 +188,7 @@ class SortColumn(object):
             None: 'glyphicon glyphicon-sort'
         }
     }
+
     def __init__(self, column_header, field=None, default=None,
                  icon_set='attributes'):
         self.column_header = column_header
@@ -270,13 +271,16 @@ class Sort(QueryComposer):
         if column_header != curr_col.column_header:
             curr_order = None
 
+        # TODO: Move this to the SortColumn class and implement
+        # enabling/disabling of ASC/DESC ordering.
         next_order = {
-            None: SORT_ASC,
-            SORT_ASC: SORT_DESC,
-            SORT_DESC: SORT_ASC
+            None: SORT_ASC + column_header,
+            SORT_ASC: SORT_DESC + column_header,
+            SORT_DESC: None,
         }
+
         args = flask.request.view_args.copy()
         args.update(flask.request.args)
-        args[self.context_var] = next_order[curr_order] + column_header
+        args[self.context_var] = next_order[curr_order]
         return flask.url_for(flask.request.endpoint, **args)
 
