@@ -8,6 +8,7 @@ from google.appengine.ext.ndb import polymodel
 
 from werkzeug import parse_options_header
 from .base import KibbleView
+from .util.forms import KibbleModelConverter
 
 import flask
 
@@ -62,7 +63,9 @@ class KibbleRegistry(defaultdict):
 
 class Kibble(flask.Blueprint):
     def __init__(self, name, import_name, auth, label=None,
-                 default_gcs_bucket=None, **kwargs):
+                 default_gcs_bucket=None, 
+                 default_model_converter=None,
+                 **kwargs):
         """
         The central point of the Kibble admin. Manages permissions of views.
 
@@ -73,6 +76,8 @@ class Kibble(flask.Blueprint):
         :param label: The label of the Kibble admin. Will default to the name.
         :param default_gcs_bucket: The default GCS bucket to use when
             uploading files.
+        :param default_model_converter: A KibbleModelConverter subclass to use
+            instead of the default.
         """
 
         kwargs.setdefault(
@@ -87,6 +92,7 @@ class Kibble(flask.Blueprint):
         self.label = label or self.name.title()
         self.auth = auth
         self.gcs_bucket = default_gcs_bucket
+        self.model_converter = default_model_converter or KibbleModelConverter
 
         self.registry = KibbleRegistry()
 
@@ -127,7 +133,8 @@ class Kibble(flask.Blueprint):
         ancest_kinds = [x._get_kind() for x in view_class.ancestors]
 
         key = "<ndbkey({0}):key>".format(",".join([
-            "'%s'" % x for x in ancest_kinds + [view_class.model._get_kind()]]))
+            "'%s'" % x
+            for x in ancest_kinds + [view_class.model._get_kind()]]))
         ancestor_key = "<ndbkey({0}):ancestor_key>".format(
             ",".join(["'%s'" % x for x in ancest_kinds]))
 
@@ -145,11 +152,13 @@ class Kibble(flask.Blueprint):
 
         self.registry[path][action] = view_class
 
-    def autodiscover(self, paths, models=None):
+    def autodiscover(self, paths, models=None, module_names=None):
         """
         Automatically register all Kibble views under ``path``.
 
         :param paths: The module paths to search under.
+        :param module_names: A list of module names to match on. e.g. `kibble`
+            will only attempt to autodiscover `kibble.py` files.
         :param models: A list of model kinds (either a ``ndb.Model`` subclass
             or a string) (Optional)
         """
@@ -164,7 +173,9 @@ class Kibble(flask.Blueprint):
         for p in paths:
             for mod in find_modules(p, True, True):
                 # logger.debug("Autodiscover: %s", mod)
-                import_string(mod)
+                if module_names is None \
+                        or mod.rsplit('.', 1)[-1] in module_names:
+                    import_string(mod)
 
         for view in KibbleMeta._autodiscover:
             if view.model and (all_models or view.kind() in models):

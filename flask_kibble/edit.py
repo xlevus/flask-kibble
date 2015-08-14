@@ -8,7 +8,7 @@ from werkzeug import cached_property
 from google.appengine.ext import ndb
 
 from .base import KibbleView
-from .util.forms import KibbleModelConverter, BaseCSRFForm
+from .util.forms import BaseCSRFForm
 from .util.ndb import instance_and_ancestors_async
 
 logger = logging.getLogger(__name__)
@@ -94,8 +94,9 @@ class FormView(KibbleView):
     # action = 'list'
 
     #: A :py:class:`wtforms_ndb.ModelConverter` class used to convert the
-    #: NDB model to a form
-    model_converter = KibbleModelConverter
+    #: NDB model to a form. If default will use the blueprint-global model
+    #: converter.
+    model_converter = None
 
     #: The base formclass to generate the form from. By default this is an
     #: empty CSRF protected form.
@@ -137,6 +138,10 @@ class FormView(KibbleView):
 
     def __init__(self, *args, **kwargs):
         super(FormView, self).__init__(*args, **kwargs)
+
+    @property
+    def _model_converter(self):
+        return self.model_converter or flask.g.kibble.model_converter
 
     def save_model(self, form, instance=None, ancestor_key=None):
         """
@@ -228,7 +233,7 @@ class FormView(KibbleView):
 
     def get_form_class(self, instance=None):
         if not self.form:
-            return self.model_converter.model_form(
+            return self._model_converter.model_form(
                 self.model,
                 base_class=self.base_form,
                 field_args=self.form_field_args,

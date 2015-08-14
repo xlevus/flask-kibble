@@ -261,14 +261,14 @@ class Sort(QueryComposer):
 
     def icon_class(self, column_header):
         order, curr_column = self.current_column()
-        if column_header != curr_column.column_header:
+        if curr_column and column_header != curr_column.column_header:
             order = None
         return self._columns[column_header].icon(order)
 
     def url_for(self, column_header):
         curr_order, curr_col = self.current_column()
 
-        if column_header != curr_col.column_header:
+        if curr_col and column_header != curr_col.column_header:
             curr_order = None
 
         # TODO: Move this to the SortColumn class and implement
