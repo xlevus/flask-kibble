@@ -1,26 +1,8 @@
-from warnings import warn
 import flask
 from flask.views import View
 from werkzeug.utils import cached_property
 
 from google.appengine.ext import ndb
-
-try:
-    import blinker
-except ImportError:
-    warn("Blinker not installed, using stub signals.")
-    blinker = None
-
-
-class StubSignal(object):
-    """
-    Stub signal class for when blinker isn't installed.
-    """
-    def send(self, *args, **kwargs):
-        pass
-
-    def connnect(self, *args, **kwargs):
-        pass
 
 
 class KibbleMeta(type):
@@ -28,17 +10,6 @@ class KibbleMeta(type):
 
     def __new__(mcls, name, bases, attrs):
         cls = super(KibbleMeta, mcls).__new__(mcls, name, bases, attrs)
-
-        if blinker and cls.model:
-            cls.pre_signal = blinker.signal("{}-pre-{}".format(
-                cls.kind(), cls.action))
-
-            cls.post_signal = blinker.signal("{}-post-{}".format(
-                cls.kind(), cls.action))
-        else:
-            cls.pre_signal = StubSignal()
-            cls.post_signal = StubSignal()
-
         mcls._autodiscover.add(cls)
 
         return cls

@@ -7,6 +7,7 @@ from werkzeug import cached_property
 
 from google.appengine.ext import ndb
 
+from . import signals
 from .base import KibbleView
 from .util.forms import BaseCSRFForm
 from .util.ndb import instance_and_ancestors_async
@@ -272,16 +273,18 @@ class FormView(KibbleView):
 
         if flask.request.method == 'POST' and form.validate():
 
-            self.pre_signal.send(
-                self.__class__,
+            signals.pre_action.send(
+                self.action,
+                view_class=self.__class__,
                 instance=instance,
                 ancestor_key=ancestor_key,
                 key=instance.key if instance else None)
 
             instance = self.save_model(form, instance, ancestor_key)
 
-            self.post_signal.send(
-                self.__class__,
+            signals.post_action.send(
+                self.action,
+                view_class=self.__class__,
                 instance=instance,
                 ancestor_key=ancestor_key,
                 key=instance.key if instance else None)

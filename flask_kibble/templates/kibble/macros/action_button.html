@@ -19,7 +19,7 @@
             {% endif %}
             {% if text or not view.button_class %}
                 {% if from and from.path() != view.path() %}
-                    {{ view.kind() }}
+                    {{ g.kibble.label_for_kind(view.kind()) }}
                 {% endif %}
                 {{ view.action|title }}
             {% endif %}

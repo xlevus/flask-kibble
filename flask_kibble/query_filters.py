@@ -320,3 +320,24 @@ class PolymodelFilter(ChoicesFilter):
         if not val:
             return query
         return query.filter(ndb.GenericProperty('class') == val)
+
+
+#class ProjectionFilter(ChoicesFilter):
+#    """
+#    Creates filter choices based off a projection query. Probably very slow.
+#    """
+#    def __init__(self, field, model):
+#        super(ChoicesFilter, self).__init__(field)
+#        self.model = model
+#    def preload(self):
+#        prop = self.model_property(self.model)
+#        self._future = self.model\
+#            .query(projection=[prop], distinct=True)\
+#            .fetch_async()
+#    @property
+#    def choices(self):
+#        result = self._future.get_result()
+#        for r in result:
+#            val = getattr(r, self.field)
+#            yield val, val
+

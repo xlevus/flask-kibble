@@ -3,6 +3,7 @@ import flask
 from google.appengine.ext import ndb
 from werkzeug.wrappers import Response as WerkzeugResponse
 
+from . import signals
 from .base import KibbleView
 from .edit import FieldsetIterator
 from .util.forms import BaseCSRFForm
@@ -133,7 +134,11 @@ class Operation(KibbleView):
         if not self.require_confirmation or \
                 (flask.request.method == 'POST' and form.validate()):
             try:
-                self.pre_signal.send(self.__class__, key=key)
+                signals.pre_action.send(
+                    self.action,
+                    view_class=self.__class__,
+                    instance=instance,
+                    key=key)
 
                 # The view has been POSTed to, and is valid. Do stuff.
                 result = self.run(
@@ -143,7 +148,12 @@ class Operation(KibbleView):
                 if isinstance(result, ndb.Future):
                     result = result.get_result()
 
-                self.post_signal.send(self.__class__, key=key, result=result)
+                signals.post_action.send(
+                    self.action,
+                    view_class=self.__class__,
+                    instance=instance,
+                    key=key,
+                    result=result)
 
                 success = True
             except self.Failure, result:
