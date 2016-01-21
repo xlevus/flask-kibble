@@ -1,0 +1,7 @@
+include flask_kibble/templates/kibble/*.html
+include flask_kibble/templates/kibble/polymodel/*.html
+include flask_kibble/templates/kibble/widgets/*.html
+include flask_kibble/templates/kibble/macros/*.html
+include flask_kibble/static/js/*
+include flask_kibble/static/css/*
+include flask_kibble/static/fonts/*

@@ -1,12 +1,18 @@
 import re
 import os
 import logging
+import mimetypes
+import pkg_resources
+
 from collections import defaultdict
 
 from google.appengine.ext import ndb, blobstore
 from google.appengine.ext.ndb import polymodel
 
 from werkzeug import parse_options_header
+from werkzeug.exceptions import NotFound
+from flask.helpers import locked_cached_property, send_file
+
 from .base import KibbleView
 from .util.forms import KibbleModelConverter
 
@@ -21,6 +27,20 @@ def index():
     Kibble index view. Lists the registered classes and views.
     """
     return flask.render_template('kibble/index.html')
+
+
+def static(filename):
+    """
+    Kibble static view. Returns contents from pkg_resources.
+    """
+    try:
+        stream = pkg_resources.resource_stream('flask_kibble',
+                                               os.path.join('static', filename))
+    except IOError:
+        raise NotFound
+
+    mimetype = mimetypes.guess_type(filename)[0]
+    return send_file(stream, mimetype=mimetype)
 
 
 def upload(gcs_bucket=None):
@@ -63,7 +83,7 @@ class KibbleRegistry(defaultdict):
 
 class Kibble(flask.Blueprint):
     def __init__(self, name, import_name, auth, label=None,
-                 default_gcs_bucket=None, 
+                 default_gcs_bucket=None,
                  default_model_converter=None,
                  **kwargs):
         """
@@ -80,14 +100,6 @@ class Kibble(flask.Blueprint):
             instead of the default.
         """
 
-        kwargs.setdefault(
-            'template_folder',
-            os.path.join(os.path.dirname(__file__), 'templates'))
-
-        kwargs.setdefault(
-            'static_folder',
-            os.path.join(os.path.dirname(__file__), 'static'))
-
         super(Kibble, self).__init__(name, import_name, **kwargs)
         self.label = label or self.name.title()
         self.auth = auth
@@ -96,7 +108,14 @@ class Kibble(flask.Blueprint):
 
         self.registry = KibbleRegistry()
 
-        self.add_url_rule('/', view_func=index, endpoint='index')
+        self.add_url_rule('/',
+                          view_func=index,
+                          endpoint='index')
+
+        self.add_url_rule('/static/<path:filename>',
+                          view_func=static,
+                          endpoint='static')
+
         self.add_url_rule('/_upload/',
                           view_func=upload,
                           endpoint='upload',
@@ -110,6 +129,20 @@ class Kibble(flask.Blueprint):
 
         self.errorhandler(403)(self.handle_403)
         self.errorhandler(404)(self.handle_404)
+
+    @locked_cached_property
+    def jinja_loader(self):
+        import jinja2
+
+        loaders = [
+            jinja2.PackageLoader('flask_kibble', 'templates'),
+        ]
+
+        if self.template_folder is not None:
+            loaders.insert(0, jinja2.FileSystemLoader(
+                os.path.join(self.root_path, self.template_folder)))
+
+        return jinja2.ChoiceLoader(loaders)
 
     def register_view(self, view_class):
         """
